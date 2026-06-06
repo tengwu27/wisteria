@@ -1,0 +1,18 @@
+---
+import { navigation } from '@/data/navigation';
+import { site } from '@/data/site';
+---
+
+<footer class="border-t border-stone bg-ink text-paper">
+  <div class="mx-auto grid max-w-7xl gap-10 px-6 py-12 md:grid-cols-[1.5fr_1fr] lg:px-8">
+    <div>
+      <a href="/" class="font-serif text-3xl tracking-normal">{site.name}</a>
+      <p class="mt-4 max-w-xl text-sm leading-6 text-paper/70">{site.tagline}</p>
+    </div>
+    <nav class="grid gap-3 text-sm text-paper/70 md:justify-end md:text-right" aria-label="Footer navigation">
+      {navigation.map((item) => (
+        <a class="transition hover:text-paper" href={item.href}>{item.label}</a>
+      ))}
+    </nav>
+  </div>
+</footer>

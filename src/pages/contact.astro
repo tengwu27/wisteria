@@ -1,0 +1,60 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { site } from '@/data/site';
+---
+
+<BaseLayout title={`Contact | ${site.name}`} description="Begin a private conversation with Wisteria.">
+  <section class="bg-paper px-6 py-20 lg:px-8">
+    <div class="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.8fr_1.2fr]">
+      <div>
+        <p class="text-sm uppercase tracking-[0.22em] text-brass">Contact</p>
+        <h1 class="mt-5 font-serif text-5xl leading-tight text-ink md:text-6xl">Begin with the place, the plan, or the possibility.</h1>
+        <p class="mt-6 text-base leading-7 text-graphite">
+          Share a little about what you are considering. The first conversation is designed to understand your priorities and whether Wisteria is the right fit.
+        </p>
+        <div class="mt-8 text-sm leading-7 text-graphite">
+          <p><a class="hover:text-ink" href={`mailto:${site.email}`}>{site.email}</a></p>
+          <p><a class="hover:text-ink" href={`tel:${site.phone}`}>{site.phone}</a></p>
+        </div>
+      </div>
+      <form
+        class="grid gap-5 border border-stone bg-white p-6 shadow-soft"
+        name="contact"
+        method="POST"
+        data-netlify="true"
+        netlify-honeypot="bot-field"
+      >
+        <input type="hidden" name="form-name" value="contact" />
+        <p class="hidden">
+          <label>Do not fill this out: <input name="bot-field" /></label>
+        </p>
+        <label class="grid gap-2 text-sm font-medium text-graphite">
+          Name
+          <input class="border border-stone bg-paper px-4 py-3 text-ink outline-none transition focus:border-ink" name="name" type="text" autocomplete="name" required />
+        </label>
+        <label class="grid gap-2 text-sm font-medium text-graphite">
+          Email
+          <input class="border border-stone bg-paper px-4 py-3 text-ink outline-none transition focus:border-ink" name="email" type="email" autocomplete="email" required />
+        </label>
+        <label class="grid gap-2 text-sm font-medium text-graphite">
+          Interest
+          <select class="border border-stone bg-paper px-4 py-3 text-ink outline-none transition focus:border-ink" name="interest" required>
+            <option value="">Select one</option>
+            <option>Real Estate</option>
+            <option>Investment</option>
+            <option>Design</option>
+            <option>Lifestyle</option>
+            <option>Integrated Advisory</option>
+          </select>
+        </label>
+        <label class="grid gap-2 text-sm font-medium text-graphite">
+          Message
+          <textarea class="min-h-40 border border-stone bg-paper px-4 py-3 text-ink outline-none transition focus:border-ink" name="message" required></textarea>
+        </label>
+        <button class="rounded-sm bg-ink px-6 py-3 text-sm font-semibold text-paper transition hover:bg-graphite" type="submit">
+          Send Inquiry
+        </button>
+      </form>
+    </div>
+  </section>
+</BaseLayout>

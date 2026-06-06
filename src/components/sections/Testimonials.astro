@@ -1,0 +1,30 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  testimonials: CollectionEntry<'testimonials'>[];
+}
+
+const { testimonials } = Astro.props;
+---
+
+<section class="bg-[#f4f0ea] px-6 py-20 lg:px-8">
+  <div class="mx-auto max-w-7xl">
+    <div class="grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
+      <div>
+        <p class="text-sm uppercase tracking-[0.22em] text-brass">Client confidence</p>
+        <h2 class="mt-4 font-serif text-4xl leading-tight text-ink md:text-5xl">Guidance for decisions with emotional and financial weight.</h2>
+      </div>
+      <div class="grid gap-6">
+        {testimonials.map((testimonial) => (
+          <blockquote class="border-l-2 border-brass bg-paper p-6">
+            <p class="font-serif text-2xl leading-9 text-ink">"{testimonial.data.quote}"</p>
+            <footer class="mt-6 text-sm text-graphite">
+              {testimonial.data.author}, {testimonial.data.role}
+            </footer>
+          </blockquote>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

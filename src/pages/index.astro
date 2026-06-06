@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import ContactCta from '@/components/sections/ContactCta.astro';
+import FeaturedProjects from '@/components/sections/FeaturedProjects.astro';
+import Hero from '@/components/sections/Hero.astro';
+import ServicePillars from '@/components/sections/ServicePillars.astro';
+import Testimonials from '@/components/sections/Testimonials.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const projects = (await getCollection('projects'))
+  .filter((project) => project.data.featured)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const testimonials = (await getCollection('testimonials'))
+  .filter((testimonial) => testimonial.data.featured)
+  .sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout>
+  <Hero />
+  <ServicePillars />
+  <FeaturedProjects projects={projects} />
+  <section class="bg-white px-6 py-20 lg:px-8">
+    <div class="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1fr_1fr]">
+      <div class="min-h-[420px] bg-[linear-gradient(135deg,#171412,#5d6a52_55%,#b08a55)]"></div>
+      <div class="self-center">
+        <p class="text-sm uppercase tracking-[0.22em] text-brass">Design and lifestyle</p>
+        <h2 class="mt-4 font-serif text-4xl leading-tight text-ink md:text-5xl">The strongest places carry both discipline and feeling.</h2>
+        <p class="mt-6 text-base leading-7 text-graphite">
+          Wisteria studies the financial structure, spatial experience, material quality, and personal rhythm behind every decision. The result is a clearer path from opportunity to lived value.
+        </p>
+      </div>
+    </div>
+  </section>
+  <Testimonials testimonials={testimonials} />
+  <ContactCta />
+</BaseLayout>

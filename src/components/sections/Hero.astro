@@ -1,0 +1,35 @@
+---
+import { site } from '@/data/site';
+---
+
+<section class="relative overflow-hidden bg-paper px-6 py-24 lg:px-8 lg:py-28">
+  <div class="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
+    <div>
+      <h1 class="max-w-4xl font-serif text-5xl leading-[0.95] text-ink md:text-7xl">
+        Real estate, capital, design, and lifestyle in one considered practice.
+      </h1>
+      <p class="mt-7 max-w-2xl text-lg leading-8 text-graphite">
+        {site.tagline}
+      </p>
+      <div class="mt-10 flex flex-col gap-3 sm:flex-row">
+        <a class="rounded-sm bg-ink px-6 py-3 text-center text-sm font-semibold text-paper transition hover:bg-graphite" href="/contact">
+          Start a Conversation
+        </a>
+        <a class="rounded-sm border border-stone px-6 py-3 text-center text-sm font-semibold text-ink transition hover:border-ink" href="#services">
+          Explore the Practice
+        </a>
+      </div>
+    </div>
+    <div class="relative min-h-[420px] border border-stone bg-white p-5 shadow-soft">
+      <div class="grid h-full min-h-[380px] grid-cols-2 gap-4">
+        <div class="bg-[linear-gradient(135deg,#d9d2c7,#f7f3ee)]"></div>
+        <div class="mt-12 bg-[linear-gradient(135deg,#5d6a52,#171412)]"></div>
+        <div class="-mt-8 bg-[linear-gradient(135deg,#b08a55,#9a6a52)]"></div>
+        <div class="bg-[linear-gradient(135deg,#e8e1d8,#fbfaf7)]"></div>
+      </div>
+      <div class="absolute bottom-8 left-8 right-8 bg-paper/95 p-5 backdrop-blur">
+        <p class="font-serif text-2xl text-ink">Property as a life strategy, not a transaction.</p>
+      </div>
+    </div>
+  </div>
+</section>
