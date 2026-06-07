@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="Abstract shelf and notes lifestyle placeholder">
+  <rect width="1200" height="900" fill="#fbfaf6"/>
+  <rect x="110" y="155" width="980" height="18" fill="#4b4740" opacity=".5"/>
+  <rect x="170" y="190" width="120" height="430" fill="#a99076"/>
+  <rect x="315" y="240" width="90" height="380" fill="#6f7768"/>
+  <rect x="430" y="210" width="150" height="410" fill="#d8cabb"/>
+  <rect x="650" y="250" width="310" height="260" fill="#eee7dc"/>
+  <path d="M160 710 C360 640 580 720 760 625 C910 545 1040 540 1130 570" fill="none" stroke="#8b735d" stroke-width="6" opacity=".45"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" role="img" aria-label="Abstract artwork placeholder with layered paper">
+  <rect width="1200" height="1500" fill="#fbfaf6"/>
+  <rect x="130" y="130" width="760" height="1050" fill="#efe7db"/>
+  <rect x="270" y="270" width="760" height="1050" fill="#d8cabb"/>
+  <path d="M250 1030 C420 870 590 950 770 790 C910 665 990 640 1090 675" fill="none" stroke="#1c1a17" stroke-width="7" opacity=".72"/>
+  <circle cx="430" cy="510" r="170" fill="#8b735d" opacity=".28"/>
+  <circle cx="790" cy="790" r="230" fill="#6f7768" opacity=".22"/>
+</svg>

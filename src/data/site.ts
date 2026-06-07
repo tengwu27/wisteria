@@ -1,16 +1,25 @@
 export const site = {
-  name: 'Wisteria',
-  tagline: 'A private advisory practice for people shaping meaningful places, resilient investments, and beautifully considered lives.',
-  url: 'https://wisteria.example.com',
-  email: 'hello@wisteria.example.com',
-  phone: '+1 555 010 2040',
-  socials: {
-    instagram: 'https://instagram.com',
-    linkedin: 'https://linkedin.com'
+  name: 'Our Life, Collected',
+  tagline: 'Art, places, and fragments of a life together.',
+  url: 'https://our-life-collected.example.com',
+  accentColor: '#8b735d',
+  hero: {
+    mediaType: 'image',
+    imageKey: 'heroStillness',
+    title: 'Our Life, Collected',
+    subtitle: 'Art, places, and fragments of a life together.',
+    alignment: 'left'
+  },
+  introduction:
+    'This is a collection of the places we have traveled, the things we have made, and the moments that have shaped our life together.',
+  placeholders: {
+    names: 'Replace with your names',
+    biography: 'Replace with a short shared biography.',
+    portraitAlt: 'Placeholder portrait for the couple'
   },
   seo: {
-    title: 'Wisteria | Real Estate, Investment, Design, and Lifestyle',
+    title: 'Our Life, Collected | Art, Travel, and Daily Fragments',
     description:
-      'Wisteria is a premium advisory practice blending real estate, investment, design, and lifestyle strategy.'
+      'A quiet personal archive for a couple’s art, lifestyle notes, travel stories, and meaningful discoveries.'
   }
 } as const;

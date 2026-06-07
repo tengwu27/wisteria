@@ -1,0 +1,21 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import MediaCard from './MediaCard.astro';
+
+interface Props {
+  entry: CollectionEntry<'art'>;
+  large?: boolean;
+}
+
+const { entry, large = false } = Astro.props;
+---
+
+<MediaCard
+  title={entry.data.title}
+  href={`/art/${entry.slug}`}
+  imageKey={entry.data.coverImage}
+  alt={entry.data.coverAlt}
+  meta={`${entry.data.year} / ${entry.data.medium}`}
+  excerpt={entry.data.excerpt}
+  large={large}
+/>

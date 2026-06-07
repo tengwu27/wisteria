@@ -13,3 +13,7 @@ export function createSeo({ title, description, path = '/' }: SeoInput = {}) {
     canonical: new URL(path, site.url).toString()
   };
 }
+
+export function absoluteUrl(path = '/') {
+  return new URL(path, site.url).toString();
+}

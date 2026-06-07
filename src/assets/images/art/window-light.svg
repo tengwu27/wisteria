@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1100" role="img" aria-label="Abstract window light artwork placeholder">
+  <rect width="1500" height="1100" fill="#eee7dc"/>
+  <rect x="120" y="120" width="520" height="760" fill="#fbfaf6"/>
+  <rect x="700" y="180" width="620" height="540" fill="#c8b7a3"/>
+  <path d="M700 180 L1320 720" stroke="#fffdf8" stroke-width="80" opacity=".28"/>
+  <path d="M210 820 C420 690 590 720 760 600 C940 475 1120 455 1320 520" fill="none" stroke="#6f7768" stroke-width="8" opacity=".45"/>
+</svg>

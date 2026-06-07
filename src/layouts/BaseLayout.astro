@@ -2,15 +2,21 @@
 import SiteFooter from '@/components/global/SiteFooter.astro';
 import Header from '@/components/layout/Header.astro';
 import { site } from '@/data/site';
+import { absoluteUrl } from '@/utils/seo';
+import { ClientRouter } from 'astro:transitions';
 import '@/styles/global.css';
 
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
+  type?: 'website' | 'article';
 }
 
 const title = Astro.props.title ?? site.seo.title;
 const description = Astro.props.description ?? site.seo.description;
+const type = Astro.props.type ?? 'website';
+const canonical = absoluteUrl(Astro.url.pathname);
 ---
 
 <!doctype html>
@@ -20,11 +26,15 @@ const description = Astro.props.description ?? site.seo.description;
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonical} />
+    {Astro.props.image && <meta property="og:image" content={Astro.props.image} />}
+    <meta name="twitter:card" content="summary_large_image" />
     <title>{title}</title>
+    <ClientRouter />
   </head>
   <body class="min-h-screen bg-paper text-ink antialiased">
     <Header />

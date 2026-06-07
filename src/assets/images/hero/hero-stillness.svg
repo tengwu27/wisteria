@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1200" role="img" aria-label="Abstract warm-toned placeholder hero image">
+  <rect width="1800" height="1200" fill="#ebe4d8"/>
+  <path d="M0 870 C250 740 420 760 650 650 C920 520 1080 390 1800 520 L1800 1200 L0 1200 Z" fill="#b5a38e"/>
+  <path d="M0 710 C330 520 620 560 920 390 C1150 260 1390 210 1800 280 L1800 0 L0 0 Z" fill="#f8f4ec"/>
+  <circle cx="1290" cy="340" r="180" fill="#d9c5a8" opacity=".72"/>
+  <rect x="190" y="170" width="450" height="640" fill="#6f7768" opacity=".3"/>
+  <rect x="250" y="230" width="450" height="640" fill="#fbfaf6" opacity=".72"/>
+  <path d="M1050 800 C1180 700 1350 690 1510 750" fill="none" stroke="#4b4740" stroke-width="3" opacity=".34"/>
+</svg>

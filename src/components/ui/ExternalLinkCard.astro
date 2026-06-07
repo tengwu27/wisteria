@@ -1,0 +1,23 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getMedia } from '@/assets/images/placeholders';
+
+interface Props {
+  entry: CollectionEntry<'lifestyle'>;
+}
+
+const { entry } = Astro.props;
+---
+
+{entry.data.externalUrl && (
+  <a class="group block border-t border-mist pt-6" href={entry.data.externalUrl} target="_blank" rel="noopener noreferrer">
+    <p class="text-xs uppercase tracking-[0.18em] text-ash">{entry.data.sourceName ?? 'External source'}</p>
+    <div class="mt-4 grid gap-5 sm:grid-cols-[160px_1fr]">
+      <img class="aspect-[4/3] w-full bg-mist object-cover" src={getMedia(entry.data.coverImage)} alt={entry.data.coverAlt} loading="lazy" />
+      <div>
+        <h3 class="font-serif text-2xl text-ink group-hover:underline">{entry.data.title}</h3>
+        <p class="mt-3 text-sm leading-6 text-graphite">{entry.data.personalNote ?? entry.data.excerpt}</p>
+      </div>
+    </div>
+  </a>
+)}

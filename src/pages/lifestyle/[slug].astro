@@ -1,0 +1,49 @@
+---
+import { getCollection } from 'astro:content';
+import ContentRenderer from '@/components/ui/ContentRenderer.astro';
+import ExternalLinkCard from '@/components/ui/ExternalLinkCard.astro';
+import PreviousNextNavigation from '@/components/ui/PreviousNextNavigation.astro';
+import { getMedia } from '@/assets/images/placeholders';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { byNewest, findPreviousNext, formatDate } from '@/utils/content';
+
+export async function getStaticPaths() {
+  const entries = (await getCollection('lifestyle')).filter((entry) => entry.data.published).sort(byNewest);
+
+  return entries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry, entries }
+  }));
+}
+
+const { entry, entries } = Astro.props;
+const { Content } = await entry.render();
+const { previous, next } = findPreviousNext(entries, entry.slug);
+---
+
+<BaseLayout title={`${entry.data.title} | Lifestyle`} description={entry.data.excerpt} type="article">
+  <article class="pt-20">
+    <header class="px-6 py-16 lg:px-8">
+      <div class="mx-auto max-w-5xl">
+        <p class="text-xs uppercase tracking-[0.22em] text-accent">
+          {entry.data.contentType === 'external' ? 'Things we found' : 'Original story'} / {formatDate(entry.data.date)}
+        </p>
+        <h1 class="mt-5 font-serif text-5xl leading-[1.02] text-ink md:text-7xl">{entry.data.title}</h1>
+        <p class="mt-7 max-w-3xl text-lg leading-8 text-graphite">{entry.data.excerpt}</p>
+      </div>
+    </header>
+    <figure class="mx-auto max-w-7xl px-6 lg:px-8">
+      <img class="aspect-[16/10] w-full bg-mist object-cover" src={getMedia(entry.data.coverImage)} alt={entry.data.coverAlt} />
+    </figure>
+    <div class="mx-auto grid max-w-5xl gap-12 px-6 py-16 lg:px-8">
+      {entry.data.personalNote && (
+        <aside class="border-l-2 border-accent pl-6 font-serif text-3xl leading-tight text-ink">
+          {entry.data.personalNote}
+        </aside>
+      )}
+      <ContentRenderer><Content /></ContentRenderer>
+      {entry.data.contentType === 'external' && <ExternalLinkCard entry={entry} />}
+      <PreviousNextNavigation previous={previous} next={next} basePath="/lifestyle" />
+    </div>
+  </article>
+</BaseLayout>

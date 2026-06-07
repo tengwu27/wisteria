@@ -1,0 +1,16 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ArtCard from '@/components/ui/ArtCard.astro';
+
+interface Props {
+  entries: CollectionEntry<'art'>[];
+}
+
+const { entries } = Astro.props;
+---
+
+<section class="px-6 pb-24 lg:px-8">
+  <div class="mx-auto grid max-w-7xl gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
+    {entries.map((entry, index) => <ArtCard entry={entry} large={index === 0} />)}
+  </div>
+</section>

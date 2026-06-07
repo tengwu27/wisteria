@@ -1,0 +1,30 @@
+---
+import { getMedia } from '@/assets/images/placeholders';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { site } from '@/data/site';
+---
+
+<BaseLayout title="About | Our Life, Collected" description="A quiet introduction to the purpose of this personal archive.">
+  <section class="px-6 pb-24 pt-40 lg:px-8">
+    <div class="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+      <figure>
+        <img class="aspect-[4/5] w-full bg-mist object-cover" src={getMedia('portraitPlaceholder')} alt={site.placeholders.portraitAlt} />
+        <figcaption class="mt-3 text-sm text-ash">Replace with a couple portrait or an abstract image that feels personal.</figcaption>
+      </figure>
+      <div class="self-center">
+        <p class="text-xs uppercase tracking-[0.22em] text-accent">About</p>
+        <h1 class="mt-5 font-serif text-5xl leading-[1.02] text-ink md:text-7xl">A private archive made public with care.</h1>
+        <div class="mt-8 grid gap-6 text-lg leading-8 text-graphite">
+          <p>{site.placeholders.names}</p>
+          <p>{site.placeholders.biography}</p>
+          <p>
+            This page is intentionally spare. Replace these placeholders with a warm shared biography, why the site exists, and any public contact or social links you want to include.
+          </p>
+          <p class="text-sm uppercase tracking-[0.18em] text-ash">
+            Privacy note: avoid home addresses, exact live locations, private travel plans, or sensitive metadata.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

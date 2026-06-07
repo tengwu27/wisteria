@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1300" role="img" aria-label="Anonymous couple portrait placeholder">
+  <rect width="1100" height="1300" fill="#eee7dc"/>
+  <circle cx="420" cy="430" r="150" fill="#8b735d" opacity=".45"/>
+  <circle cx="680" cy="410" r="145" fill="#6f7768" opacity=".45"/>
+  <path d="M210 1120 C260 820 410 660 550 660 C720 660 890 830 940 1120 Z" fill="#fbfaf6"/>
+  <path d="M250 1040 C430 940 620 960 820 860" fill="none" stroke="#4b4740" stroke-width="6" opacity=".35"/>
+</svg>

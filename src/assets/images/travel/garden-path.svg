@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" role="img" aria-label="Abstract garden path travel placeholder">
+  <rect width="1200" height="1400" fill="#f4efe7"/>
+  <path d="M0 950 C250 840 380 730 520 540 C650 365 780 220 1200 170 L1200 1400 L0 1400 Z" fill="#6f7768" opacity=".6"/>
+  <path d="M420 1400 C480 1080 610 820 820 610 C950 480 1040 390 1200 330 L1200 1400 Z" fill="#d8cabb"/>
+  <circle cx="260" cy="330" r="160" fill="#8b735d" opacity=".28"/>
+</svg>

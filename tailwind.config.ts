@@ -6,13 +6,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: '#171412',
-        paper: '#fbfaf7',
-        stone: '#e8e1d8',
-        graphite: '#37302b',
-        moss: '#5d6a52',
-        brass: '#b08a55',
-        clay: '#9a6a52'
+        ink: '#1c1a17',
+        paper: '#fbfaf6',
+        milk: '#fffdf8',
+        mist: '#e8e3da',
+        graphite: '#4b4740',
+        ash: '#777168',
+        accent: '#8b735d',
+        moss: '#6f7768',
+        dusk: '#2f3030'
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],

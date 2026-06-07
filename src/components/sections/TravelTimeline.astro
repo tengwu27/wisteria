@@ -1,0 +1,30 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import TravelCard from '@/components/ui/TravelCard.astro';
+
+interface Props {
+  entries: CollectionEntry<'travel'>[];
+}
+
+const { entries } = Astro.props;
+---
+
+<section class="px-6 pb-24 lg:px-8">
+  <div class="relative mx-auto max-w-7xl">
+    <div class="absolute bottom-0 left-4 top-0 w-px bg-accent/40 md:left-1/2"></div>
+    <div class="grid gap-14">
+      {entries.map((entry, index) => {
+        const isRight = index % 2 === 1;
+        return (
+          <article class={`relative grid gap-6 pl-12 md:grid-cols-2 md:pl-0 ${isRight ? '' : 'md:[&>*:first-child]:col-start-1'}`}>
+            <div class={`reveal ${isRight ? 'md:col-start-2 md:pl-16' : 'md:pr-16'}`}>
+              <TravelCard entry={entry} />
+            </div>
+            <div class="absolute left-4 top-8 h-3 w-3 -translate-x-1/2 rounded-full bg-accent ring-8 ring-paper md:left-1/2"></div>
+            <div class={`absolute top-9 hidden h-px w-12 bg-accent/40 md:block ${isRight ? 'left-1/2' : 'right-1/2'}`}></div>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</section>

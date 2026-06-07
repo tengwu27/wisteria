@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1000" role="img" aria-label="Abstract table light lifestyle placeholder">
+  <rect width="1400" height="1000" fill="#f4efe7"/>
+  <rect x="150" y="160" width="360" height="560" fill="#fffdf8"/>
+  <rect x="565" y="210" width="470" height="330" fill="#d5c7b8"/>
+  <circle cx="1030" cy="650" r="170" fill="#8b735d" opacity=".35"/>
+  <path d="M0 780 C330 690 550 740 770 650 C990 560 1140 520 1400 600 L1400 1000 L0 1000 Z" fill="#ded6ca"/>
+</svg>

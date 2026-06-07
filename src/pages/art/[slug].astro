@@ -1,0 +1,48 @@
+---
+import { getCollection } from 'astro:content';
+import ContentRenderer from '@/components/ui/ContentRenderer.astro';
+import ImageGallery from '@/components/ui/ImageGallery.astro';
+import PreviousNextNavigation from '@/components/ui/PreviousNextNavigation.astro';
+import { getMedia } from '@/assets/images/placeholders';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { byOrder, findPreviousNext, formatDate } from '@/utils/content';
+
+export async function getStaticPaths() {
+  const entries = (await getCollection('art')).filter((entry) => entry.data.published).sort(byOrder);
+
+  return entries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry, entries }
+  }));
+}
+
+const { entry, entries } = Astro.props;
+const { Content } = await entry.render();
+const { previous, next } = findPreviousNext(entries, entry.slug);
+---
+
+<BaseLayout title={`${entry.data.title} | Art`} description={entry.data.excerpt} type="article">
+  <article class="pt-20">
+    <header class="px-6 py-16 lg:px-8">
+      <div class="mx-auto max-w-5xl">
+        <p class="text-xs uppercase tracking-[0.22em] text-accent">{entry.data.category} / {entry.data.year}</p>
+        <h1 class="mt-5 font-serif text-5xl leading-[1.02] text-ink md:text-7xl">{entry.data.title}</h1>
+        <dl class="mt-8 grid gap-4 text-sm text-graphite sm:grid-cols-2 lg:grid-cols-4">
+          <div><dt class="text-ash">Creator</dt><dd>{entry.data.creator}</dd></div>
+          <div><dt class="text-ash">Date</dt><dd>{formatDate(entry.data.date)}</dd></div>
+          <div><dt class="text-ash">Medium</dt><dd>{entry.data.medium}</dd></div>
+          {entry.data.dimensions && <div><dt class="text-ash">Dimensions</dt><dd>{entry.data.dimensions}</dd></div>}
+        </dl>
+      </div>
+    </header>
+    <figure class="mx-auto max-w-7xl px-6 lg:px-8">
+      <img class="aspect-[16/10] w-full bg-mist object-cover" src={getMedia(entry.data.coverImage)} alt={entry.data.coverAlt} />
+      {entry.data.caption && <figcaption class="mt-3 text-sm text-ash">{entry.data.caption}</figcaption>}
+    </figure>
+    <div class="mx-auto grid max-w-5xl gap-12 px-6 py-16 lg:px-8">
+      <ContentRenderer><Content /></ContentRenderer>
+      <ImageGallery items={entry.data.gallery} />
+      <PreviousNextNavigation previous={previous} next={next} basePath="/art" />
+    </div>
+  </article>
+</BaseLayout>

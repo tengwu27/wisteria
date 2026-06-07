@@ -1,23 +1,27 @@
-export type ServicePillar = {
-  title: string;
+export type HomeChapter = {
+  title: 'Art' | 'Lifestyle' | 'Travel';
+  href: string;
+  imageKey: 'artPaperStudy' | 'lifestyleTable' | 'travelCoast';
   description: string;
 };
 
-export const services: ServicePillar[] = [
+export const homeChapters: HomeChapter[] = [
   {
-    title: 'Real Estate',
-    description: 'Acquisition, positioning, and property strategy for homes, retreats, and boutique developments.'
-  },
-  {
-    title: 'Investment',
-    description: 'Capital-aware guidance that evaluates risk, upside, timing, and long-term ownership value.'
-  },
-  {
-    title: 'Design',
-    description: 'Creative direction that connects architecture, interiors, materials, and brand atmosphere.'
+    title: 'Art',
+    href: '/art',
+    imageKey: 'artPaperStudy',
+    description: 'A visual portfolio of paintings, studies, photographs, experiments, and quiet works in progress.'
   },
   {
     title: 'Lifestyle',
-    description: 'A human view of how place supports daily rhythm, hospitality, wellness, and legacy.'
+    href: '/lifestyle',
+    imageKey: 'lifestyleTable',
+    description: 'Notes on daily life, objects, books, meals, music, and meaningful things found along the way.'
+  },
+  {
+    title: 'Travel',
+    href: '/travel',
+    imageKey: 'travelCoast',
+    description: 'A chronological journey through places, seasons, and the small details that made them stay with us.'
   }
 ];

@@ -1,0 +1,23 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import MediaCard from './MediaCard.astro';
+import { formatDate } from '@/utils/content';
+
+interface Props {
+  entry: CollectionEntry<'lifestyle'>;
+  large?: boolean;
+}
+
+const { entry, large = false } = Astro.props;
+const meta = `${entry.data.contentType === 'external' ? 'Things we found' : 'Original story'} / ${formatDate(entry.data.date)}`;
+---
+
+<MediaCard
+  title={entry.data.title}
+  href={`/lifestyle/${entry.slug}`}
+  imageKey={entry.data.coverImage}
+  alt={entry.data.coverAlt}
+  meta={meta}
+  excerpt={entry.data.personalNote ?? entry.data.excerpt}
+  large={large}
+/>

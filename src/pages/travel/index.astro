@@ -1,0 +1,20 @@
+---
+import { getCollection } from 'astro:content';
+import SectionIntroduction from '@/components/sections/SectionIntroduction.astro';
+import TravelTimeline from '@/components/sections/TravelTimeline.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { byNewest } from '@/utils/content';
+
+const entries = (await getCollection('travel')).filter((entry) => entry.data.published).sort(byNewest);
+---
+
+<BaseLayout title="Travel | Our Life, Collected" description="A chronological visual journey through places, seasons, and shared memories.">
+  <div class="pt-20">
+    <SectionIntroduction
+      eyebrow="Travel"
+      title="A chronological journey through places and seasons."
+      text="On desktop, travel entries alternate along a central branch. On mobile, the timeline becomes single-sided for clarity."
+    />
+    <TravelTimeline entries={entries} />
+  </div>
+</BaseLayout>

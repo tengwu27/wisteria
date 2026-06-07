@@ -1,37 +1,53 @@
 ---
 import { getCollection } from 'astro:content';
-import ContactCta from '@/components/sections/ContactCta.astro';
-import FeaturedProjects from '@/components/sections/FeaturedProjects.astro';
-import Hero from '@/components/sections/Hero.astro';
-import ServicePillars from '@/components/sections/ServicePillars.astro';
-import Testimonials from '@/components/sections/Testimonials.astro';
+import ArtCard from '@/components/ui/ArtCard.astro';
+import FullScreenHero from '@/components/sections/FullScreenHero.astro';
+import LifestyleCard from '@/components/ui/LifestyleCard.astro';
+import MediaCard from '@/components/ui/MediaCard.astro';
+import TravelCard from '@/components/ui/TravelCard.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { homeChapters } from '@/data/services';
+import { site } from '@/data/site';
+import { byNewest, byOrder } from '@/utils/content';
 
-const projects = (await getCollection('projects'))
-  .filter((project) => project.data.featured)
-  .sort((a, b) => a.data.order - b.data.order);
-
-const testimonials = (await getCollection('testimonials'))
-  .filter((testimonial) => testimonial.data.featured)
-  .sort((a, b) => a.data.order - b.data.order);
+const art = (await getCollection('art')).filter((entry) => entry.data.published).sort(byOrder);
+const lifestyle = (await getCollection('lifestyle')).filter((entry) => entry.data.published).sort(byNewest);
+const travel = (await getCollection('travel')).filter((entry) => entry.data.published).sort(byNewest);
 ---
 
 <BaseLayout>
-  <Hero />
-  <ServicePillars />
-  <FeaturedProjects projects={projects} />
-  <section class="bg-white px-6 py-20 lg:px-8">
-    <div class="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1fr_1fr]">
-      <div class="min-h-[420px] bg-[linear-gradient(135deg,#171412,#5d6a52_55%,#b08a55)]"></div>
-      <div class="self-center">
-        <p class="text-sm uppercase tracking-[0.22em] text-brass">Design and lifestyle</p>
-        <h2 class="mt-4 font-serif text-4xl leading-tight text-ink md:text-5xl">The strongest places carry both discipline and feeling.</h2>
-        <p class="mt-6 text-base leading-7 text-graphite">
-          Wisteria studies the financial structure, spatial experience, material quality, and personal rhythm behind every decision. The result is a clearer path from opportunity to lived value.
-        </p>
-      </div>
+  <FullScreenHero />
+  <section id="introduction" class="px-6 py-24 lg:px-8">
+    <div class="mx-auto max-w-4xl">
+      <p class="font-serif text-4xl leading-tight text-ink md:text-6xl">{site.introduction}</p>
+      <p class="mt-8 text-sm uppercase tracking-[0.18em] text-ash">Replace the words, images, dates, and places as the archive becomes yours.</p>
     </div>
   </section>
-  <Testimonials testimonials={testimonials} />
-  <ContactCta />
+  <section class="px-6 pb-24 lg:px-8">
+    <div class="mx-auto grid max-w-7xl gap-16">
+      {homeChapters.map((chapter, index) => (
+        <div class={`grid items-end gap-8 md:grid-cols-2 ${index % 2 === 1 ? 'md:[&>*:first-child]:order-2' : ''}`}>
+          <MediaCard
+            title={chapter.title}
+            href={chapter.href}
+            imageKey={chapter.imageKey}
+            alt={`${chapter.title} chapter placeholder image`}
+            excerpt={chapter.description}
+            large
+          />
+        </div>
+      ))}
+    </div>
+  </section>
+  <section class="bg-milk px-6 py-24 lg:px-8">
+    <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3">
+      <div>
+        <p class="text-xs uppercase tracking-[0.22em] text-accent">Recently placed</p>
+        <h2 class="mt-4 font-serif text-4xl leading-tight text-ink">A few pieces from the archive.</h2>
+      </div>
+      {art[0] && <ArtCard entry={art[0]} />}
+      {lifestyle[0] && <LifestyleCard entry={lifestyle[0]} />}
+      {travel[0] && <TravelCard entry={travel[0]} />}
+    </div>
+  </section>
 </BaseLayout>

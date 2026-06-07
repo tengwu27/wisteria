@@ -1,0 +1,32 @@
+---
+import { getMedia, type MediaKey } from '@/assets/images/placeholders';
+
+interface Props {
+  title: string;
+  href: string;
+  imageKey: MediaKey;
+  alt: string;
+  meta?: string;
+  excerpt?: string;
+  large?: boolean;
+}
+
+const { title, href, imageKey, alt, meta, excerpt, large = false } = Astro.props;
+---
+
+<a class={`group block ${large ? 'md:col-span-2' : ''}`} href={href}>
+  <div class="overflow-hidden bg-mist">
+    <img
+      class={`w-full object-cover transition duration-700 group-hover:scale-[1.03] ${large ? 'aspect-[16/9]' : 'aspect-[4/5]'}`}
+      src={getMedia(imageKey)}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+    />
+  </div>
+  <div class="mt-5">
+    {meta && <p class="text-xs uppercase tracking-[0.18em] text-ash">{meta}</p>}
+    <h2 class="mt-2 font-serif text-3xl leading-tight text-ink group-hover:underline">{title}</h2>
+    {excerpt && <p class="mt-3 text-sm leading-6 text-graphite">{excerpt}</p>}
+  </div>
+</a>

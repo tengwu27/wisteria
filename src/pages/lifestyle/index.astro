@@ -1,0 +1,24 @@
+---
+import { getCollection } from 'astro:content';
+import LifestyleCard from '@/components/ui/LifestyleCard.astro';
+import SectionIntroduction from '@/components/sections/SectionIntroduction.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { byNewest } from '@/utils/content';
+
+const entries = (await getCollection('lifestyle')).filter((entry) => entry.data.published).sort(byNewest);
+---
+
+<BaseLayout title="Lifestyle | Our Life, Collected" description="Original stories and meaningful discoveries from daily life.">
+  <div class="pt-20">
+    <SectionIntroduction
+      eyebrow="Lifestyle"
+      title="Daily fragments, original notes, and things worth saving."
+      text="Lifestyle entries can be original stories or external discoveries, each with a personal note and replaceable imagery."
+    />
+    <section class="px-6 pb-24 lg:px-8">
+      <div class="mx-auto grid max-w-7xl gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
+        {entries.map((entry, index) => <LifestyleCard entry={entry} large={index === 0} />)}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

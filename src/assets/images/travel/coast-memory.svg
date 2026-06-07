@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1000" role="img" aria-label="Abstract coast travel placeholder">
+  <rect width="1500" height="1000" fill="#eef0ed"/>
+  <path d="M0 630 C290 490 510 560 760 470 C990 390 1190 320 1500 370 L1500 1000 L0 1000 Z" fill="#8f9a90"/>
+  <path d="M0 760 C230 720 450 770 660 690 C890 602 1080 605 1500 680 L1500 1000 L0 1000 Z" fill="#d8cabb"/>
+  <circle cx="1130" cy="250" r="145" fill="#dcc7a6" opacity=".72"/>
+  <path d="M140 520 C450 440 780 430 1120 500" fill="none" stroke="#fbfaf6" stroke-width="7" opacity=".58"/>
+</svg>
