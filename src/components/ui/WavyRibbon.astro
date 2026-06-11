@@ -1,0 +1,56 @@
+---
+interface Props {
+  items: string[];
+  label?: string;
+}
+
+const { items, label = 'Moving wavy text ribbon' } = Astro.props;
+const ribbonPathId = 'hero-wavy-ribbon-path';
+const ribbonPhrases = Array.from({ length: 32 }, () => items).flat();
+const phraseGap = '\u00A0\u00A0\u00A0\u00A0';
+const period = 1440;
+const phaseShift = period * ((15 / 360) + (1 / 5));
+const amplitude = 132;
+const centerY = 170;
+const waveStart = -420;
+const waveEnd = 1860;
+const segmentWidth = 90;
+const radiansPerPixel = (2 * Math.PI) / period;
+const yAt = (x: number) => centerY - amplitude * Math.cos(radiansPerPixel * (x - phaseShift));
+const slopeAt = (x: number) => amplitude * radiansPerPixel * Math.sin(radiansPerPixel * (x - phaseShift));
+
+const segments = [];
+for (let x = waveStart; x < waveEnd; x += segmentWidth) {
+  const nextX = Math.min(x + segmentWidth, waveEnd);
+  const y = yAt(x);
+  const nextY = yAt(nextX);
+  const handle = (nextX - x) / 3;
+  segments.push(
+    `C ${(x + handle).toFixed(1)} ${(y + slopeAt(x) * handle).toFixed(1)} ${(nextX - handle).toFixed(1)} ${(nextY - slopeAt(nextX) * handle).toFixed(1)} ${nextX.toFixed(1)} ${nextY.toFixed(1)}`
+  );
+}
+const ribbonPath = `M ${waveStart.toFixed(1)} ${yAt(waveStart).toFixed(1)} ${segments.join(' ')}`;
+---
+
+<figure class="wavy-ribbon" aria-label={label}>
+  <svg viewBox="0 0 1440 360" preserveAspectRatio="xMidYMid meet" role="img">
+    <defs>
+      <path id={ribbonPathId} d={ribbonPath} />
+    </defs>
+    <use class="wavy-ribbon__band" href={`#${ribbonPathId}`}></use>
+    <text class="wavy-ribbon__text">
+      <textPath class="wavy-ribbon__text-path" href={`#${ribbonPathId}`} startOffset="-18%">
+        {ribbonPhrases.map((phrase, index) => (
+          <tspan dx={index === 0 ? '0' : '90'}>{phrase}{phraseGap}</tspan>
+        ))}
+        <animate
+          attributeName="startOffset"
+          from="-18%"
+          to="10%"
+          dur="26s"
+          repeatCount="indefinite"
+        />
+      </textPath>
+    </text>
+  </svg>
+</figure>

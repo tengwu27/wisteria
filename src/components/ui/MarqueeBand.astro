@@ -1,0 +1,20 @@
+---
+interface Props {
+  items: string[];
+  tone?: 'light' | 'dark';
+  reverse?: boolean;
+  label?: string;
+}
+
+const { items, tone = 'dark', reverse = false, label = 'Moving text' } = Astro.props;
+const repeatedItems = [...items, ...items, ...items];
+---
+
+<div
+  class={`marquee-band ${tone === 'light' ? 'marquee-band--light' : 'marquee-band--dark'}`}
+  aria-label={label}
+>
+  <div class={`marquee-band__track ${reverse ? 'marquee-band__track--reverse' : ''}`} aria-hidden="true">
+    {repeatedItems.map((item) => <span>{item}</span>)}
+  </div>
+</div>

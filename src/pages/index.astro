@@ -3,11 +3,11 @@ import { getCollection } from 'astro:content';
 import ArtCard from '@/components/ui/ArtCard.astro';
 import FullScreenHero from '@/components/sections/FullScreenHero.astro';
 import LifestyleCard from '@/components/ui/LifestyleCard.astro';
+import MarqueeBand from '@/components/ui/MarqueeBand.astro';
 import MediaCard from '@/components/ui/MediaCard.astro';
 import TravelCard from '@/components/ui/TravelCard.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { homeChapters } from '@/data/services';
-import { site } from '@/data/site';
 import { byNewest, byOrder } from '@/utils/content';
 
 const art = (await getCollection('art')).filter((entry) => entry.data.published).sort(byOrder);
@@ -17,16 +17,29 @@ const travel = (await getCollection('travel')).filter((entry) => entry.data.publ
 
 <BaseLayout>
   <FullScreenHero />
-  <section id="introduction" class="px-6 py-24 lg:px-8">
-    <div class="mx-auto max-w-4xl">
-      <p class="font-serif text-4xl leading-tight text-ink md:text-6xl">{site.introduction}</p>
-      <p class="mt-8 text-sm uppercase tracking-[0.18em] text-ash">Replace the words, images, dates, and places as the archive becomes yours.</p>
+  <section id="introduction" class="relative overflow-hidden bg-milk px-6 py-24 lg:px-8">
+    <div class="absolute right-8 top-10 hidden rotate-6 font-mono text-sm text-accent md:block">make it personal</div>
+    <div class="mx-auto max-w-5xl text-center">
+      <p class="intro-statement text-balance font-sans text-4xl font-black leading-tight text-ink md:text-6xl">
+        This is a collection of the places we have
+        <span class="hero-highlight hero-highlight--green">traveled</span>, the things we have
+        <span class="font-serif italic font-semibold">made</span>, and the moments that shaped us.
+      </p>
+      <p class="mx-auto mt-8 max-w-2xl text-base font-semibold leading-7 text-graphite">Replace the words, images, dates, and places as the archive becomes yours.</p>
     </div>
   </section>
-  <section class="px-6 pb-24 lg:px-8">
+  <section class="relative overflow-hidden px-6 pb-24 pt-8 lg:px-8">
+    <div class="-mx-6 mb-20 rotate-1 lg:-mx-8">
+      <MarqueeBand
+        tone="light"
+        reverse
+        items={['paint what lingers', 'keep the ticket stubs', 'write down the weather', 'collect the ordinary']}
+        label="Archive prompts"
+      />
+    </div>
     <div class="mx-auto grid max-w-7xl gap-16">
       {homeChapters.map((chapter, index) => (
-        <div class={`grid items-end gap-8 md:grid-cols-2 ${index % 2 === 1 ? 'md:[&>*:first-child]:order-2' : ''}`}>
+        <div class={`chapter-row grid items-end gap-8 md:grid-cols-2 ${index % 2 === 1 ? 'md:[&>*:first-child]:order-2' : ''}`}>
           <MediaCard
             title={chapter.title}
             href={chapter.href}
@@ -39,11 +52,11 @@ const travel = (await getCollection('travel')).filter((entry) => entry.data.publ
       ))}
     </div>
   </section>
-  <section class="bg-milk px-6 py-24 lg:px-8">
+  <section class="bg-[#fff0f2] px-6 py-24 lg:px-8">
     <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3">
       <div>
-        <p class="text-xs uppercase tracking-[0.22em] text-accent">Recently placed</p>
-        <h2 class="mt-4 font-serif text-4xl leading-tight text-ink">A few pieces from the archive.</h2>
+        <p class="text-xs font-black uppercase tracking-[0.16em] text-accent">Recently placed</p>
+        <h2 class="mt-4 font-sans text-4xl font-black leading-tight text-ink">A few pieces from the <span class="font-serif italic font-semibold">archive.</span></h2>
       </div>
       {art[0] && <ArtCard entry={art[0]} />}
       {lifestyle[0] && <LifestyleCard entry={lifestyle[0]} />}
