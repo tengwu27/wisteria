@@ -1,7 +1,7 @@
 ---
-title: "Winter Coastline"
-destination: "Replace with destination"
-country: "Replace with country or region"
+title: "冬日海岸线"
+destination: "替换为目的地"
+country: "替换为国家或地区"
 startDate: 2026-01-20
 endDate: 2026-01-24
 year: 2026
@@ -9,27 +9,27 @@ coordinates:
   lat: 0
   lng: 0
 coverImage: "travelCoast"
-coverAlt: "Abstract placeholder of a muted coastline"
-excerpt: "A sample travel entry for the timeline, written without real private location details."
-tripCategory: "Quiet trip"
+coverAlt: "柔和海岸线的抽象占位图"
+excerpt: "一篇用于时间线展示的旅行示例，未包含真实的私人位置细节。"
+tripCategory: "安静旅程"
 gallery:
   - imageKey: "travelCoast"
-    alt: "Coastline placeholder"
-    caption: "Replace with a photograph and caption."
+    alt: "海岸线占位图"
+    caption: "替换为真实照片和说明。"
   - imageKey: "travelGarden"
-    alt: "Garden path travel placeholder"
-    caption: "Optional secondary travel image placeholder."
+    alt: "花园小径旅行占位图"
+    caption: "可选的第二张旅行图片占位说明。"
 highlights:
-  - "Replace with a memorable moment."
-  - "Replace with a favorite meal, walk, or view."
+  - "替换为一个值得记住的瞬间。"
+  - "替换为一顿喜欢的饭、一次散步或一处风景。"
 featured: true
 published: true
 tags:
-  - placeholder
-  - coast
+  - 占位
+  - 海岸
 order: 1
 ---
 
-This travel story is a placeholder for a complete trip page. Replace it with the written memory, full-width photographs, image grids, captions, optional itinerary notes, and highlights.
+这篇旅行故事是完整旅程页面的占位内容。请替换为真实记忆、横向大图、图片网格、说明文字、可选行程笔记和记忆亮点。
 
-Avoid adding exact live-location information or private travel plans to public entries.
+公开条目中请避免加入实时精确位置或私人旅行计划。

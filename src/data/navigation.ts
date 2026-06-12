@@ -1,7 +1,7 @@
 export const navigation = [
-  { label: 'Home', href: '/' },
-  { label: 'Art', href: '/art' },
-  { label: 'Lifestyle', href: '/lifestyle' },
-  { label: 'Travel', href: '/travel' },
-  { label: 'About', href: '/about' }
+  { label: '首页', href: '/' },
+  { label: '艺术', href: '/art' },
+  { label: '生活', href: '/lifestyle' },
+  { label: '旅行', href: '/travel' },
+  { label: '关于', href: '/about' }
 ] as const;

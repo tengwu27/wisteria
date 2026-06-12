@@ -6,7 +6,7 @@ interface Props {
   label?: string;
 }
 
-const { items, tone = 'dark', reverse = false, label = 'Moving text' } = Astro.props;
+const { items, tone = 'dark', reverse = false, label = '滚动文字' } = Astro.props;
 const repeatedItems = [...items, ...items, ...items];
 ---
 

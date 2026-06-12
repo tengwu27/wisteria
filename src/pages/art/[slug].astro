@@ -19,19 +19,28 @@ export async function getStaticPaths() {
 const { entry, entries } = Astro.props;
 const { Content } = await entry.render();
 const { previous, next } = findPreviousNext(entries, entry.slug);
+const categoryLabels = {
+  painting: '绘画',
+  illustration: '插画',
+  photography: '摄影',
+  'digital art': '数字艺术',
+  design: '设计',
+  objects: '物件',
+  experiments: '实验'
+};
 ---
 
-<BaseLayout title={`${entry.data.title} | Art`} description={entry.data.excerpt} type="article">
+<BaseLayout title={`${entry.data.title} | 艺术`} description={entry.data.excerpt} type="article">
   <article class="pt-20">
     <header class="px-6 py-16 lg:px-8">
       <div class="mx-auto max-w-5xl">
-        <p class="text-xs uppercase tracking-[0.22em] text-accent">{entry.data.category} / {entry.data.year}</p>
+        <p class="text-xs uppercase tracking-[0.22em] text-accent">{categoryLabels[entry.data.category]} / {entry.data.year}</p>
         <h1 class="mt-5 font-serif text-5xl leading-[1.02] text-ink md:text-7xl">{entry.data.title}</h1>
         <dl class="mt-8 grid gap-4 text-sm text-graphite sm:grid-cols-2 lg:grid-cols-4">
-          <div><dt class="text-ash">Creator</dt><dd>{entry.data.creator}</dd></div>
-          <div><dt class="text-ash">Date</dt><dd>{formatDate(entry.data.date)}</dd></div>
-          <div><dt class="text-ash">Medium</dt><dd>{entry.data.medium}</dd></div>
-          {entry.data.dimensions && <div><dt class="text-ash">Dimensions</dt><dd>{entry.data.dimensions}</dd></div>}
+          <div><dt class="text-ash">创作者</dt><dd>{entry.data.creator}</dd></div>
+          <div><dt class="text-ash">日期</dt><dd>{formatDate(entry.data.date)}</dd></div>
+          <div><dt class="text-ash">媒介</dt><dd>{entry.data.medium}</dd></div>
+          {entry.data.dimensions && <div><dt class="text-ash">尺寸</dt><dd>{entry.data.dimensions}</dd></div>}
         </dl>
       </div>
     </header>

@@ -8,9 +8,9 @@ import { site } from '@/data/site';
     <div>
       <a href="/" class="font-serif text-3xl tracking-normal">{site.name}</a>
       <p class="mt-4 max-w-xl text-sm leading-6 text-paper/70">{site.tagline}</p>
-      <p class="mt-8 text-xs uppercase tracking-[0.18em] text-paper/45">All names, dates, places, and images are placeholders until replaced.</p>
+      <p class="mt-8 text-xs uppercase tracking-[0.18em] text-paper/45">所有姓名、日期、地点和图片在替换前均为占位内容。</p>
     </div>
-    <nav class="grid gap-3 text-sm text-paper/70 md:justify-end md:text-right" aria-label="Footer navigation">
+    <nav class="grid gap-3 text-sm text-paper/70 md:justify-end md:text-right" aria-label="页脚导航">
       {navigation.map((item) => (
         <a class="transition hover:text-paper" href={item.href}>{item.label}</a>
       ))}

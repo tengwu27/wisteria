@@ -16,7 +16,7 @@ export function byOrder<T extends { data: { order?: number } }>(a: T, b: T) {
 }
 
 export function formatDate(date: Date) {
-  return new Intl.DateTimeFormat('en', {
+  return new Intl.DateTimeFormat('zh-CN', {
     month: 'long',
     day: 'numeric',
     year: 'numeric'

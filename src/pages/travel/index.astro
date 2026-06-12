@@ -8,12 +8,12 @@ import { byNewest } from '@/utils/content';
 const entries = (await getCollection('travel')).filter((entry) => entry.data.published).sort(byNewest);
 ---
 
-<BaseLayout title="Travel | Our Life, Collected" description="A chronological visual journey through places, seasons, and shared memories.">
+<BaseLayout title="旅行 | 我们的生活收藏" description="一段按时间展开的视觉旅程，经过地点、季节与共同记忆。">
   <div class="pt-20">
     <SectionIntroduction
-      eyebrow="Travel"
-      title="A chronological journey through places and seasons."
-      text="On desktop, travel entries alternate along a central branch. On mobile, the timeline becomes single-sided for clarity."
+      eyebrow="旅行"
+      title="按时间经过地点与季节。"
+      text="在桌面端，旅行条目会沿着中轴线交错排列；在移动端，时间线会变成单侧布局，阅读更清晰。"
     />
     <TravelTimeline entries={entries} />
   </div>

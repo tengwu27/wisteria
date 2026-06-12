@@ -10,30 +10,30 @@ const hero = site.hero;
   <img
     class="hero-drift absolute inset-0 h-full w-full object-cover opacity-28 mix-blend-multiply"
     src={getMedia(hero.imageKey)}
-    alt="Replaceable full-screen hero placeholder"
+    alt="可替换的全屏首页占位图"
     fetchpriority="high"
     decoding="async"
   />
   <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.95),rgba(255,240,242,0.72)_42%,rgba(255,255,255,0.88))]"></div>
   <div class="absolute left-8 top-28 hidden rotate-[-8deg] font-mono text-sm leading-tight text-ink/70 md:block">
-    <span class="scribble-arrow">follow the small sparks</span>
+    <span class="scribble-arrow">跟着细小的光走</span>
   </div>
   <div class="relative z-20 mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6 pb-28 pt-32 text-center lg:px-8">
     <div class="max-w-5xl reveal">
       <h1 class="hero-title text-balance font-sans text-5xl font-black leading-[0.92] tracking-normal text-ink md:text-7xl lg:text-8xl">
-        <span class="hero-highlight hero-highlight--rose">Our Life</span>,<br />
-        <span class="font-serif italic font-semibold">Collected</span>
+        <span class="hero-highlight hero-highlight--rose">我们的生活</span><br />
+        <span class="font-serif italic font-semibold">收藏</span>
       </h1>
       <p class="mx-auto mt-7 max-w-2xl text-lg font-semibold leading-8 text-graphite md:text-xl">{hero.subtitle}</p>
       <a class="button-pop mt-10 inline-flex items-center justify-center rounded-lg bg-ink px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-paper shadow-soft transition hover:-translate-y-1 hover:bg-accent" href="#introduction">
-        Start the archive
+        开始浏览
       </a>
     </div>
   </div>
   <div class="absolute inset-x-0 bottom-0 z-10">
     <WavyRibbon
-      items={['DREAM, MAKE, TRAVEL']}
-      label="Archive themes"
+      items={['做梦，创作，旅行']}
+      label="档案主题"
     />
   </div>
 </section>

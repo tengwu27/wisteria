@@ -8,12 +8,12 @@ import { byNewest } from '@/utils/content';
 const entries = (await getCollection('lifestyle')).filter((entry) => entry.data.published).sort(byNewest);
 ---
 
-<BaseLayout title="Lifestyle | Our Life, Collected" description="Original stories and meaningful discoveries from daily life.">
+<BaseLayout title="生活 | 我们的生活收藏" description="来自日常生活的原创故事与有意义的发现。">
   <div class="pt-20">
     <SectionIntroduction
-      eyebrow="Lifestyle"
-      title="Daily fragments, original notes, and things worth saving."
-      text="Lifestyle entries can be original stories or external discoveries, each with a personal note and replaceable imagery."
+      eyebrow="生活"
+      title="日常片段、原创札记，以及值得留下的事物。"
+      text="生活条目可以是原创故事，也可以是外部发现；每一则都可以带上一段私人备注和可替换图片。"
     />
     <section class="px-6 pb-24 lg:px-8">
       <div class="mx-auto grid max-w-7xl gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-3">

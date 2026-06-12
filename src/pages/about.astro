@@ -4,24 +4,24 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import { site } from '@/data/site';
 ---
 
-<BaseLayout title="About | Our Life, Collected" description="A quiet introduction to the purpose of this personal archive.">
+<BaseLayout title="关于 | 我们的生活收藏" description="关于这个私人档案的一段安静介绍。">
   <section class="px-6 pb-24 pt-40 lg:px-8">
     <div class="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.9fr_1.1fr]">
       <figure>
         <img class="aspect-[4/5] w-full bg-mist object-cover" src={getMedia('portraitPlaceholder')} alt={site.placeholders.portraitAlt} />
-        <figcaption class="mt-3 text-sm text-ash">Replace with a couple portrait or an abstract image that feels personal.</figcaption>
+        <figcaption class="mt-3 text-sm text-ash">替换为一张合照，或一张对你们有私人意义的抽象图片。</figcaption>
       </figure>
       <div class="self-center">
-        <p class="text-xs uppercase tracking-[0.22em] text-accent">About</p>
-        <h1 class="mt-5 font-serif text-5xl leading-[1.02] text-ink md:text-7xl">A private archive made public with care.</h1>
+        <p class="text-xs uppercase tracking-[0.22em] text-accent">关于</p>
+        <h1 class="mt-5 font-serif text-5xl leading-[1.02] text-ink md:text-7xl">一份被认真公开的私人档案。</h1>
         <div class="mt-8 grid gap-6 text-lg leading-8 text-graphite">
           <p>{site.placeholders.names}</p>
           <p>{site.placeholders.biography}</p>
           <p>
-            This page is intentionally spare. Replace these placeholders with a warm shared biography, why the site exists, and any public contact or social links you want to include.
+            这个页面刻意保持简洁。把这些占位文字替换成一段温暖的共同简介、这个网站存在的原因，以及你们愿意公开的联系方式或社交链接。
           </p>
           <p class="text-sm uppercase tracking-[0.18em] text-ash">
-            Privacy note: avoid home addresses, exact live locations, private travel plans, or sensitive metadata.
+            隐私提示：请避免公开住址、实时精确位置、私人旅行计划或敏感元数据。
           </p>
         </div>
       </div>

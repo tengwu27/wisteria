@@ -18,14 +18,14 @@ const travel = (await getCollection('travel')).filter((entry) => entry.data.publ
 <BaseLayout>
   <FullScreenHero />
   <section id="introduction" class="relative overflow-hidden bg-milk px-6 py-24 lg:px-8">
-    <div class="absolute right-8 top-10 hidden rotate-6 font-mono text-sm text-accent md:block">make it personal</div>
+    <div class="absolute right-8 top-10 hidden rotate-6 font-mono text-sm text-accent md:block">让它属于你们</div>
     <div class="mx-auto max-w-5xl text-center">
       <p class="intro-statement text-balance font-sans text-4xl font-black leading-tight text-ink md:text-6xl">
-        This is a collection of the places we have
-        <span class="hero-highlight hero-highlight--green">traveled</span>, the things we have
-        <span class="font-serif italic font-semibold">made</span>, and the moments that shaped us.
+        这里收藏着我们
+        <span class="hero-highlight hero-highlight--green">去过的地方</span>、亲手
+        <span class="font-serif italic font-semibold">做过的事</span>，以及塑造我们的时刻。
       </p>
-      <p class="mx-auto mt-8 max-w-2xl text-base font-semibold leading-7 text-graphite">Replace the words, images, dates, and places as the archive becomes yours.</p>
+      <p class="mx-auto mt-8 max-w-2xl text-base font-semibold leading-7 text-graphite">随着档案慢慢成为你们自己的，把文字、图片、日期和地点都换成真实内容。</p>
     </div>
   </section>
   <section class="relative overflow-hidden px-6 pb-24 pt-8 lg:px-8">
@@ -33,8 +33,8 @@ const travel = (await getCollection('travel')).filter((entry) => entry.data.publ
       <MarqueeBand
         tone="light"
         reverse
-        items={['paint what lingers', 'keep the ticket stubs', 'write down the weather', 'collect the ordinary']}
-        label="Archive prompts"
+        items={['画下仍在心里的东西', '收好票根', '写下那天的天气', '收藏平凡日常']}
+        label="档案提示"
       />
     </div>
     <div class="mx-auto grid max-w-7xl gap-16">
@@ -44,7 +44,7 @@ const travel = (await getCollection('travel')).filter((entry) => entry.data.publ
             title={chapter.title}
             href={chapter.href}
             imageKey={chapter.imageKey}
-            alt={`${chapter.title} chapter placeholder image`}
+            alt={`${chapter.title}章节占位图`}
             excerpt={chapter.description}
             large
           />
@@ -55,8 +55,8 @@ const travel = (await getCollection('travel')).filter((entry) => entry.data.publ
   <section class="bg-[#fff0f2] px-6 py-24 lg:px-8">
     <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3">
       <div>
-        <p class="text-xs font-black uppercase tracking-[0.16em] text-accent">Recently placed</p>
-        <h2 class="mt-4 font-sans text-4xl font-black leading-tight text-ink">A few pieces from the <span class="font-serif italic font-semibold">archive.</span></h2>
+        <p class="text-xs font-black uppercase tracking-[0.16em] text-accent">最近放入</p>
+        <h2 class="mt-4 font-sans text-4xl font-black leading-tight text-ink">从<span class="font-serif italic font-semibold">档案</span>里选出的几件。</h2>
       </div>
       {art[0] && <ArtCard entry={art[0]} />}
       {lifestyle[0] && <LifestyleCard entry={lifestyle[0]} />}

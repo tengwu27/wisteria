@@ -21,12 +21,12 @@ const { Content } = await entry.render();
 const { previous, next } = findPreviousNext(entries, entry.slug);
 ---
 
-<BaseLayout title={`${entry.data.title} | Lifestyle`} description={entry.data.excerpt} type="article">
+<BaseLayout title={`${entry.data.title} | 生活`} description={entry.data.excerpt} type="article">
   <article class="pt-20">
     <header class="px-6 py-16 lg:px-8">
       <div class="mx-auto max-w-5xl">
         <p class="text-xs uppercase tracking-[0.22em] text-accent">
-          {entry.data.contentType === 'external' ? 'Things we found' : 'Original story'} / {formatDate(entry.data.date)}
+          {entry.data.contentType === 'external' ? '我们发现的事物' : '原创故事'} / {formatDate(entry.data.date)}
         </p>
         <h1 class="mt-5 font-serif text-5xl leading-[1.02] text-ink md:text-7xl">{entry.data.title}</h1>
         <p class="mt-7 max-w-3xl text-lg leading-8 text-graphite">{entry.data.excerpt}</p>

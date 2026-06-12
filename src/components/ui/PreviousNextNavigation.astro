@@ -15,11 +15,11 @@ interface Props {
 const { previous, next, basePath } = Astro.props;
 ---
 
-<nav class="grid gap-4 border-t border-mist pt-8 md:grid-cols-2" aria-label="Previous and next entries">
+<nav class="grid gap-4 border-t border-mist pt-8 md:grid-cols-2" aria-label="上一篇与下一篇">
   <div>
     {previous && (
       <a class="group block" href={`${basePath}/${previous.slug}`}>
-        <span class="text-xs uppercase tracking-[0.18em] text-ash">Previous</span>
+        <span class="text-xs uppercase tracking-[0.18em] text-ash">上一篇</span>
         <span class="mt-2 block font-serif text-2xl text-ink group-hover:underline">{previous.data.title}</span>
       </a>
     )}
@@ -27,7 +27,7 @@ const { previous, next, basePath } = Astro.props;
   <div class="md:text-right">
     {next && (
       <a class="group block" href={`${basePath}/${next.slug}`}>
-        <span class="text-xs uppercase tracking-[0.18em] text-ash">Next</span>
+        <span class="text-xs uppercase tracking-[0.18em] text-ash">下一篇</span>
         <span class="mt-2 block font-serif text-2xl text-ink group-hover:underline">{next.data.title}</span>
       </a>
     )}

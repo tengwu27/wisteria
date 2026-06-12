@@ -4,7 +4,7 @@ interface Props {
   label?: string;
 }
 
-const { items, label = 'Moving wavy text ribbon' } = Astro.props;
+const { items, label = '波浪文字丝带' } = Astro.props;
 const ribbonPathId = 'hero-wavy-ribbon-path';
 const ribbonPhrases = Array.from({ length: 32 }, () => items).flat();
 const phraseGap = '\u00A0\u00A0\u00A0\u00A0';

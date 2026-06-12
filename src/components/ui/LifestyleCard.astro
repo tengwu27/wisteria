@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { entry, large = false } = Astro.props;
-const meta = `${entry.data.contentType === 'external' ? 'Things we found' : 'Original story'} / ${formatDate(entry.data.date)}`;
+const meta = `${entry.data.contentType === 'external' ? '我们发现的事物' : '原创故事'} / ${formatDate(entry.data.date)}`;
 ---
 
 <MediaCard

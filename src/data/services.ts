@@ -1,5 +1,5 @@
 export type HomeChapter = {
-  title: 'Art' | 'Lifestyle' | 'Travel';
+  title: string;
   href: string;
   imageKey: 'artPaperStudy' | 'lifestyleTable' | 'travelCoast';
   description: string;
@@ -7,21 +7,21 @@ export type HomeChapter = {
 
 export const homeChapters: HomeChapter[] = [
   {
-    title: 'Art',
+    title: '艺术',
     href: '/art',
     imageKey: 'artPaperStudy',
-    description: 'A visual portfolio of paintings, studies, photographs, experiments, and quiet works in progress.'
+    description: '收藏绘画、习作、照片、实验，以及那些仍在慢慢生长的安静作品。'
   },
   {
-    title: 'Lifestyle',
+    title: '生活',
     href: '/lifestyle',
     imageKey: 'lifestyleTable',
-    description: 'Notes on daily life, objects, books, meals, music, and meaningful things found along the way.'
+    description: '记录日常、器物、书、餐桌、音乐，以及一路遇见并想要留下的事物。'
   },
   {
-    title: 'Travel',
+    title: '旅行',
     href: '/travel',
     imageKey: 'travelCoast',
-    description: 'A chronological journey through places, seasons, and the small details that made them stay with us.'
+    description: '按时间收藏地点、季节，以及那些让旅程停留在记忆里的细小细节。'
   }
 ];

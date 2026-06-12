@@ -1,21 +1,21 @@
 ---
-title: "Morning Table Notes"
+title: "晨间餐桌札记"
 date: 2026-02-04
 contentType: "original"
-author: "Replace with author name"
+author: "替换为作者姓名"
 coverImage: "lifestyleTable"
-coverAlt: "Abstract placeholder of a quiet table scene"
-excerpt: "A placeholder original story for everyday observations, meals, books, and domestic rituals."
-personalNote: "Replace this with a personal note about the moment."
+coverAlt: "安静餐桌场景的抽象占位图"
+excerpt: "一篇关于日常观察、餐食、书本与居家仪式的原创故事占位内容。"
+personalNote: "替换为你对这个时刻的私人备注。"
 featured: true
 published: true
 tags:
-  - home
-  - food
-  - daily life
+  - 家
+  - 食物
+  - 日常
 order: 1
 ---
 
-This original lifestyle story is a placeholder. Replace it with a reflection, a recipe, a room update, a book note, a small milestone, or anything else that belongs in the living archive.
+这篇原创生活故事是占位内容。你可以把它替换成一段反思、一道食谱、一次房间更新、一则读书笔记、一个小小里程碑，或任何属于生活档案的内容。
 
-The layout supports long-form writing, images, and embedded media when needed.
+这个版式支持长文、图片，以及需要时嵌入的媒体内容。

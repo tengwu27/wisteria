@@ -6,13 +6,13 @@ import { site } from '@/data/site';
 <header class="fixed inset-x-0 top-0 z-40 bg-[#fff0f2]/82 backdrop-blur-md">
   <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
     <a href="/" class="font-sans text-xl font-black tracking-normal text-ink md:text-2xl">{site.name}</a>
-    <nav class="hidden items-center gap-8 text-xs font-black uppercase tracking-[0.12em] text-graphite md:flex" aria-label="Primary navigation">
+    <nav class="hidden items-center gap-8 text-xs font-black uppercase tracking-[0.12em] text-graphite md:flex" aria-label="主导航">
       {navigation.map((item) => (
         <a class="transition hover:text-ink" href={item.href}>{item.label}</a>
       ))}
     </nav>
     <a class="text-xs font-black uppercase tracking-[0.12em] text-graphite transition hover:text-ink md:hidden" href="/about">
-      About
+      关于
     </a>
   </div>
 </header>

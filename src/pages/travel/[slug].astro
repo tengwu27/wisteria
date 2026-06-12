@@ -22,7 +22,7 @@ const { previous, next } = findPreviousNext(entries, entry.slug);
 const dateRange = entry.data.endDate ? `${formatDate(entry.data.startDate)} - ${formatDate(entry.data.endDate)}` : formatDate(entry.data.startDate);
 ---
 
-<BaseLayout title={`${entry.data.destination} | Travel`} description={entry.data.excerpt} type="article">
+<BaseLayout title={`${entry.data.destination} | 旅行`} description={entry.data.excerpt} type="article">
   <article class="pt-20">
     <header class="px-6 py-16 lg:px-8">
       <div class="mx-auto max-w-5xl">
@@ -39,7 +39,7 @@ const dateRange = entry.data.endDate ? `${formatDate(entry.data.startDate)} - ${
       <ContentRenderer><Content /></ContentRenderer>
       {entry.data.highlights.length > 0 && (
         <section>
-          <h2 class="font-serif text-4xl text-ink">Highlights</h2>
+          <h2 class="font-serif text-4xl text-ink">记忆亮点</h2>
           <ul class="mt-5 grid gap-3 text-graphite">
             {entry.data.highlights.map((highlight) => <li class="border-l border-accent pl-4">{highlight}</li>)}
           </ul>

@@ -11,7 +11,7 @@ const { entry } = Astro.props;
 
 {entry.data.externalUrl && (
   <a class="group block border-t border-mist pt-6" href={entry.data.externalUrl} target="_blank" rel="noopener noreferrer">
-    <p class="text-xs uppercase tracking-[0.18em] text-ash">{entry.data.sourceName ?? 'External source'}</p>
+    <p class="text-xs uppercase tracking-[0.18em] text-ash">{entry.data.sourceName ?? '外部来源'}</p>
     <div class="mt-4 grid gap-5 sm:grid-cols-[160px_1fr]">
       <img class="aspect-[4/3] w-full bg-mist object-cover" src={getMedia(entry.data.coverImage)} alt={entry.data.coverAlt} loading="lazy" />
       <div>

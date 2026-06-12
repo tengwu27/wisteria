@@ -8,12 +8,12 @@ import { byOrder } from '@/utils/content';
 const entries = (await getCollection('art')).filter((entry) => entry.data.published).sort(byOrder);
 ---
 
-<BaseLayout title="Art | Our Life, Collected" description="A quiet visual portfolio of works, studies, photographs, and experiments.">
+<BaseLayout title="艺术 | 我们的生活收藏" description="一组安静的视觉档案，收藏作品、习作、照片与实验。">
   <div class="pt-20">
     <SectionIntroduction
-      eyebrow="Art"
-      title="Works, studies, and experiments gathered over time."
-      text="This gallery is structured for mixed proportions, process images, written stories, tags, and future categories."
+      eyebrow="艺术"
+      title="随时间聚拢的作品、习作与实验。"
+      text="这个画廊适合收纳不同尺寸的作品、过程图片、文字故事、标签，以及未来新增的分类。"
     />
     <ArtGallery entries={entries} />
   </div>

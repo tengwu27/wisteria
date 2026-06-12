@@ -1,20 +1,20 @@
 ---
-title: "A Found Essay on Attention"
+title: "一篇关于注意力的文章"
 date: 2026-03-18
 contentType: "external"
-author: "Replace with curator name"
-sourceName: "External Source Placeholder"
+author: "替换为策展人姓名"
+sourceName: "外部来源占位"
 externalUrl: "https://example.com"
 coverImage: "lifestyleShelf"
-coverAlt: "Abstract placeholder of shelves and notes"
-excerpt: "A sample external discovery card with a personal note and safe outbound link."
-personalNote: "We saved this as a reminder to pay attention to ordinary days. Replace with your real reason for sharing."
+coverAlt: "书架与笔记的抽象占位图"
+excerpt: "一张外部发现示例卡片，包含私人备注和安全的外部链接。"
+personalNote: "我们保存这篇文章，是为了提醒自己留意普通日子。请替换为你真正想分享它的原因。"
 featured: true
 published: true
 tags:
-  - things we found
-  - essays
+  - 我们发现的事物
+  - 文章
 order: 2
 ---
 
-This entry demonstrates an external discovery. Keep a short personal note here, then send visitors to the original source with a safe external link.
+这则条目展示如何收纳一个外部发现。可以在这里保留一段简短的私人备注，然后通过安全的外部链接把访客带到原始来源。
