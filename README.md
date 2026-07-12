@@ -7,6 +7,7 @@ Static-first personal website for a married couple’s art, lifestyle notes, tra
 - Astro + TypeScript for static site generation and content-driven pages
 - Tailwind CSS for styling and design tokens
 - Astro Content Collections for typed Art, Lifestyle, and Travel entries
+- Supabase-ready content adapter with local Markdown fallback
 - Netlify for deployment
 
 ## Getting Started
@@ -36,6 +37,25 @@ This repo is configured for Netlify.
 - Config file: `netlify.toml`
 
 No backend, analytics, cookies, login, or CMS are included in this first version.
+
+## Supabase Content
+
+The site now reads content through `src/lib/content.ts`.
+
+- Without Supabase environment variables, it falls back to local Markdown in `src/content`.
+- With `SUPABASE_URL` and `SUPABASE_ANON_KEY`, it reads published rows from `public.content_entries`.
+- The expected Supabase schema is in `supabase/schema.sql`.
+
+Each Supabase row uses:
+
+- `collection`: `art`, `lifestyle`, or `travel`
+- `slug`: route slug, for example `soft-geometry`
+- `published`: whether the row is visible
+- `data`: JSON matching the current front matter shape for that collection
+- `body_markdown`: Markdown body text, rendered during the Astro build
+- `body_html`: optional pre-rendered HTML override
+
+Add the same environment variables in Netlify, then create a Netlify build hook and call it after Supabase content changes.
 
 ## Content Model
 

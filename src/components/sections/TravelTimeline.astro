@@ -1,9 +1,9 @@
 ---
-import type { CollectionEntry } from 'astro:content';
 import TravelCard from '@/components/ui/TravelCard.astro';
+import type { TravelEntry } from '@/lib/content';
 
 interface Props {
-  entries: CollectionEntry<'travel'>[];
+  entries: TravelEntry[];
 }
 
 const { entries } = Astro.props;

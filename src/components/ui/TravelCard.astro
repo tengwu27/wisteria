@@ -1,9 +1,9 @@
 ---
-import type { CollectionEntry } from 'astro:content';
 import { getMedia } from '@/assets/images/placeholders';
+import type { TravelEntry } from '@/lib/content';
 
 interface Props {
-  entry: CollectionEntry<'travel'>;
+  entry: TravelEntry;
 }
 
 const { entry } = Astro.props;

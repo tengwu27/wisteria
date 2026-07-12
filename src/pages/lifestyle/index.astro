@@ -1,11 +1,11 @@
 ---
-import { getCollection } from 'astro:content';
 import LifestyleCard from '@/components/ui/LifestyleCard.astro';
 import SectionIntroduction from '@/components/sections/SectionIntroduction.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getPublishedEntries } from '@/lib/content';
 import { byNewest } from '@/utils/content';
 
-const entries = (await getCollection('lifestyle')).filter((entry) => entry.data.published).sort(byNewest);
+const entries = (await getPublishedEntries('lifestyle')).sort(byNewest);
 ---
 
 <BaseLayout title="生活 | 我们的生活收藏" description="来自日常生活的原创故事与有意义的发现。">

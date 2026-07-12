@@ -1,9 +1,9 @@
 ---
-import type { CollectionEntry } from 'astro:content';
 import MediaCard from './MediaCard.astro';
+import type { ArtEntry } from '@/lib/content';
 
 interface Props {
-  entry: CollectionEntry<'art'>;
+  entry: ArtEntry;
   large?: boolean;
 }
 

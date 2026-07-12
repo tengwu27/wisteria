@@ -1,11 +1,11 @@
 ---
-import { getCollection } from 'astro:content';
 import SectionIntroduction from '@/components/sections/SectionIntroduction.astro';
 import TravelTimeline from '@/components/sections/TravelTimeline.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getPublishedEntries } from '@/lib/content';
 import { byNewest } from '@/utils/content';
 
-const entries = (await getCollection('travel')).filter((entry) => entry.data.published).sort(byNewest);
+const entries = (await getPublishedEntries('travel')).sort(byNewest);
 ---
 
 <BaseLayout title="旅行 | 我们的生活收藏" description="一段按时间展开的视觉旅程，经过地点、季节与共同记忆。">

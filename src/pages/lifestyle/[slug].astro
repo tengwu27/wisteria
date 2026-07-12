@@ -1,14 +1,14 @@
 ---
-import { getCollection } from 'astro:content';
-import ContentRenderer from '@/components/ui/ContentRenderer.astro';
+import EntryContent from '@/components/ui/EntryContent.astro';
 import ExternalLinkCard from '@/components/ui/ExternalLinkCard.astro';
 import PreviousNextNavigation from '@/components/ui/PreviousNextNavigation.astro';
 import { getMedia } from '@/assets/images/placeholders';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getPublishedEntries } from '@/lib/content';
 import { byNewest, findPreviousNext, formatDate } from '@/utils/content';
 
 export async function getStaticPaths() {
-  const entries = (await getCollection('lifestyle')).filter((entry) => entry.data.published).sort(byNewest);
+  const entries = (await getPublishedEntries('lifestyle')).sort(byNewest);
 
   return entries.map((entry) => ({
     params: { slug: entry.slug },
@@ -17,7 +17,6 @@ export async function getStaticPaths() {
 }
 
 const { entry, entries } = Astro.props;
-const { Content } = await entry.render();
 const { previous, next } = findPreviousNext(entries, entry.slug);
 ---
 
@@ -41,7 +40,7 @@ const { previous, next } = findPreviousNext(entries, entry.slug);
           {entry.data.personalNote}
         </aside>
       )}
-      <ContentRenderer><Content /></ContentRenderer>
+      <EntryContent entry={entry} />
       {entry.data.contentType === 'external' && <ExternalLinkCard entry={entry} />}
       <PreviousNextNavigation previous={previous} next={next} basePath="/lifestyle" />
     </div>

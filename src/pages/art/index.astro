@@ -1,11 +1,11 @@
 ---
-import { getCollection } from 'astro:content';
 import ArtGallery from '@/components/sections/ArtGallery.astro';
 import SectionIntroduction from '@/components/sections/SectionIntroduction.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getPublishedEntries } from '@/lib/content';
 import { byOrder } from '@/utils/content';
 
-const entries = (await getCollection('art')).filter((entry) => entry.data.published).sort(byOrder);
+const entries = (await getPublishedEntries('art')).sort(byOrder);
 ---
 
 <BaseLayout title="艺术 | 我们的生活收藏" description="一组安静的视觉档案，收藏作品、习作、照片与实验。">

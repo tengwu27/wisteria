@@ -7,12 +7,16 @@
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
     "lint": "ASTRO_TELEMETRY_DISABLED=1 astro check",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build",
-    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview"
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "supabase:seed:generate": "node scripts/export-content-to-supabase.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "latest",
     "@astrojs/tailwind": "latest",
-    "astro": "latest"
+    "@supabase/supabase-js": "^2.110.2",
+    "astro": "latest",
+    "gray-matter": "^4.0.3",
+    "marked": "^18.0.6"
   },
   "devDependencies": {
     "@astrojs/check": "latest",

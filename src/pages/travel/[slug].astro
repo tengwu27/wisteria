@@ -1,14 +1,14 @@
 ---
-import { getCollection } from 'astro:content';
-import ContentRenderer from '@/components/ui/ContentRenderer.astro';
+import EntryContent from '@/components/ui/EntryContent.astro';
 import ImageGallery from '@/components/ui/ImageGallery.astro';
 import PreviousNextNavigation from '@/components/ui/PreviousNextNavigation.astro';
 import { getMedia } from '@/assets/images/placeholders';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getPublishedEntries } from '@/lib/content';
 import { byNewest, findPreviousNext, formatDate } from '@/utils/content';
 
 export async function getStaticPaths() {
-  const entries = (await getCollection('travel')).filter((entry) => entry.data.published).sort(byNewest);
+  const entries = (await getPublishedEntries('travel')).sort(byNewest);
 
   return entries.map((entry) => ({
     params: { slug: entry.slug },
@@ -17,7 +17,6 @@ export async function getStaticPaths() {
 }
 
 const { entry, entries } = Astro.props;
-const { Content } = await entry.render();
 const { previous, next } = findPreviousNext(entries, entry.slug);
 const dateRange = entry.data.endDate ? `${formatDate(entry.data.startDate)} - ${formatDate(entry.data.endDate)}` : formatDate(entry.data.startDate);
 ---
@@ -36,7 +35,7 @@ const dateRange = entry.data.endDate ? `${formatDate(entry.data.startDate)} - ${
       <img class="aspect-[16/10] w-full bg-mist object-cover" src={getMedia(entry.data.coverImage)} alt={entry.data.coverAlt} />
     </figure>
     <div class="mx-auto grid max-w-5xl gap-12 px-6 py-16 lg:px-8">
-      <ContentRenderer><Content /></ContentRenderer>
+      <EntryContent entry={entry} />
       {entry.data.highlights.length > 0 && (
         <section>
           <h2 class="font-serif text-4xl text-ink">记忆亮点</h2>

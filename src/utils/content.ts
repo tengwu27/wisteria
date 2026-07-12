@@ -1,4 +1,4 @@
-import type { CollectionEntry } from 'astro:content';
+import type { AnyContentEntry } from '@/lib/content';
 
 export function byNewest<T extends { data: { date?: Date; startDate?: Date; order?: number } }>(a: T, b: T) {
   const aDate = a.data.date ?? a.data.startDate;
@@ -23,7 +23,7 @@ export function formatDate(date: Date) {
   }).format(date);
 }
 
-export function findPreviousNext<T extends CollectionEntry<'art' | 'lifestyle' | 'travel'>>(items: T[], slug: string) {
+export function findPreviousNext<T extends AnyContentEntry>(items: T[], slug: string) {
   const currentIndex = items.findIndex((item) => item.slug === slug);
 
   return {

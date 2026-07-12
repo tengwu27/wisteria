@@ -1,5 +1,4 @@
 ---
-import { getCollection } from 'astro:content';
 import ArtCard from '@/components/ui/ArtCard.astro';
 import FullScreenHero from '@/components/sections/FullScreenHero.astro';
 import LifestyleCard from '@/components/ui/LifestyleCard.astro';
@@ -8,11 +7,12 @@ import MediaCard from '@/components/ui/MediaCard.astro';
 import TravelCard from '@/components/ui/TravelCard.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { homeChapters } from '@/data/services';
+import { getPublishedEntries } from '@/lib/content';
 import { byNewest, byOrder } from '@/utils/content';
 
-const art = (await getCollection('art')).filter((entry) => entry.data.published).sort(byOrder);
-const lifestyle = (await getCollection('lifestyle')).filter((entry) => entry.data.published).sort(byNewest);
-const travel = (await getCollection('travel')).filter((entry) => entry.data.published).sort(byNewest);
+const art = (await getPublishedEntries('art')).sort(byOrder);
+const lifestyle = (await getPublishedEntries('lifestyle')).sort(byNewest);
+const travel = (await getPublishedEntries('travel')).sort(byNewest);
 ---
 
 <BaseLayout>

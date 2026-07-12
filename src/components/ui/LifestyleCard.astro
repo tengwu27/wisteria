@@ -1,10 +1,10 @@
 ---
-import type { CollectionEntry } from 'astro:content';
 import MediaCard from './MediaCard.astro';
+import type { LifestyleEntry } from '@/lib/content';
 import { formatDate } from '@/utils/content';
 
 interface Props {
-  entry: CollectionEntry<'lifestyle'>;
+  entry: LifestyleEntry;
   large?: boolean;
 }
 
