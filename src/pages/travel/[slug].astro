@@ -26,7 +26,7 @@ const dateRange = entry.data.endDate ? `${formatDate(entry.data.startDate)} - ${
     <header class="px-6 py-16 lg:px-8">
       <div class="mx-auto max-w-5xl">
         <p class="text-xs uppercase tracking-[0.22em] text-accent">{entry.data.year} / {entry.data.country}</p>
-        <h1 class="mt-5 font-serif text-5xl leading-[1.02] text-ink md:text-7xl">{entry.data.destination}</h1>
+        <h1 class="mt-5 font-sans text-5xl font-black leading-[1.02] text-ink md:text-7xl">{entry.data.destination}</h1>
         <p class="mt-6 text-sm uppercase tracking-[0.16em] text-ash">{dateRange}</p>
         <p class="mt-7 max-w-3xl text-lg leading-8 text-graphite">{entry.data.excerpt}</p>
       </div>
@@ -38,7 +38,7 @@ const dateRange = entry.data.endDate ? `${formatDate(entry.data.startDate)} - ${
       <EntryContent entry={entry} />
       {entry.data.highlights.length > 0 && (
         <section>
-          <h2 class="font-serif text-4xl text-ink">记忆亮点</h2>
+          <h2 class="font-sans text-4xl font-black text-ink">记忆亮点</h2>
           <ul class="mt-5 grid gap-3 text-graphite">
             {entry.data.highlights.map((highlight) => <li class="border-l border-accent pl-4">{highlight}</li>)}
           </ul>

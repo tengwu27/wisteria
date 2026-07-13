@@ -27,7 +27,7 @@ const { previous, next } = findPreviousNext(entries, entry.slug);
         <p class="text-xs uppercase tracking-[0.22em] text-accent">
           {entry.data.contentType === 'external' ? '我们发现的事物' : '原创故事'} / {formatDate(entry.data.date)}
         </p>
-        <h1 class="mt-5 font-serif text-5xl leading-[1.02] text-ink md:text-7xl">{entry.data.title}</h1>
+        <h1 class="mt-5 font-sans text-5xl font-black leading-[1.02] text-ink md:text-7xl">{entry.data.title}</h1>
         <p class="mt-7 max-w-3xl text-lg leading-8 text-graphite">{entry.data.excerpt}</p>
       </div>
     </header>
@@ -36,7 +36,7 @@ const { previous, next } = findPreviousNext(entries, entry.slug);
     </figure>
     <div class="mx-auto grid max-w-5xl gap-12 px-6 py-16 lg:px-8">
       {entry.data.personalNote && (
-        <aside class="border-l-2 border-accent pl-6 font-serif text-3xl leading-tight text-ink">
+        <aside class="comic-panel rotate-1 bg-sunshine p-6 font-sans text-2xl font-black leading-tight text-ink">
           {entry.data.personalNote}
         </aside>
       )}

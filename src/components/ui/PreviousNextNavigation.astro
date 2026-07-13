@@ -20,7 +20,7 @@ const { previous, next, basePath } = Astro.props;
     {previous && (
       <a class="group block" href={`${basePath}/${previous.slug}`}>
         <span class="text-xs uppercase tracking-[0.18em] text-ash">上一篇</span>
-        <span class="mt-2 block font-serif text-2xl text-ink group-hover:underline">{previous.data.title}</span>
+        <span class="mt-2 block font-sans text-2xl font-black text-ink group-hover:underline">{previous.data.title}</span>
       </a>
     )}
   </div>
@@ -28,7 +28,7 @@ const { previous, next, basePath } = Astro.props;
     {next && (
       <a class="group block" href={`${basePath}/${next.slug}`}>
         <span class="text-xs uppercase tracking-[0.18em] text-ash">下一篇</span>
-        <span class="mt-2 block font-serif text-2xl text-ink group-hover:underline">{next.data.title}</span>
+        <span class="mt-2 block font-sans text-2xl font-black text-ink group-hover:underline">{next.data.title}</span>
       </a>
     )}
   </div>

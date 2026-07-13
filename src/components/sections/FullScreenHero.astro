@@ -1,39 +1,24 @@
 ---
 import { getMedia } from '@/assets/images/placeholders';
 import { site } from '@/data/site';
-import WavyRibbon from '@/components/ui/WavyRibbon.astro';
-
-const hero = site.hero;
 ---
 
-<section class="relative min-h-screen overflow-visible bg-[#fff0f2] text-ink">
-  <img
-    class="hero-drift absolute inset-0 h-full w-full object-cover opacity-28 mix-blend-multiply"
-    src={getMedia(hero.imageKey)}
-    alt="可替换的全屏首页占位图"
-    fetchpriority="high"
-    decoding="async"
-  />
-  <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.95),rgba(255,240,242,0.72)_42%,rgba(255,255,255,0.88))]"></div>
-  <div class="absolute left-8 top-28 hidden rotate-[-8deg] font-mono text-sm leading-tight text-ink/70 md:block">
-    <span class="scribble-arrow">跟着细小的光走</span>
-  </div>
-  <div class="relative z-20 mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6 pb-28 pt-32 text-center lg:px-8">
-    <div class="max-w-5xl reveal">
-      <h1 class="hero-title text-balance font-sans text-5xl font-black leading-[0.92] tracking-normal text-ink md:text-7xl lg:text-8xl">
-        <span class="hero-highlight hero-highlight--rose">我们的生活</span><br />
-        <span class="font-serif italic font-semibold">收藏</span>
+<section class="relative min-h-[860px] overflow-hidden border-b-[3px] border-ink bg-sky pt-16 text-ink lg:min-h-screen">
+  <img class="absolute inset-0 h-full w-full object-cover object-[67%_center]" src={getMedia(site.hero.imageKey)} alt="阳光下充满奇妙机械的彩色小镇" fetchpriority="high" decoding="async" />
+  <div class="absolute inset-0 bg-gradient-to-r from-sky/85 via-sky/25 to-transparent"></div>
+  <div class="comic-burst floaty absolute left-[6%] top-28 hidden h-24 w-24 rotate-[-8deg] place-items-center bg-sunshine text-4xl font-black md:grid">★</div>
+  <div class="absolute right-[8%] top-28 hidden rotate-6 rounded-full border-[3px] border-ink bg-paper px-5 py-3 font-black shadow-[4px_5px_0_#24231f] lg:block">跟着细小的光走 →</div>
+  <div class="relative z-20 mx-auto flex min-h-[810px] max-w-7xl items-center px-6 pb-32 pt-28 lg:min-h-screen lg:px-8">
+    <div class="hero-cloud reveal relative max-w-[760px] bg-paper/95 px-8 py-14 text-center md:px-16 md:py-16">
+      <span class="absolute -left-6 top-10 -rotate-12 text-5xl font-black text-tomato">Z</span>
+      <span class="absolute -right-5 top-8 rotate-12 text-5xl text-sunshine">⚡</span>
+      <p class="mb-4 text-sm font-black tracking-[0.18em] text-accent">一本仍在长大的生活漫画</p>
+      <h1 class="hero-title text-balance font-sans text-5xl font-black leading-[.92] md:text-7xl lg:text-8xl">
+        我们的<br /><span class="text-tomato">生活</span>收藏
       </h1>
-      <p class="mx-auto mt-7 max-w-2xl text-lg font-semibold leading-8 text-graphite md:text-xl">{hero.subtitle}</p>
-      <a class="button-pop mt-10 inline-flex items-center justify-center rounded-lg bg-ink px-7 py-4 text-sm font-black uppercase tracking-[0.08em] text-paper shadow-soft transition hover:-translate-y-1 hover:bg-accent" href="#introduction">
-        开始浏览
-      </a>
+      <p class="mx-auto mt-6 max-w-xl text-base font-bold leading-7 text-graphite md:text-lg">{site.hero.subtitle}</p>
+      <a class="button-pop comic-sticker mt-8 inline-flex items-center gap-4 rounded-full bg-ink px-7 py-4 text-sm font-black text-paper transition hover:bg-tomato" href="#introduction">开始浏览 <span class="text-xl text-sunshine">➜</span></a>
     </div>
   </div>
-  <div class="absolute inset-x-0 bottom-0 z-10">
-    <WavyRibbon
-      items={['做梦，创作，旅行']}
-      label="档案主题"
-    />
-  </div>
+  <div class="absolute inset-x-0 bottom-0 z-20 border-y-[3px] border-ink bg-sunshine py-3 text-center font-black tracking-[.15em] shadow-[0_-5px_0_rgba(36,35,31,.15)]">★ 做梦 · 创作 · 旅行 · 收藏平凡日常 ★</div>
 </section>
