@@ -9,15 +9,20 @@ import { site } from '@/data/site';
   <div class="comic-burst floaty absolute left-[6%] top-28 hidden h-24 w-24 rotate-[-8deg] place-items-center bg-sunshine text-4xl font-black md:grid">★</div>
   <div class="absolute right-[8%] top-28 hidden rotate-6 rounded-full border-[3px] border-ink bg-paper px-5 py-3 font-black shadow-[4px_5px_0_#24231f] lg:block">跟着细小的光走 →</div>
   <div class="relative z-20 mx-auto flex min-h-[810px] max-w-7xl items-center px-6 pb-32 pt-28 lg:min-h-screen lg:px-8">
-    <div class="hero-cloud reveal relative max-w-[760px] bg-paper/95 px-8 py-14 text-center md:px-16 md:py-16">
-      <span class="absolute -left-6 top-10 -rotate-12 text-5xl font-black text-tomato">Z</span>
-      <span class="absolute -right-5 top-8 rotate-12 text-5xl text-sunshine">⚡</span>
-      <p class="mb-4 text-sm font-black tracking-[0.18em] text-accent">一本仍在长大的生活漫画</p>
-      <h1 class="hero-title text-balance font-sans text-5xl font-black leading-[.92] md:text-7xl lg:text-8xl">
+    <div class="hero-cloud reveal relative w-full max-w-[760px] px-8 py-16 text-center md:px-16 md:py-20">
+      <span class="comic-burst absolute -left-10 top-3 -z-20 h-44 w-44 -rotate-12 bg-[#ff839a] md:-left-16 md:h-56 md:w-56"></span>
+      <span class="comic-burst absolute -right-8 bottom-0 -z-20 h-40 w-40 rotate-12 bg-[#ff839a] md:-right-14 md:h-52 md:w-52"></span>
+      <svg class="absolute -inset-8 -z-10 h-[calc(100%+4rem)] w-[calc(100%+4rem)] overflow-visible" viewBox="0 0 820 520" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M132 84C183 28 248 45 276 67C324 12 394 31 416 61C470 18 538 37 559 74C622 49 678 85 675 128C741 132 770 180 745 219C797 256 780 315 730 328C752 383 696 422 645 405C620 463 548 466 509 431C470 484 394 478 361 438C308 477 241 455 226 415C161 439 107 400 116 354C51 345 34 288 72 253C29 207 58 150 109 143C85 119 101 98 132 84Z" fill="#fff8e7" stroke="#24231f" stroke-width="8" stroke-linejoin="round" />
+      </svg>
+      <span class="absolute -left-5 top-14 -rotate-12 font-comic text-5xl text-tomato">Z</span>
+      <span class="absolute -right-3 top-10 rotate-12 text-5xl text-sunshine">⚡</span>
+      <p class="mb-4 font-hand text-sm font-bold tracking-[0.14em] text-accent">一本仍在长大的生活漫画</p>
+      <h1 class="hero-title text-balance font-comic text-5xl font-black leading-[.94] md:text-7xl lg:text-8xl">
         我们的<br /><span class="text-tomato">生活</span>收藏
       </h1>
-      <p class="mx-auto mt-6 max-w-xl text-base font-bold leading-7 text-graphite md:text-lg">{site.hero.subtitle}</p>
-      <a class="button-pop comic-sticker mt-8 inline-flex items-center gap-4 rounded-full bg-ink px-7 py-4 text-sm font-black text-paper transition hover:bg-tomato" href="#introduction">开始浏览 <span class="text-xl text-sunshine">➜</span></a>
+      <p class="mx-auto mt-6 max-w-xl font-hand text-base font-bold leading-7 text-graphite md:text-lg">{site.hero.subtitle}</p>
+      <a class="button-pop comic-sticker mt-8 inline-flex items-center gap-4 rounded-full bg-ink px-7 py-4 font-comic text-base text-paper transition hover:bg-tomato" href="#introduction">开始浏览 <span class="text-xl text-sunshine">➜</span></a>
     </div>
   </div>
   <div class="absolute inset-x-0 bottom-0 z-20 border-y-[3px] border-ink bg-sunshine py-3 text-center font-black tracking-[.15em] shadow-[0_-5px_0_rgba(36,35,31,.15)]">★ 做梦 · 创作 · 旅行 · 收藏平凡日常 ★</div>

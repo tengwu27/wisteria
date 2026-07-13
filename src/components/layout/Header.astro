@@ -5,11 +5,11 @@ import { site } from '@/data/site';
 
 <header class="fixed inset-x-0 top-0 z-40 border-b-[3px] border-ink bg-paper/95 backdrop-blur-sm">
   <div class="mx-auto flex max-w-7xl items-center justify-between gap-5 px-5 py-3 lg:px-8">
-    <a href="/" class="group flex items-center gap-3 font-sans text-lg font-black text-ink md:text-xl">
+    <a href="/" class="group flex items-center gap-3 font-comic text-lg text-ink md:text-xl">
       <span class="comic-sticker grid h-10 w-10 -rotate-3 place-items-center rounded-xl bg-tomato text-xl transition group-hover:rotate-3">⌂</span>
       <span class="hidden sm:block">{site.name}</span><span class="text-sunshine">⚡</span>
     </a>
-    <nav class="hidden items-center gap-3 text-sm font-black md:flex" aria-label="主导航">
+    <nav class="hidden items-center gap-3 font-comic text-base md:flex" aria-label="主导航">
       {navigation.map((item, index) => (
         <a class={`rounded-full border-[3px] border-ink px-5 py-2 transition hover:-translate-y-1 hover:shadow-[3px_4px_0_#24231f] ${['bg-[#ff839a]','bg-sunshine','bg-mint','bg-sky','bg-paper'][index]}`} href={item.href}>{item.label}</a>
       ))}

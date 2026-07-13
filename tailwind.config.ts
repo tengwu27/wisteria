@@ -11,7 +11,9 @@ export default {
         sky: '#75d7ed', sunshine: '#ffd64f', mint: '#91d979', tomato: '#ff6c57'
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['LXGW WenKai', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        hand: ['LXGW WenKai', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        comic: ['ZCOOL KuaiLe', 'LXGW WenKai', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         serif: ['Cormorant Garamond', 'Georgia', 'serif']
       },
       boxShadow: {
