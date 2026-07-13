@@ -5,7 +5,7 @@ export const site = {
   accentColor: '#8b735d',
   hero: {
     mediaType: 'image',
-    imageKey: 'heroStillness',
+    imageKey: 'heroRetroTown',
     title: '我们的生活收藏',
     subtitle: '艺术、远方，以及共同生活里的片段。',
     alignment: 'left'

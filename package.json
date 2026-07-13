@@ -13,9 +13,11 @@
   "dependencies": {
     "@astrojs/sitemap": "latest",
     "@astrojs/tailwind": "latest",
+    "@fontsource/zcool-kuaile": "^5.2.8",
     "@supabase/supabase-js": "^2.110.2",
     "astro": "latest",
     "gray-matter": "^4.0.3",
+    "lxgw-wenkai-webfont": "^1.7.0",
     "marked": "^18.0.6"
   },
   "devDependencies": {

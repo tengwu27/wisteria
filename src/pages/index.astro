@@ -3,32 +3,42 @@ import ArtCard from '@/components/ui/ArtCard.astro';
 import FullScreenHero from '@/components/sections/FullScreenHero.astro';
 import LifestyleCard from '@/components/ui/LifestyleCard.astro';
 import MarqueeBand from '@/components/ui/MarqueeBand.astro';
-import MediaCard from '@/components/ui/MediaCard.astro';
 import TravelCard from '@/components/ui/TravelCard.astro';
+import MediaCard from '@/components/ui/MediaCard.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { homeChapters } from '@/data/services';
 import { getPublishedEntries } from '@/lib/content';
 import { byNewest, byOrder } from '@/utils/content';
+import musicSticker from '@/assets/images/stickers/music-note.png?url';
+import cameraSticker from '@/assets/images/stickers/camera.png?url';
+import suitcaseSticker from '@/assets/images/stickers/suitcase.png?url';
 
 const art = (await getPublishedEntries('art')).sort(byOrder);
 const lifestyle = (await getPublishedEntries('lifestyle')).sort(byNewest);
 const travel = (await getPublishedEntries('travel')).sort(byNewest);
+const chapterStickers = [musicSticker, cameraSticker, suitcaseSticker];
+const stickerLabels = ['音乐符号贴纸', '相机贴纸', '旅行箱贴纸'];
+const stickerPositions = [
+  '-bottom-8 -left-5 w-24 -rotate-12 lg:-left-8 lg:w-32',
+  '-bottom-9 left-1/2 w-28 -translate-x-1/2 rotate-3 lg:w-36',
+  '-bottom-8 -right-5 w-28 rotate-6 lg:-right-9 lg:w-36'
+];
 ---
 
 <BaseLayout>
   <FullScreenHero />
-  <section id="introduction" class="relative overflow-hidden bg-milk px-6 py-24 lg:px-8">
-    <div class="absolute right-8 top-10 hidden rotate-6 font-mono text-sm text-accent md:block">让它属于你们</div>
+  <section id="introduction" class="paper-grain relative overflow-hidden border-b-[3px] border-ink bg-milk px-6 py-24 lg:px-8">
+    <div class="comic-burst absolute -right-6 top-5 hidden h-28 w-28 rotate-6 place-items-center bg-mint text-center text-sm font-black md:grid">让它<br />属于你们</div>
     <div class="mx-auto max-w-5xl text-center">
-      <p class="intro-statement text-balance font-sans text-4xl font-black leading-tight text-ink md:text-6xl">
+      <p class="intro-statement text-balance font-comic text-4xl font-black leading-tight text-ink md:text-6xl">
         这里收藏着我们
         <span class="hero-highlight hero-highlight--green">去过的地方</span>、亲手
-        <span class="font-serif italic font-semibold">做过的事</span>，以及塑造我们的时刻。
+        <span class="rounded-xl bg-sunshine px-2">做过的事</span>，以及塑造我们的时刻。
       </p>
-      <p class="mx-auto mt-8 max-w-2xl text-base font-semibold leading-7 text-graphite">随着档案慢慢成为你们自己的，把文字、图片、日期和地点都换成真实内容。</p>
+      <p class="mx-auto mt-8 max-w-2xl text-base font-bold leading-7 text-graphite">随着档案慢慢成为你们自己的，把文字、图片、日期和地点都换成真实内容。</p>
     </div>
   </section>
-  <section class="relative overflow-hidden px-6 pb-24 pt-8 lg:px-8">
+  <section class="comic-dots relative overflow-hidden bg-paper px-6 pb-24 pt-8 lg:px-8">
     <div class="-mx-6 mb-20 rotate-1 lg:-mx-8">
       <MarqueeBand
         tone="light"
@@ -37,26 +47,21 @@ const travel = (await getPublishedEntries('travel')).sort(byNewest);
         label="档案提示"
       />
     </div>
-    <div class="mx-auto grid max-w-7xl gap-16">
+    <div class="mx-auto grid max-w-7xl gap-20 lg:grid-cols-3 lg:gap-7 lg:pb-10">
       {homeChapters.map((chapter, index) => (
-        <div class={`chapter-row grid items-end gap-8 md:grid-cols-2 ${index % 2 === 1 ? 'md:[&>*:first-child]:order-2' : ''}`}>
-          <MediaCard
-            title={chapter.title}
-            href={chapter.href}
-            imageKey={chapter.imageKey}
-            alt={`${chapter.title}章节占位图`}
-            excerpt={chapter.description}
-            large
-          />
+        <div class={`chapter-row relative rounded-[28px] border-[3px] border-ink p-5 pb-14 md:p-7 md:pb-16 lg:p-5 lg:pb-16 ${['bg-[#ffe7ec]','bg-[#fff2b5]','bg-[#dff6fa]'][index]}`}>
+          <span class={`comic-burst absolute -left-4 -top-7 z-20 grid h-20 w-20 place-items-center text-lg font-black lg:h-20 lg:w-20 ${['bg-[#ff839a]','bg-sunshine','bg-sky'][index]}`}>0{index + 1}</span>
+          <MediaCard title={chapter.title} href={chapter.href} imageKey={chapter.imageKey} alt={`${chapter.title}章节插画`} excerpt={chapter.description} large compact />
+          <img class={`sticker-float pointer-events-none absolute z-20 drop-shadow-[4px_5px_0_rgba(36,35,31,.2)] ${stickerPositions[index]}`} src={chapterStickers[index]} alt={stickerLabels[index]} loading="lazy" decoding="async" />
         </div>
       ))}
     </div>
   </section>
-  <section class="bg-[#fff0f2] px-6 py-24 lg:px-8">
+  <section class="paper-grain border-t-[3px] border-ink bg-mint px-6 py-24 lg:px-8">
     <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3">
       <div>
-        <p class="text-xs font-black uppercase tracking-[0.16em] text-accent">最近放入</p>
-        <h2 class="mt-4 font-sans text-4xl font-black leading-tight text-ink">从<span class="font-serif italic font-semibold">档案</span>里选出的几件。</h2>
+        <p class="inline-block -rotate-2 rounded-full border-2 border-ink bg-tomato px-3 py-1 text-xs font-black text-paper">最近放入</p>
+        <h2 class="mt-5 font-comic text-4xl font-black leading-tight text-ink">从<span class="decoration-sunshine decoration-8 underline">档案</span>里选出的几件。</h2>
       </div>
       {art[0] && <ArtCard entry={art[0]} />}
       {lifestyle[0] && <LifestyleCard entry={lifestyle[0]} />}

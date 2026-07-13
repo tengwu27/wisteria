@@ -3,16 +3,17 @@ import { navigation } from '@/data/navigation';
 import { site } from '@/data/site';
 ---
 
-<footer class="bg-ink text-paper">
+<footer class="comic-dots border-t-[3px] border-ink bg-dusk text-paper">
   <div class="mx-auto grid max-w-7xl gap-12 px-6 py-14 md:grid-cols-[1.4fr_1fr] lg:px-8">
     <div>
-      <a href="/" class="font-serif text-3xl tracking-normal">{site.name}</a>
-      <p class="mt-4 max-w-xl text-sm leading-6 text-paper/70">{site.tagline}</p>
+      <p class="mb-3 text-3xl">★ ☁ ⚡</p>
+      <a href="/" class="font-comic text-3xl">{site.name}</a>
+      <p class="mt-4 max-w-xl text-sm font-semibold leading-6 text-paper/75">{site.tagline}</p>
       <p class="mt-8 text-xs uppercase tracking-[0.18em] text-paper/45">所有姓名、日期、地点和图片在替换前均为占位内容。</p>
     </div>
     <nav class="grid gap-3 text-sm text-paper/70 md:justify-end md:text-right" aria-label="页脚导航">
       {navigation.map((item) => (
-        <a class="transition hover:text-paper" href={item.href}>{item.label}</a>
+        <a class="font-bold transition hover:text-sunshine" href={item.href}>→ {item.label}</a>
       ))}
     </nav>
   </div>
