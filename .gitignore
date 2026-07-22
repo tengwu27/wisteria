@@ -4,5 +4,8 @@ dist/
 .netlify/
 .DS_Store
 npm-debug.log*
+__pycache__/
+*.py[cod]
+.claude/
 
 .env

@@ -8,17 +8,24 @@
     "lint": "ASTRO_TELEMETRY_DISABLED=1 astro check",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
-    "supabase:seed:generate": "node scripts/export-content-to-supabase.mjs"
+    "assets:house:validate": ".venv/bin/python scripts/assets/validate-house.py",
+    "supabase:seed:generate": "node scripts/content/export-to-supabase.mjs"
   },
   "dependencies": {
+    "@astrojs/react": "^6.0.1",
     "@astrojs/sitemap": "latest",
     "@astrojs/tailwind": "latest",
     "@fontsource/zcool-kuaile": "^5.2.8",
     "@supabase/supabase-js": "^2.110.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "astro": "latest",
     "gray-matter": "^4.0.3",
     "lxgw-wenkai-webfont": "^1.7.0",
-    "marked": "^18.0.6"
+    "marked": "^18.0.6",
+    "motion": "^12.42.2",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@astrojs/check": "latest",

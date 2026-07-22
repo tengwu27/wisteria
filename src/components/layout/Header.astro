@@ -1,19 +1,36 @@
 ---
 import { navigation } from '@/data/navigation';
 import { site } from '@/data/site';
+
+const isHome = Astro.url.pathname === '/';
 ---
 
-<header class="fixed inset-x-0 top-0 z-40 border-b-[3px] border-ink bg-paper/95 backdrop-blur-sm">
-  <div class="mx-auto flex max-w-7xl items-center justify-between gap-5 px-5 py-3 lg:px-8">
-    <a href="/" class="group flex items-center gap-3 font-comic text-lg text-ink md:text-xl">
-      <span class="comic-sticker grid h-10 w-10 -rotate-3 place-items-center rounded-xl bg-tomato text-xl transition group-hover:rotate-3">⌂</span>
-      <span class="hidden sm:block">{site.name}</span><span class="text-sunshine">⚡</span>
+{isHome ? (
+  <header class="home-hud-header">
+    <a href="#introduction" class="home-hud-profile" aria-label="跳到世界日志">
+      <span class="home-hud-profile__avatar" aria-hidden="true">★</span>
+      <span class="home-hud-profile__copy"><b>玩家 01</b><small>世界收藏家 · Lv.12</small></span>
     </a>
-    <nav class="hidden items-center gap-3 font-comic text-base md:flex" aria-label="主导航">
-      {navigation.map((item, index) => (
-        <a class={`rounded-full border-[3px] border-ink px-5 py-2 transition hover:-translate-y-1 hover:shadow-[3px_4px_0_#24231f] ${['bg-[#ff839a]','bg-sunshine','bg-mint','bg-sky','bg-paper'][index]}`} href={item.href}>{item.label}</a>
-      ))}
-    </nav>
-    <a class="comic-sticker rounded-full bg-sunshine px-4 py-2 text-sm font-black md:hidden" href="/about">关于</a>
-  </div>
-</header>
+    <details class="home-hud-menu">
+      <summary aria-label="打开主菜单"><span aria-hidden="true">☰</span><span>菜单</span></summary>
+      <nav aria-label="主导航">
+        {navigation.map((item) => <a href={item.href}>→ {item.label}</a>)}
+      </nav>
+    </details>
+  </header>
+) : (
+  <header class="fixed inset-x-0 top-0 z-40 border-b-[3px] border-ink bg-paper/95 backdrop-blur-sm">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-5 px-5 py-3 lg:px-8">
+      <a href="/" class="group flex items-center gap-3 font-comic text-lg text-ink md:text-xl">
+        <span class="comic-sticker grid h-10 w-10 -rotate-3 place-items-center rounded-xl bg-tomato text-xl transition group-hover:rotate-3">⌂</span>
+        <span class="hidden sm:block">{site.name}</span><span class="text-sunshine">⚡</span>
+      </a>
+      <nav class="hidden items-center gap-3 font-comic text-base md:flex" aria-label="主导航">
+        {navigation.map((item, index) => (
+          <a class={`rounded-full border-[3px] border-ink px-5 py-2 transition hover:-translate-y-1 hover:shadow-[3px_4px_0_#24231f] ${['bg-[#ff839a]','bg-sunshine','bg-mint','bg-sky','bg-paper'][index]}`} href={item.href}>{item.label}</a>
+        ))}
+      </nav>
+      <a class="comic-sticker rounded-full bg-sunshine px-4 py-2 text-sm font-black md:hidden" href="/about">关于</a>
+    </div>
+  </header>
+)}

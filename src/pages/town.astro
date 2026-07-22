@@ -1,0 +1,438 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+// Building asset layer intentionally removed for this map draft.
+// Restore the <a class="town-spot"> assets + imports from git history (town v3)
+// once the terrain layout is approved.
+
+type P = { x: number; y: number };
+type Seg = { x1: number; y1: number; x2: number; y2: number };
+type Poly = P[];
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+// ---------------------------------------------------------------------------
+// Landscape planning rules (applied by the helpers below, not hand-tuned):
+//   R1 · Buildings never collide with roads: either right beside the road
+//        (short brick apron) or away from it, linked by a brick driveway.
+//   R2 · Roads are never built into the water. Each road is clipped at the shore.
+//   R3 · The trail is a waterfront path offset inland from the shoreline; it
+//        hugs the bay and never crosses a road.
+//
+// Layout traced from the user's composite sketch (canvas = sketch × 0.8/0.885):
+//   · café → garage → house sit RIGHT BESIDE one main road, fronts to it
+//   · the main road runs from the lower-left along the building fronts, then
+//     continues up-right PAST the house and BEHIND the harbor, exiting near the
+//     top-right beside a big tree
+//   · a near-vertical spur turns up the left edge, with a flag at its end
+//   · water fills only the LOWER-RIGHT corner; the top-right corner is land
+//   · the harbor straddles the shoreline (quay on land, dock over water),
+//     reached by a brick lane branching down from the main road
+//   · car on the road between garage and house · boat in the bay · plane top-left
+// ---------------------------------------------------------------------------
+
+const ROAD_HALF = 38;
+const SHORE_INSET = 78;
+
+// coastline anchors (top → bottom); land is x < shoreX(y), water to the right.
+// Water occupies only the lower-right corner: above y≈555 it is all land.
+const coast = [
+  { y: 555, x: 1600 },
+  { y: 585, x: 1420 },
+  { y: 650, x: 1120 },
+  { y: 710, x: 912 },
+  { y: 850, x: 936 },
+  { y: 1000, x: 896 }
+];
+function shoreX(y: number): number {
+  if (y <= coast[0].y) return 1700; // land all the way to the frame edge
+  if (y >= coast[coast.length - 1].y) return coast[coast.length - 1].x;
+  for (let i = 0; i < coast.length - 1; i++) {
+    const a = coast[i];
+    const b = coast[i + 1];
+    if (y >= a.y && y <= b.y) return lerp(a.x, b.x, (y - a.y) / (b.y - a.y));
+  }
+  return coast[coast.length - 1].x;
+}
+const onLand = (p: P) => p.x < shoreX(p.y) - 34;
+
+function projSeg(px: number, py: number, s: Seg) {
+  const dx = s.x2 - s.x1;
+  const dy = s.y2 - s.y1;
+  const t = Math.max(0, Math.min(1, ((px - s.x1) * dx + (py - s.y1) * dy) / (dx * dx + dy * dy || 1)));
+  const cx = s.x1 + dx * t;
+  const cy = s.y1 + dy * t;
+  return { cx, cy, dist: Math.hypot(px - cx, py - cy) };
+}
+
+/** Nearest point + distance from (px,py) to a polyline road. */
+function projPoly(px: number, py: number, poly: Poly) {
+  let best = { cx: poly[0].x, cy: poly[0].y, dist: Infinity };
+  for (let i = 0; i < poly.length - 1; i++) {
+    const pr = projSeg(px, py, { x1: poly[i].x, y1: poly[i].y, x2: poly[i + 1].x, y2: poly[i + 1].y });
+    if (pr.dist < best.dist) best = pr;
+  }
+  return best;
+}
+
+/** Evenly spaced points along a polyline (by arc length), offset perpendicular. */
+function pointsAlong(poly: Poly, count: number, offset = 0): P[] {
+  const segs = poly.slice(0, -1).map((a, i) => {
+    const b = poly[i + 1];
+    return { a, b, len: Math.hypot(b.x - a.x, b.y - a.y) };
+  });
+  const total = segs.reduce((s, seg) => s + seg.len, 0) || 1;
+  return Array.from({ length: count }, (_, k) => {
+    let target = ((k + 0.5) / count) * total;
+    let seg = segs[segs.length - 1];
+    for (const s of segs) {
+      if (target <= s.len) {
+        seg = s;
+        break;
+      }
+      target -= s.len;
+    }
+    const lt = seg.len ? target / seg.len : 0;
+    const dx = seg.b.x - seg.a.x;
+    const dy = seg.b.y - seg.a.y;
+    const L = Math.hypot(dx, dy) || 1;
+    return { x: lerp(seg.a.x, seg.b.x, lt) + (-dy / L) * offset, y: lerp(seg.a.y, seg.b.y, lt) + (dx / L) * offset };
+  });
+}
+
+/** R2 · trim a polyline road so it ends SHORE_INSET inland of the water. */
+function clipToLand(poly: Poly): Poly {
+  const out: Poly = [poly[0]];
+  for (let i = 0; i < poly.length - 1; i++) {
+    const a = poly[i];
+    const b = poly[i + 1];
+    const steps = 40;
+    for (let s = 1; s <= steps; s++) {
+      const t = s / steps;
+      const x = lerp(a.x, b.x, t);
+      const y = lerp(a.y, b.y, t);
+      if (x >= shoreX(y) - SHORE_INSET) {
+        const p = (s - 1) / steps;
+        out.push({ x: lerp(a.x, b.x, p), y: lerp(a.y, b.y, p) });
+        return out;
+      }
+    }
+    out.push(b);
+  }
+  return out;
+}
+const polyD = (poly: Poly) => 'M' + poly.map((p) => `${p.x.toFixed(0)} ${p.y.toFixed(0)}`).join(' L');
+
+// main road: lower-left → along the building fronts → up-right behind the
+// harbor, exiting near the top-right corner (R2-clipped, though it stays on land)
+const mainRoad = clipToLand([
+  { x: 0, y: 760 }, { x: 286, y: 700 }, { x: 510, y: 640 }, { x: 806, y: 570 },
+  { x: 1100, y: 470 }, { x: 1380, y: 390 }, { x: 1600, y: 325 }
+]);
+// near-vertical spur up the left edge (flag at its end, per the sketch)
+const spur = clipToLand([{ x: 150, y: 728 }, { x: 90, y: 560 }, { x: 75, y: 330 }]);
+const roads = [mainRoad, spur];
+const roadPaths = roads.map(polyD);
+const flagAt = { x: 75, y: 330 };
+
+// R3 · waterfront trail along the lower bay shore (the clear stretch of coast)
+const trailPts: P[] = [];
+for (let y = 720; y <= 1000; y += 35) trailPts.push({ x: shoreX(y) - SHORE_INSET - 6, y });
+const trailD = polyD(trailPts);
+
+// building footprints; positions traced from the sketch. `coastal` pads are
+// allowed to straddle the shoreline (quay structures).
+const basePads = [
+  { x: 286, y: 566, w: 220, label: '咖啡店', coastal: false },
+  { x: 510, y: 500, w: 210, label: '车库', coastal: false },
+  { x: 806, y: 443, w: 255, label: '房子', coastal: false },
+  { x: 1296, y: 646, w: 250, label: '海港', coastal: true }
+];
+function placePad(p: (typeof basePads)[number]) {
+  let { x, y } = p;
+  const clearance = ROAD_HALF + p.w * 0.3 + 20;
+  for (let pass = 0; pass < 5; pass++) {
+    for (const r of roads) {
+      const pr = projPoly(x, y, r);
+      if (pr.dist > 0.1 && pr.dist < clearance) {
+        x = pr.cx + ((x - pr.cx) / pr.dist) * clearance;
+        y = pr.cy + ((y - pr.cy) / pr.dist) * clearance;
+      }
+    }
+  }
+  if (!p.coastal) {
+    const maxX = shoreX(y) - p.w / 2 - 12;
+    if (x > maxX) x = maxX;
+  }
+  return { ...p, x, y };
+}
+const pads = basePads.map(placePad);
+
+// R1 · brick apron/driveway from each pad's front (bottom) vertex to the road
+const driveways = pads.map((p) => {
+  const from = { x: p.x, y: p.y + p.w / 4 };
+  const nearest = roads.map((r) => projPoly(from.x, from.y, r)).reduce((a, b) => (a.dist < b.dist ? a : b));
+  return { from, to: { x: nearest.cx, y: nearest.cy } };
+});
+
+// vehicle markers: car ON the road between garage and house · boat in the bay ·
+// plane in the top-left sky
+const markers = [
+  { x: 592, y: 621, label: '汽车' },
+  { x: 1464, y: 885, label: '帆船' },
+  { x: 312, y: 200, label: '飞机' }
+];
+
+// landscaping
+const hills = [
+  { x: 620, y: 265, rx: 150, ry: 52 },
+  { x: 240, y: 900, rx: 128, ry: 46 }
+];
+const flowerBeds = [
+  { x: 395, y: 640 }, { x: 690, y: 520 }, { x: 150, y: 470 }, { x: 1010, y: 700 }
+];
+const bushes = [
+  { x: 210, y: 640 }, { x: 430, y: 570 }, { x: 700, y: 480 }, { x: 940, y: 430 },
+  { x: 180, y: 850 }, { x: 620, y: 800 }, { x: 1060, y: 560 }
+].filter(onLand);
+// s = optional scale; the big roadside tree at the top-right is from the sketch
+const trees: (P & { s?: number })[] = [
+  { x: 1268, y: 292, s: 1.5 },
+  { x: 120, y: 240 }, { x: 320, y: 120 }, { x: 700, y: 150 }, { x: 950, y: 200 },
+  { x: 1080, y: 120 }, { x: 60, y: 660 }, { x: 420, y: 860 }, { x: 700, y: 920 },
+  { x: 1050, y: 860 }, { x: 880, y: 640 }
+].filter(onLand);
+const lamps = [...pointsAlong(mainRoad, 7, 46), ...pointsAlong(spur, 3, -42)].filter(onLand);
+
+// bay + coastline paths derived from the same coast anchors
+const bayD = `M1600 ${coast[0].y} L${coast.map((c) => `${c.x} ${c.y}`).join(' L')} L1600 1000 Z`;
+const coastD = `M${coast.map((c) => `${c.x} ${c.y}`).join(' L')}`;
+---
+
+<BaseLayout
+  title="等距小镇地图草稿 | 我们的生活收藏"
+  description="逐项对照合成草图的等距地形草稿：建筑贴路、主路过海港后方、右下角海湾。"
+>
+  <div class="pt-[62px] md:pt-[70px]">
+    <p class="town-note">
+      🗺️ 地图草稿 v4 · 逐项对照草图修正：建筑贴路 · 主路过海港后方 · 右下角海湾 · 大树与旗标
+      <a href="/">← 返回正式首页</a>
+    </p>
+    <h1 class="sr-only">等距小镇地图草稿：贴路的建筑排、海港后方的主路与右下角海湾</h1>
+
+    <section class="town" aria-label="等距小镇地图草稿">
+      <div class="town-stage">
+        <svg class="town-terrain" viewBox="0 0 1600 1000" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="sea" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#57bbdc" />
+              <stop offset="1" stop-color="#2f93bd" />
+            </linearGradient>
+            <g id="iso-tree">
+              <ellipse cx="0" cy="0" rx="27" ry="10" fill="rgba(36,35,31,0.16)" />
+              <rect x="-5" y="-32" width="10" height="32" rx="3" fill="#9a6438" stroke="#24231f" stroke-width="3" />
+              <circle cx="0" cy="-50" r="31" fill="#6fae4d" stroke="#24231f" stroke-width="3.5" />
+              <circle cx="-11" cy="-58" r="18" fill="#8fca67" />
+            </g>
+            <g id="iso-bush">
+              <ellipse cx="0" cy="0" rx="22" ry="8" fill="rgba(36,35,31,0.15)" />
+              <circle cx="-8" cy="-12" r="16" fill="#6fae4d" stroke="#24231f" stroke-width="3" />
+              <circle cx="10" cy="-11" r="14" fill="#6fae4d" stroke="#24231f" stroke-width="3" />
+              <circle cx="0" cy="-18" r="12" fill="#8fca67" />
+            </g>
+            <g id="iso-lamp">
+              <ellipse cx="0" cy="0" rx="12" ry="5" fill="rgba(36,35,31,0.18)" />
+              <rect x="-3" y="-66" width="6" height="66" rx="2" fill="#556070" stroke="#24231f" stroke-width="2.5" />
+              <circle cx="0" cy="-71" r="12" fill="rgba(255,221,130,0.4)" />
+              <rect x="-9" y="-80" width="18" height="18" rx="4" fill="#ffdf94" stroke="#24231f" stroke-width="2.5" />
+            </g>
+            <g id="iso-flag">
+              <ellipse cx="0" cy="0" rx="10" ry="4" fill="rgba(36,35,31,0.18)" />
+              <rect x="-2.5" y="-58" width="5" height="58" rx="2" fill="#9a6438" stroke="#24231f" stroke-width="2.5" />
+              <path d="M2.5 -58 L34 -49 L2.5 -40 Z" fill="#ff6c57" stroke="#24231f" stroke-width="2.5" />
+            </g>
+          </defs>
+
+          <!-- 1 · base grass -->
+          <rect x="0" y="0" width="1600" height="1000" fill="#9ed470" />
+
+          <!-- 2 · lawn variation patches -->
+          <g>
+            <ellipse cx="560" cy="230" rx="380" ry="150" fill="#a6db7c" opacity="0.55" />
+            <ellipse cx="250" cy="850" rx="280" ry="130" fill="#93c964" opacity="0.5" />
+            <ellipse cx="1150" cy="200" rx="280" ry="120" fill="#a6db7c" opacity="0.4" />
+          </g>
+
+          <!-- 3 · small hills (soft mounds) -->
+          {hills.map((h) => (
+            <g>
+              <ellipse cx={h.x} cy={h.y} rx={h.rx} ry={h.ry} fill="#8fc85f" />
+              <ellipse cx={h.x} cy={h.y - h.ry * 0.5} rx={h.rx * 0.72} ry={h.ry * 0.68} fill="#a6db7c" />
+            </g>
+          ))}
+
+          <!-- 4 · brick aprons / driveways (R1) -->
+          <g stroke-linecap="round">
+            {driveways.map((d) => (
+              <>
+                <line x1={d.from.x} y1={d.from.y} x2={d.to.x} y2={d.to.y} stroke="#24231f" stroke-width="40" opacity="0.9" />
+                <line x1={d.from.x} y1={d.from.y} x2={d.to.x} y2={d.to.y} stroke="#c67b5c" stroke-width="30" />
+                <line x1={d.from.x} y1={d.from.y} x2={d.to.x} y2={d.to.y} stroke="#e6a888" stroke-width="30" stroke-dasharray="5 11" />
+              </>
+            ))}
+          </g>
+
+          <!-- 5 · waterfront trail (R3) -->
+          <g stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <path d={trailD} stroke="#24231f" stroke-width="22" opacity="0.85" />
+            <path d={trailD} stroke="#d9a85f" stroke-width="14" stroke-dasharray="30 15" />
+          </g>
+
+          <!-- 6 · roads (R2: clipped to land) -->
+          <g stroke-linecap="round" stroke-linejoin="round" fill="none">
+            {roadPaths.map((d) => (
+              <>
+                <path d={d} stroke="#24231f" stroke-width="76" opacity="0.9" />
+                <path d={d} stroke="#e3cfa0" stroke-width="60" />
+                <path d={d} stroke="#fffdf6" stroke-width="5" stroke-dasharray="26 36" />
+              </>
+            ))}
+          </g>
+
+          <!-- 7 · bay (lower-right corner) + shoreline -->
+          <path d={bayD} fill="url(#sea)" />
+          <path d={coastD} fill="none" stroke="#24231f" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" />
+          <path d={coastD} fill="none" stroke="#d9b878" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" />
+          <g class="town-waves" stroke="#dff3fa" stroke-width="6" stroke-linecap="round" fill="none">
+            <path d="M1380 660 q30 -14 60 0" /><path d="M1500 740 q30 -14 60 0" />
+            <path d="M1250 800 q30 -14 60 0" /><path d="M1480 900 q30 -14 60 0" />
+            <path d="M1120 930 q30 -14 60 0" /><path d="M1300 960 q30 -14 60 0" />
+          </g>
+
+          <!-- 8 · building footprint pads (labeled) -->
+          {pads.map((p) => (
+            <g>
+              <polygon
+                points={`${p.x},${p.y - p.w / 4} ${p.x + p.w / 2},${p.y} ${p.x},${p.y + p.w / 4} ${p.x - p.w / 2},${p.y}`}
+                fill="#d8cba7"
+                stroke="#24231f"
+                stroke-width="3"
+                stroke-dasharray="12 9"
+                opacity="0.92"
+              />
+              <polygon
+                points={`${p.x},${p.y - p.w / 4 + 12} ${p.x + p.w / 2 - 24},${p.y} ${p.x},${p.y + p.w / 4 - 12} ${p.x - p.w / 2 + 24},${p.y}`}
+                fill="none"
+                stroke="#b7a97f"
+                stroke-width="2"
+              />
+              <text
+                x={p.x}
+                y={p.y + 8}
+                text-anchor="middle"
+                font-family="'ZCOOL KuaiLe','LXGW WenKai',sans-serif"
+                font-size="26"
+                font-weight="900"
+                fill="#5a5346"
+              >{p.label}</text>
+            </g>
+          ))}
+
+          <!-- 9 · vehicle markers (car · boat · plane) + spur-end flag -->
+          {markers.map((m) => (
+            <g>
+              <ellipse cx={m.x} cy={m.y + 15} rx="20" ry="7" fill="rgba(36,35,31,0.16)" />
+              <circle cx={m.x} cy={m.y} r="17" fill="#fff8e7" stroke="#24231f" stroke-width="3" />
+              <circle cx={m.x} cy={m.y} r="9" fill="#75d7ed" stroke="#24231f" stroke-width="2" />
+              <text
+                x={m.x}
+                y={m.y + 40}
+                text-anchor="middle"
+                font-family="'ZCOOL KuaiLe','LXGW WenKai',sans-serif"
+                font-size="20"
+                font-weight="900"
+                fill="#3d5568"
+              >{m.label}</text>
+            </g>
+          ))}
+          <use href="#iso-flag" transform={`translate(${flagAt.x} ${flagAt.y})`} />
+
+          <!-- 10 · flower beds -->
+          {flowerBeds.map((f) => (
+            <g transform={`translate(${f.x} ${f.y})`}>
+              <ellipse cx="0" cy="0" rx="36" ry="17" fill="#c9a86a" stroke="#24231f" stroke-width="2.5" />
+              <circle cx="-16" cy="-2" r="6" fill="#ff9eb1" stroke="#24231f" stroke-width="1.6" />
+              <circle cx="-2" cy="-6" r="6" fill="#ffd64f" stroke="#24231f" stroke-width="1.6" />
+              <circle cx="12" cy="-2" r="6" fill="#fffdf6" stroke="#24231f" stroke-width="1.6" />
+              <circle cx="4" cy="4" r="6" fill="#ff9eb1" stroke="#24231f" stroke-width="1.6" />
+              <circle cx="-9" cy="5" r="5" fill="#ffd64f" stroke="#24231f" stroke-width="1.6" />
+            </g>
+          ))}
+
+          <!-- 11 · bushes -->
+          {bushes.map((b) => (
+            <use href="#iso-bush" transform={`translate(${b.x} ${b.y})`} />
+          ))}
+
+          <!-- 12 · trees (the big one by the road's top-right end is from the sketch) -->
+          {trees.map((t, i) => (
+            <use href="#iso-tree" transform={`translate(${t.x} ${t.y}) scale(${(t.s ?? 0.82 + ((i * 37) % 34) / 100).toFixed(2)})`} />
+          ))}
+
+          <!-- 13 · street lamps -->
+          {lamps.map((l) => (
+            <use href="#iso-lamp" transform={`translate(${l.x} ${l.y})`} />
+          ))}
+        </svg>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .town-note {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    margin: 0;
+    border-bottom: 3px solid var(--ink);
+    background: #ffd64f;
+    padding: 0.6rem 1rem;
+    font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 900;
+    text-align: center;
+  }
+
+  .town-note a { text-decoration: underline; }
+
+  .town {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 3px solid var(--ink);
+    background: #9ed470;
+  }
+
+  .town-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1600 / 1000;
+  }
+
+  .town-terrain {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .town-waves { animation: town-shimmer 2.6s ease-in-out infinite alternate; }
+  }
+
+  @keyframes town-shimmer {
+    from { opacity: 0.55; }
+    to { opacity: 1; }
+  }
+</style>

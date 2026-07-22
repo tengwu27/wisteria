@@ -103,7 +103,22 @@ hero: {
 
 Placeholder images are mapped in `src/assets/images/placeholders.ts`. Add new local media files under `src/assets/images`, import them in that file, and use the new key in content front matter or hero settings.
 
-Future public videos can be stored under `public/videos`. Do not autoplay video with sound.
+Do not autoplay video with sound.
+
+## World Asset Architecture
+
+- `src/assets/images/world/`: canonical, versioned modular-object packages,
+  geometry contracts, and the runtime images imported by Astro.
+- `assets/cinematic/`: editable cinematic source frames and masks.
+- `public/media/village/`: approved ambient and interaction video delivery
+  copies.
+- `scripts/`: asset validation, content generation, and media-rendering tools,
+  grouped by responsibility.
+
+See [`src/assets/images/world/README.md`](src/assets/images/world/README.md) for
+the component and layering contract, and
+[`assets/cinematic/README.md`](assets/cinematic/README.md) for cinematic-source
+organization.
 
 ## Privacy Notes
 

@@ -3,13 +3,24 @@ interface Props {
   eyebrow?: string;
   title: string;
   text?: string;
+  theme?: 'art' | 'lifestyle' | 'travel';
 }
 
-const { eyebrow, title, text } = Astro.props;
+const { eyebrow, title, text, theme } = Astro.props;
+const arrival = {
+  art: { icon: '☕', label: '咖啡店画室已抵达', color: 'bg-[#ff9eb1]' },
+  lifestyle: { icon: '⌂', label: '家的任务板已打开', color: 'bg-sunshine' },
+  travel: { icon: '✈', label: '旅行航线已解锁', color: 'bg-sky' }
+} as const;
 ---
 
-<section class="paper-grain px-6 py-20 lg:px-8">
+<section class={`section-arrival paper-grain px-6 py-20 lg:px-8 ${theme ? `section-arrival--${theme}` : ''}`}>
   <div class="mx-auto max-w-5xl">
+    {theme && (
+      <p class={`arrival-badge ${arrival[theme].color}`}>
+        <span aria-hidden="true">{arrival[theme].icon}</span> {arrival[theme].label}
+      </p>
+    )}
     {eyebrow && <p class="inline-block -rotate-1 rounded-full border-2 border-ink bg-sunshine px-4 py-2 text-xs font-black tracking-[0.12em] text-ink">{eyebrow}</p>}
     <h1 class="mt-6 max-w-4xl font-comic text-5xl font-black leading-[1.02] text-ink md:text-7xl">{title}</h1>
     {text && <p class="mt-8 max-w-3xl text-lg font-semibold leading-8 text-graphite">{text}</p>}

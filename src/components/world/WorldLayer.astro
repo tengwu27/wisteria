@@ -1,0 +1,194 @@
+---
+import type { Behavior, ShapeSpec, WorldFacing, WorldLayerSpec, WorldRect } from '@/lib/world/types';
+import { unitRectToPercent } from '@/lib/world/types';
+
+interface Props {
+  layer: WorldLayerSpec;
+  /** Placement of the containing object, for stage-aligned night grading. */
+  box?: { at: WorldRect; canvas: { w: number; h: number }; facing?: WorldFacing };
+}
+
+const { layer, box } = Astro.props;
+
+const SMOKE_PATH =
+  'M4 18C1 17 1 13 4 11C2 7 6 4 10 6C11 2 17 1 20 5C24 3 28 6 27 10C31 11 31 16 27 18C21 21 10 21 4 18Z';
+
+function behaviorVars(behavior?: Behavior): string[] {
+  if (!behavior) return [];
+  switch (behavior.name) {
+    case 'rotate':
+      return [`--wl-dur:${behavior.duration}ms`, `--wl-origin:${behavior.origin}`];
+    case 'sway':
+      return [
+        `--wl-dur:${behavior.duration}ms`,
+        `--sway-from:${behavior.from}`,
+        `--sway-to:${behavior.to}`,
+        ...(behavior.origin ? [`--wl-origin:${behavior.origin}`] : []),
+        ...(behavior.easing ? [`--wl-ease:${behavior.easing}`] : [])
+      ];
+    case 'bob':
+      return [`--wl-dur:${behavior.duration}ms`, `--bob-amp:${behavior.amplitude}`];
+    case 'hinge-open':
+      return [
+        `--hinge-angle:${behavior.angle}deg`,
+        `--hinge-persp:${behavior.perspective ?? 220}px`,
+        `--hinge-shift:${behavior.shift ?? '0%'}`,
+        `--wl-origin:${behavior.hinge}`
+      ];
+    case 'reveal':
+    case 'conceal':
+      return [];
+    case 'pulse':
+      return [`--wl-dur:${behavior.duration}ms`];
+    case 'blink':
+      return [
+        `--wl-dur:${behavior.duration}ms`,
+        `--wl-delay:${behavior.delay ?? 0}ms`,
+        `--blink-min:${behavior.min ?? 0.2}`,
+        `--blink-max:${behavior.max ?? 1}`
+      ];
+  }
+}
+
+function behaviorAttrs(behavior?: Behavior) {
+  if (!behavior) return {};
+  return { 'data-behavior': behavior.name, 'data-trigger': behavior.trigger };
+}
+
+function shapeStyle(shape: ShapeSpec): string {
+  const parts = [
+    ...(shape.left !== undefined ? [`left:${shape.left}`] : []),
+    ...(shape.right !== undefined ? [`right:${shape.right}`] : []),
+    `width:${shape.width}`,
+    ...(shape.height ? [`height:${shape.height}`] : []),
+    ...(shape.clip ? [`clip-path:${shape.clip}`] : []),
+    ...(shape.background ? [`background:${shape.background}`] : []),
+    ...(shape.borderLeft ? [`border-left:${shape.borderLeft}`] : []),
+    ...(shape.origin ? [`--wl-origin:${shape.origin}`] : []),
+    ...behaviorVars(shape.behavior)
+  ];
+  return parts.join(';');
+}
+
+const frame = unitRectToPercent(layer.frame);
+const styleParts = [`left:${frame.left}`, `top:${frame.top}`, `width:${frame.width}`];
+if (frame.height) {
+  styleParts.push(`height:${frame.height}`);
+} else if (layer.kind === 'image') {
+  styleParts.push(`aspect-ratio:${layer.width} / ${layer.height}`);
+}
+if (layer.z !== undefined) styleParts.push(`z-index:${layer.z}`);
+styleParts.push(...behaviorVars(layer.behavior));
+
+if (layer.kind === 'glow') {
+  styleParts.push(`--glow-core:${layer.color}`);
+  if (layer.soft) styleParts.push(`--glow-soft:${layer.soft}`);
+  if (layer.halo) styleParts.push(`--glow-halo:${layer.halo}`);
+}
+if (layer.kind === 'shadow') {
+  styleParts.push(`--shadow-strength:${layer.strength ?? 0.2}`);
+}
+if (layer.kind === 'crop') {
+  styleParts.push(`background-size:${layer.bgSize}`, `background-position:${layer.bgPos}`);
+  if (layer.radius) styleParts.push(`border-radius:${layer.radius}`);
+  if (layer.halo) styleParts.push(`box-shadow:${layer.halo}`);
+}
+if (layer.kind === 'emitter') {
+  styleParts.push(`--wl-dur:${layer.duration}ms`);
+  if (layer.variant === 'puff' && layer.drift) {
+    const drift = layer.drift;
+    styleParts.push(`--puff-x:${drift.x}`, `--puff-y:${drift.y}`, `--puff-s:${drift.scale ?? 1.1}`);
+    if (drift.startY) styleParts.push(`--puff-start-y:${drift.startY}`);
+    if (drift.startScale !== undefined) styleParts.push(`--puff-start-s:${drift.startScale}`);
+    if (drift.peak !== undefined) styleParts.push(`--puff-peak:${drift.peak}`);
+  }
+  if (layer.variant === 'puff' && layer.size) styleParts.push(`--puff-size:${layer.size}`);
+}
+
+// Scale the part's multiply grade so its gradient matches the stage-level
+// grade at the element's vertical position (avoids visible seams at night).
+if (box && (layer.kind === 'image' || layer.kind === 'crop')) {
+  const elemWorldHeight =
+    layer.frame.h !== undefined
+      ? layer.frame.h * box.at.h
+      : layer.kind === 'image'
+        ? (layer.frame.w * box.at.w * layer.height) / layer.width
+        : box.at.h;
+  const hFrac = elemWorldHeight / box.canvas.h;
+  const yFrac = (box.at.y + layer.frame.y * box.at.h) / box.canvas.h;
+  const size = 100 / hFrac;
+  const pos = hFrac >= 1 ? 0 : (yFrac / (1 - hFrac)) * 100;
+  styleParts.push(`--wl-grade-size:${size.toFixed(2)}%`, `--wl-grade-pos:${pos.toFixed(3)}%`);
+}
+
+const style = styleParts.join(';');
+const flipX = layer.kind === 'image' && Boolean(layer.assetFacing && box?.facing && layer.assetFacing !== box.facing);
+const attrs = {
+  'data-layer': layer.id,
+  ...(flipX ? { 'data-flip-x': 'true' } : {}),
+  ...(layer.env ? { 'data-env': layer.env } : {}),
+  ...(layer.kind === 'emitter' ? { 'data-trigger': layer.trigger } : behaviorAttrs(layer.behavior))
+};
+const puffCount = layer.kind === 'emitter' && layer.variant === 'puff' ? (layer.count ?? 3) : 0;
+const stagger = layer.kind === 'emitter' ? (layer.stagger ?? 0) : 0;
+---
+
+{layer.kind === 'image' && (
+  <span class="wl wl-image" style={style} {...attrs}>
+    <img
+      class="wl-image__art"
+      src={layer.src}
+      width={layer.width}
+      height={layer.height}
+      alt=""
+      loading="eager"
+      decoding="async"
+    />
+    <span class="wl-image__grade" style={`--wl-mask:url('${layer.src}')`}></span>
+  </span>
+)}
+
+{layer.kind === 'shapes' && (
+  <span class="wl wl-shapes" style={style} {...attrs}>
+    {layer.shapes.map((shape) => (
+      <i style={shapeStyle(shape)} {...behaviorAttrs(shape.behavior)}></i>
+    ))}
+  </span>
+)}
+
+{layer.kind === 'emitter' && layer.variant === 'puff' && (
+  <span class:list={['wl', 'wl-emitter', 'wl-emitter--puff']} style={style} {...attrs} data-anchor={layer.anchor ?? 'left'}>
+    {Array.from({ length: puffCount }).map((_, index) => (
+      <svg viewBox="0 0 32 22" style={index > 0 ? `animation-delay:${index * stagger}ms` : undefined}>
+        <path d={SMOKE_PATH} />
+      </svg>
+    ))}
+  </span>
+)}
+
+{layer.kind === 'emitter' && layer.variant === 'wisp' && (
+  <span class:list={['wl', 'wl-emitter', 'wl-emitter--wisp']} style={style} {...attrs}>
+    {(layer.items ?? []).map((item, index) => (
+      <i style={`left:${item.left};height:${item.height};${index > 0 ? `animation-delay:${index * stagger}ms` : ''}`}></i>
+    ))}
+  </span>
+)}
+
+{layer.kind === 'emitter' && layer.variant === 'ring' && (
+  <span class:list={['wl', 'wl-emitter', 'wl-emitter--ring']} style={style} {...attrs}>
+    <i></i>
+  </span>
+)}
+
+{layer.kind === 'glow' && (
+  <span
+    class:list={['wl', 'wl-glow', `wl-glow--${layer.shape ?? 'circle'}`]}
+    style={style}
+    {...attrs}
+    data-night-on={layer.nightOn ? 'true' : undefined}
+  ></span>
+)}
+
+{layer.kind === 'shadow' && <span class="wl wl-shadow" style={style} {...attrs}></span>}
+
+{layer.kind === 'crop' && <span class="wl wl-crop" style={style} {...attrs}></span>}
