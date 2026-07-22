@@ -105,6 +105,22 @@ Placeholder images are mapped in `src/assets/images/placeholders.ts`. Add new lo
 
 Future public videos can be stored under `public/videos`. Do not autoplay video with sound.
 
+## World Asset Architecture
+
+- `assets/model-library/`: canonical, versioned modular-object packages and
+  geometry contracts.
+- `assets/cinematic/`: aligned cinematic source frames, masks, and master
+  renders.
+- `src/assets/images/world/`: the small runtime image set imported by Astro.
+- `public/media/village/`: approved ambient and interaction video delivery
+  copies.
+- `assets/archive/`: retained prototypes and superseded encodes that are not
+  shipped by the app.
+
+See [`assets/model-library/README.md`](assets/model-library/README.md) for the
+component and layering contract, and [`assets/cinematic/README.md`](assets/cinematic/README.md)
+for cinematic-source organization.
+
 ## Privacy Notes
 
 Before publishing real media, remove unintended EXIF location metadata from photos. Avoid public home addresses, exact live locations, private travel plans, and sensitive personal details.

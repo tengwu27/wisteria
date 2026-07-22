@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "format": "lossless-rgba-png",
+  "projection": "three-quarter-isometric-30deg",
+  "style": "cozy-retro-modern-hand-painted-rpg",
+  "packages": [
+    {
+      "id": "house",
+      "sheet": "house/v1/house-interactive-world-v1.png",
+      "source": "house/v1/house-interactive-world-source-v1.png",
+      "contract": "house/v2/house-v2.json",
+      "canonicalCanvas": { "width": 780, "height": 975 },
+      "nativeFacing": "bottom-right",
+      "pilotStatus": "validated-v2-main-door",
+      "states": ["window-open-closed", "door-open-closed", "turbine-runtime-rotate", "flag-runtime-sway", "lamp-off-on", "clock-runtime-hands"]
+    },
+    {
+      "id": "coffee-shop",
+      "sheet": "coffee-shop/v1/coffee-shop-modular-v1.png",
+      "source": "coffee-shop/v1/coffee-shop-modular-source-v1.png",
+      "states": ["door-open-closed", "storefront-open-closed", "gable-window-open-closed", "awning-extended-rolled", "sign-swing-2", "lamp-off-on", "steam-3"]
+    },
+    {
+      "id": "garage",
+      "sheet": "garage/v1/garage-modular-v1.png",
+      "source": "garage/v1/garage-modular-source-v1.png",
+      "states": ["bay-door-closed-half-open-open", "service-door-open-closed", "window-open-closed", "lamp-off-on", "fan-3"]
+    },
+    {
+      "id": "car",
+      "sheet": "car/v1/car-modular-v1.png",
+      "source": "car/v1/car-modular-source-v1.png",
+      "states": ["driver-door-open-closed", "hatch-open-closed", "front-wheel-3", "rear-wheel-3", "headlamps-off-on", "luggage-loaded-empty", "exhaust-3"]
+    },
+    {
+      "id": "sailboat",
+      "sheet": "sailboat/v1/sailboat-modular-v1.png",
+      "source": "sailboat/v1/sailboat-modular-source-v1.png",
+      "states": ["mainsail-3", "jib-3", "flag-3", "anchor-up-down", "tiller-left-center-right", "lamp-off-on", "cabin-door-open-closed", "wake-3"]
+    },
+    {
+      "id": "airplane",
+      "sheet": "airplane/v1/airplane-modular-v1.png",
+      "source": "airplane/v1/airplane-modular-source-v1.png",
+      "states": ["propeller-3", "canopy-open-closed", "landing-gear-down-retracted", "navigation-lights-off-on", "rudder-left-center-right", "flap-neutral-lowered", "exhaust-3"]
+    },
+    {
+      "id": "harbor",
+      "sheet": "harbor/v1/harbor-modular-v1.png",
+      "source": "harbor/v1/harbor-modular-source-v1.png",
+      "states": ["beacon-off-on", "reflector-3", "shed-door-open-closed", "shed-window-open-closed", "crane-left-center-right", "gangway-raised-lowered", "flag-3", "lamp-off-on", "buoy-3", "ripple-3"]
+    }
+  ]
+}

@@ -1,0 +1,238 @@
+{
+  "package": "house-v2",
+  "pass": true,
+  "canvas": {
+    "width": 780,
+    "height": 975
+  },
+  "nativeFacing": "bottom-right",
+  "checks": [
+    {
+      "name": "format:house-shell-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:main-door-interior-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:main-door-closed-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:main-door-open-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:main-door-foreground-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:main-door-fit-mask-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:window-backplates-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:windows-closed-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:windows-open-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:turbine-mast-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:turbine-rotor-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:turbine-hub-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:roof-flag-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:wall-lamp-off-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:wall-lamp-on-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "format:clock-base-v2.png",
+      "pass": true,
+      "detail": "780x975 RGBA"
+    },
+    {
+      "name": "state-facing",
+      "pass": true,
+      "detail": "bottom-right"
+    },
+    {
+      "name": "shared-pivot",
+      "pass": true,
+      "detail": {
+        "x": 346,
+        "y": 766
+      }
+    },
+    {
+      "name": "closed-fit-mask",
+      "pass": true,
+      "detail": {
+        "spill": null,
+        "gap": null
+      }
+    },
+    {
+      "name": "open-motion-envelope",
+      "pass": true,
+      "detail": {
+        "bbox": [
+          296,
+          680,
+          347,
+          829
+        ],
+        "envelope": [
+          294,
+          662,
+          350,
+          832
+        ]
+      }
+    },
+    {
+      "name": "inward-hinge-side",
+      "pass": true,
+      "detail": {
+        "opens": "inward",
+        "nativeHinge": "right",
+        "integratedHinge": "left",
+        "pivotX": 346,
+        "openBBox": [
+          296,
+          680,
+          347,
+          829
+        ]
+      }
+    },
+    {
+      "name": "remaining-state-canvases",
+      "pass": true,
+      "detail": [
+        780,
+        975
+      ]
+    },
+    {
+      "name": "component-depth-modes",
+      "pass": true,
+      "detail": {
+        "mainDoor": "behind-aperture",
+        "windows": "behind-aperture",
+        "turbine": "sandwiched",
+        "roofFlag": "foreground-mounted",
+        "wallLamp": "foreground-mounted",
+        "wallClock": "foreground-mounted"
+      }
+    },
+    {
+      "name": "shell-occludes-aperture-components",
+      "pass": true,
+      "detail": [
+        "window-backplates-v2.png",
+        "windows-closed-v2.png|windows-open-v2.png",
+        "main-door-interior-v2.png",
+        "main-door-closed-v2.png|main-door-open-v2.png",
+        "house-shell-v2.png",
+        "main-door-foreground-v2.png",
+        "turbine-mast-v2.png",
+        "turbine-rotor-v2.png",
+        "turbine-hub-v2.png",
+        "roof-flag-v2.png",
+        "wall-lamp-off-v2.png|wall-lamp-on-v2.png",
+        "clock-base-v2.png",
+        "clock-hands-runtime"
+      ]
+    },
+    {
+      "name": "rigid-turbine-stack",
+      "pass": true,
+      "detail": {
+        "kind": "rigid-rotor-assembly",
+        "placementMode": "sandwiched",
+        "pivot": {
+          "x": 350,
+          "y": 92
+        },
+        "animation": "runtime-rotation",
+        "layerOrder": [
+          "turbine-mast-v2.png",
+          "turbine-rotor-v2.png",
+          "turbine-hub-v2.png"
+        ]
+      }
+    },
+    {
+      "name": "fixed-hinge-perspective",
+      "pass": true,
+      "detail": {
+        "hingeLine": {
+          "top": {
+            "x": 346,
+            "y": 704
+          },
+          "bottom": {
+            "x": 346,
+            "y": 828
+          }
+        },
+        "openProjection": {
+          "freeTop": {
+            "x": 296,
+            "y": 688
+          },
+          "hingeTop": {
+            "x": 346,
+            "y": 665
+          },
+          "hingeBottom": {
+            "x": 346,
+            "y": 828
+          },
+          "freeBottom": {
+            "x": 296,
+            "y": 792
+          }
+        }
+      }
+    }
+  ],
+  "errors": []
+}

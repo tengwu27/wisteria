@@ -1,0 +1,18 @@
+{
+  "source": "main-door-closed-bottom-right-v3-cutout.png",
+  "cleanBase": "main-door-clean-base-v1-cutout.png",
+  "output": "main-door-closed-bottom-right-hardware-translated-v5-cutout.png",
+  "nativeFacing": "bottom-right",
+  "operation": "translation-only",
+  "components": {
+    "handle": {
+      "sourceLayer": "hardware-handle-original-geometry-v1.png",
+      "translate": { "x": 360, "y": 0 }
+    },
+    "hinges": {
+      "sourceLayer": "hardware-hinges-original-geometry-v1.png",
+      "translate": { "x": -540, "y": 0 }
+    }
+  },
+  "forbiddenTransforms": ["mirror", "rotate", "scale", "skew", "regenerate"]
+}
