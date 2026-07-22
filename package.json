@@ -8,9 +8,8 @@
     "lint": "ASTRO_TELEMETRY_DISABLED=1 astro check",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
-    "assets:house:build": "python3 scripts/build-house-v2.py",
-    "assets:house:validate": "python3 scripts/validate-house-assets.py",
-    "supabase:seed:generate": "node scripts/export-content-to-supabase.mjs"
+    "assets:house:validate": ".venv/bin/python scripts/assets/validate-house.py",
+    "supabase:seed:generate": "node scripts/content/export-to-supabase.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.1",
