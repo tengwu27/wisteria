@@ -1,25 +1,12 @@
 ---
-import LifestyleCard from '@/components/ui/LifestyleCard.astro';
-import SectionIntroduction from '@/components/sections/SectionIntroduction.astro';
+import VisualNovelLivingRoom from '@/components/sections/VisualNovelLivingRoom.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getPublishedEntries } from '@/lib/content';
-import { byNewest } from '@/utils/content';
-
-const entries = (await getPublishedEntries('lifestyle')).sort(byNewest);
 ---
 
-<BaseLayout title="生活 | 我们的生活收藏" description="来自日常生活的原创故事与有意义的发现。">
-  <div class="pt-20">
-    <SectionIntroduction
-      theme="lifestyle"
-      eyebrow="生活"
-      title="日常片段、原创札记，以及值得留下的事物。"
-      text="生活条目可以是原创故事，也可以是外部发现；每一则都可以带上一段私人备注和可替换图片。"
-    />
-    <section class="px-6 pb-24 lg:px-8">
-      <div class="mx-auto grid max-w-7xl gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
-        {entries.map((entry, index) => <LifestyleCard entry={entry} large={index === 0} />)}
-      </div>
-    </section>
-  </div>
+<BaseLayout
+  title="主屋客厅 | 生活"
+  description="走进港湾主屋的复古未来客厅，查看窗边相框里的生活收藏。"
+  immersive
+>
+  <VisualNovelLivingRoom />
 </BaseLayout>

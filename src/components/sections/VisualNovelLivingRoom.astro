@@ -1,0 +1,622 @@
+---
+const mediaRoot = '/media/lifestyle/ambient';
+---
+
+<section
+  class="living-room"
+  data-living-room
+  data-state="arriving"
+  aria-label="港湾主屋的复古未来客厅"
+>
+  <div class="living-room__stage">
+    <video
+      class="living-room__video is-active"
+      data-room-video="day"
+      src={`${mediaRoot}/living-room-multilayer-v6.mp4`}
+      poster={`${mediaRoot}/living-room-multilayer-v6-poster.jpg`}
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      aria-hidden="true"
+    ></video>
+    <video
+      class="living-room__video"
+      data-room-video="night"
+      src={`${mediaRoot}/living-room-night-v5.mp4`}
+      poster={`${mediaRoot}/living-room-night-v5-poster.jpg`}
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      aria-hidden="true"
+    ></video>
+
+    <button
+      class="living-room__photo"
+      type="button"
+      data-photo-trigger
+      aria-label="查看窗边相框，打开生活档案"
+      disabled
+    >
+      <span class="living-room__photo-glow" aria-hidden="true"></span>
+      <span class="living-room__photo-label" aria-hidden="true">
+        <span>查看照片</span>
+        <small>EXAMINE</small>
+      </span>
+    </button>
+  </div>
+
+  <a class="living-room__back" href="/" data-room-back aria-label="返回村庄">
+    <span aria-hidden="true">←</span>
+    <span>返回村庄</span>
+  </a>
+
+  <button
+    class="living-room__theme-toggle"
+    type="button"
+    data-room-theme-toggle
+    aria-label="切换为夜晚客厅"
+    aria-pressed="false"
+    disabled
+  >
+    <span class="living-room__theme-icon" data-room-theme-icon aria-hidden="true">☀</span>
+    <span data-room-theme-label>白昼</span>
+  </button>
+
+  <p class="sr-only" data-room-status aria-live="polite">正在进入客厅</p>
+  <div class="living-room__curtain" data-room-curtain aria-hidden="true"></div>
+</section>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+
+  const SESSION_KEY = 'wisteria-hero-environment';
+
+  type Environment = 'day' | 'night';
+  type RoomState = 'arriving' | 'idle' | 'exiting';
+
+  function getStoredEnvironment(): Environment | null {
+    try {
+      const stored = window.sessionStorage.getItem(SESSION_KEY);
+      return stored === 'day' || stored === 'night' ? stored : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function getLocalEnvironment(): Environment {
+    const hour = new Date().getHours();
+    return hour >= 7 && hour < 19 ? 'day' : 'night';
+  }
+
+  function initialiseLivingRoom() {
+    const root = document.querySelector<HTMLElement>('[data-living-room]');
+    if (!root || root.dataset.ready === 'true') return;
+
+    const dayVideo = root.querySelector<HTMLVideoElement>('[data-room-video="day"]');
+    const nightVideo = root.querySelector<HTMLVideoElement>('[data-room-video="night"]');
+    const photoTrigger = root.querySelector<HTMLButtonElement>('[data-photo-trigger]');
+    const backLink = root.querySelector<HTMLAnchorElement>('[data-room-back]');
+    const themeToggle = root.querySelector<HTMLButtonElement>('[data-room-theme-toggle]');
+    const themeIcon = root.querySelector<HTMLElement>('[data-room-theme-icon]');
+    const themeLabel = root.querySelector<HTMLElement>('[data-room-theme-label]');
+    const status = root.querySelector<HTMLElement>('[data-room-status]');
+
+    if (
+      !dayVideo ||
+      !nightVideo ||
+      !photoTrigger ||
+      !backLink ||
+      !themeToggle ||
+      !themeIcon ||
+      !themeLabel ||
+      !status
+    ) return;
+
+    root.dataset.ready = 'true';
+
+    const lifecycle = new AbortController();
+    const { signal } = lifecycle;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const videos: Record<Environment, HTMLVideoElement> = {
+      day: dayVideo,
+      night: nightVideo
+    };
+    let environment: Environment = getStoredEnvironment() ?? getLocalEnvironment();
+    let activeVideo = videos[environment];
+    let state: RoomState = 'arriving';
+    let arrivalTimer = 0;
+    let navigationTimer = 0;
+    let themeTimer = 0;
+
+    const setState = (next: RoomState) => {
+      state = next;
+      root.dataset.state = next;
+    };
+
+    const safelyPlay = (video = activeVideo) => {
+      if (reduceMotion.matches || document.hidden || state === 'exiting') return;
+      const playback = video.play();
+      playback
+        ?.then(() => delete root.dataset.playback)
+        .catch(() => {
+          root.dataset.playback = `${environment}-poster`;
+        });
+    };
+
+    const updateEnvironment = (
+      next: Environment,
+      persist = false,
+      announce = false,
+      initial = false
+    ) => {
+      const previousVideo = activeVideo;
+      environment = next;
+      activeVideo = videos[next];
+      root.dataset.environment = next;
+
+      if (initial) {
+        (Object.entries(videos) as [Environment, HTMLVideoElement][]).forEach(
+          ([name, video]) => {
+            video.classList.toggle('is-active', name === next);
+            if (name !== next) video.pause();
+          }
+        );
+      } else if (previousVideo !== activeVideo) {
+        window.clearTimeout(themeTimer);
+        if (
+          Number.isFinite(previousVideo.currentTime) &&
+          Number.isFinite(activeVideo.duration) &&
+          activeVideo.duration > 0
+        ) {
+          activeVideo.currentTime = previousVideo.currentTime % activeVideo.duration;
+        }
+        activeVideo.classList.add('is-active');
+        safelyPlay(activeVideo);
+        requestAnimationFrame(() => previousVideo.classList.remove('is-active'));
+        themeTimer = window.setTimeout(() => previousVideo.pause(), 560);
+      }
+
+      const showingNight = next === 'night';
+      themeToggle.setAttribute('aria-pressed', String(showingNight));
+      themeToggle.setAttribute(
+        'aria-label',
+        showingNight ? '切换为白昼客厅' : '切换为夜晚客厅'
+      );
+      themeIcon.textContent = showingNight ? '☾' : '☀';
+      themeLabel.textContent = showingNight ? '夜晚' : '白昼';
+
+      if (announce) {
+        status.textContent = showingNight ? '已切换为夜晚客厅' : '已切换为白昼客厅';
+      }
+
+      if (persist) {
+        try {
+          window.sessionStorage.setItem(SESSION_KEY, next);
+        } catch {
+          // Theme switching remains available when storage is blocked.
+        }
+      }
+
+      if (reduceMotion.matches || document.hidden || state === 'exiting') {
+        Object.values(videos).forEach((video) => video.pause());
+      } else if (initial || previousVideo === activeVideo) {
+        safelyPlay(activeVideo);
+      }
+    };
+
+    const finishArrival = () => {
+      if (state !== 'arriving') return;
+      window.clearTimeout(arrivalTimer);
+      root.classList.add('is-revealed');
+      status.textContent = '已进入客厅。可以查看窗边的相框。';
+
+      window.setTimeout(() => {
+        if (state !== 'arriving') return;
+        setState('idle');
+        root.classList.add('is-interactive');
+        photoTrigger.disabled = false;
+        themeToggle.disabled = false;
+      }, reduceMotion.matches ? 1 : 500);
+    };
+
+    const navigateTo = async (destination: string) => {
+      window.clearTimeout(navigationTimer);
+      window.clearTimeout(themeTimer);
+      Object.values(videos).forEach((video) => video.pause());
+
+      try {
+        await navigate(destination);
+      } catch {
+        window.location.assign(destination);
+      }
+    };
+
+    const startExit = (destination: string, message: string) => {
+      if (state !== 'idle') return;
+      setState('exiting');
+      root.classList.remove('is-interactive');
+      root.classList.add('is-exiting');
+      photoTrigger.disabled = true;
+      themeToggle.disabled = true;
+      backLink.setAttribute('aria-disabled', 'true');
+      status.textContent = message;
+      navigationTimer = window.setTimeout(
+        () => navigateTo(destination),
+        reduceMotion.matches ? 1 : 360
+      );
+    };
+
+    const resetAfterRestore = () => {
+      window.clearTimeout(arrivalTimer);
+      window.clearTimeout(navigationTimer);
+      window.clearTimeout(themeTimer);
+      root.classList.remove('is-exiting');
+      root.classList.add('is-revealed', 'is-interactive');
+      backLink.removeAttribute('aria-disabled');
+      photoTrigger.disabled = false;
+      themeToggle.disabled = false;
+      setState('idle');
+      status.textContent = '已回到客厅。可以查看窗边的相框。';
+      updateEnvironment(getStoredEnvironment() ?? environment, false, false, true);
+    };
+
+    Object.values(videos).forEach((video) => {
+      video.muted = true;
+      video.load();
+      video.addEventListener('loadeddata', () => {
+        if (video === activeVideo) finishArrival();
+      }, { signal });
+      video.addEventListener('canplay', () => {
+        if (video === activeVideo) finishArrival();
+      }, { signal });
+      video.addEventListener('error', () => {
+        if (video !== activeVideo) return;
+        root.dataset.playback = `${environment}-poster`;
+        finishArrival();
+      }, { signal });
+    });
+
+    updateEnvironment(environment, false, false, true);
+
+    if (reduceMotion.matches) {
+      finishArrival();
+    } else {
+      if (activeVideo.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        requestAnimationFrame(finishArrival);
+      }
+
+      arrivalTimer = window.setTimeout(finishArrival, 1400);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      if (state !== 'idle') return;
+      updateEnvironment(environment === 'day' ? 'night' : 'day', true, true);
+    }, { signal });
+
+    photoTrigger.addEventListener('click', () => {
+      startExit('/lifestyle/archive', '正在打开生活档案');
+    }, { signal });
+
+    photoTrigger.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      startExit('/lifestyle/archive', '正在打开生活档案');
+    }, { signal });
+
+    backLink.addEventListener('click', (event) => {
+      if (state !== 'idle') {
+        event.preventDefault();
+        return;
+      }
+
+      event.preventDefault();
+      startExit('/', '正在返回村庄');
+    }, { signal });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        Object.values(videos).forEach((video) => video.pause());
+      } else if (state === 'idle') {
+        safelyPlay(activeVideo);
+      }
+    }, { signal });
+
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) resetAfterRestore();
+    }, { signal });
+
+    document.addEventListener('astro:before-swap', () => {
+      lifecycle.abort();
+      window.clearTimeout(arrivalTimer);
+      window.clearTimeout(navigationTimer);
+      window.clearTimeout(themeTimer);
+      Object.values(videos).forEach((video) => video.pause());
+    }, { once: true, signal });
+  }
+
+  initialiseLivingRoom();
+  document.addEventListener('astro:page-load', initialiseLivingRoom);
+</script>
+
+<style>
+  .living-room {
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    isolation: isolate;
+    background: #101d1b;
+    color: #fff8e7;
+  }
+
+  .living-room__stage {
+    --stage-offset-x: -50%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100vw, calc(100vh * 16 / 9));
+    height: max(100vh, calc(100vw * 9 / 16));
+    overflow: hidden;
+    transform: translate(var(--stage-offset-x), -50%);
+  }
+
+  @supports (height: 100svh) {
+    .living-room__stage {
+      width: max(100vw, calc(100svh * 16 / 9));
+      height: max(100svh, calc(100vw * 9 / 16));
+    }
+  }
+
+  .living-room__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: fill;
+    opacity: 0;
+    transition: opacity 520ms ease;
+  }
+
+  .living-room__video.is-active {
+    opacity: 1;
+  }
+
+  .living-room__photo {
+    position: absolute;
+    left: 36.2%;
+    top: 36.1%;
+    width: 6.5%;
+    height: 11.6%;
+    border: 0;
+    border-radius: 12% 12% 8% 8%;
+    background: transparent;
+    color: #fff8e7;
+    cursor: pointer;
+  }
+
+  .living-room__photo-glow {
+    position: absolute;
+    inset: -8%;
+    border: 2px solid rgba(255, 248, 231, 0);
+    border-radius: 14%;
+    background: rgba(255, 214, 79, 0);
+    box-shadow: 0 0 0 0 rgba(255, 214, 79, 0);
+    transition:
+      border-color 180ms ease,
+      background 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .living-room__photo-label {
+    position: absolute;
+    left: 50%;
+    bottom: -3rem;
+    display: grid;
+    min-width: max-content;
+    border: 1px solid rgba(255, 248, 231, .72);
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .82);
+    box-shadow: 0 8px 24px rgba(8, 22, 20, .34);
+    padding: .4rem .72rem .32rem;
+    opacity: 0;
+    text-align: center;
+    transform: translate(-50%, .35rem);
+    backdrop-filter: blur(8px);
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .living-room__photo-label span {
+    font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
+    font-size: clamp(.66rem, .88vw, .82rem);
+    line-height: 1;
+  }
+
+  .living-room__photo-label small {
+    margin-top: .2rem;
+    font-size: .46rem;
+    font-weight: 900;
+    letter-spacing: .18em;
+    opacity: .72;
+  }
+
+  .living-room__photo:hover .living-room__photo-glow,
+  .living-room__photo:focus-visible .living-room__photo-glow {
+    border-color: rgba(255, 248, 231, .8);
+    background: rgba(255, 214, 79, .1);
+    box-shadow:
+      0 0 0 7px rgba(255, 214, 79, .12),
+      0 0 32px 12px rgba(255, 214, 79, .34);
+    transform: scale(1.04);
+  }
+
+  .living-room__photo:hover .living-room__photo-label,
+  .living-room__photo:focus-visible .living-room__photo-label {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .living-room__photo:focus-visible {
+    outline: 3px solid #ffd64f;
+    outline-offset: 5px;
+  }
+
+  .living-room__photo:disabled {
+    cursor: default;
+  }
+
+  .living-room__back {
+    position: fixed;
+    z-index: 5;
+    left: max(1rem, env(safe-area-inset-left));
+    top: max(1rem, env(safe-area-inset-top));
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: .55rem;
+    border: 1px solid rgba(255, 248, 231, .68);
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .72);
+    box-shadow: 0 8px 24px rgba(8, 22, 20, .3);
+    padding: .5rem .85rem;
+    color: #fff8e7;
+    font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
+    font-size: .78rem;
+    text-decoration: none;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-.35rem);
+    backdrop-filter: blur(8px);
+    transition:
+      opacity 220ms ease,
+      transform 220ms ease,
+      background 180ms ease;
+  }
+
+  .living-room.is-interactive .living-room__back {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .living-room__back:hover,
+  .living-room__back:focus-visible {
+    background: rgba(13, 34, 32, .94);
+    transform: translateY(-2px);
+  }
+
+  .living-room__back[aria-disabled='true'] {
+    pointer-events: none;
+  }
+
+  .living-room__theme-toggle {
+    position: fixed;
+    z-index: 5;
+    right: max(1rem, env(safe-area-inset-right));
+    top: max(1rem, env(safe-area-inset-top));
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: .55rem;
+    border: 1px solid rgba(255, 248, 231, .68);
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .72);
+    box-shadow: 0 8px 24px rgba(8, 22, 20, .3);
+    padding: .45rem .8rem .45rem .48rem;
+    color: #fff8e7;
+    cursor: pointer;
+    font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
+    font-size: .78rem;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-.35rem);
+    backdrop-filter: blur(8px);
+    transition:
+      opacity 220ms ease,
+      transform 220ms ease,
+      background 180ms ease;
+  }
+
+  .living-room.is-interactive .living-room__theme-toggle {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .living-room__theme-toggle:hover,
+  .living-room__theme-toggle:focus-visible {
+    background: rgba(13, 34, 32, .94);
+    transform: translateY(-2px);
+  }
+
+  .living-room__theme-icon {
+    display: grid;
+    width: 1.9rem;
+    height: 1.9rem;
+    place-items: center;
+    border-radius: 50%;
+    background: #ffd64f;
+    color: #24231f;
+    font-size: 1rem;
+  }
+
+  .living-room[data-environment='night'] .living-room__theme-icon {
+    background: #b8caff;
+    color: #14233a;
+  }
+
+  .living-room__curtain {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    background: #101d1b;
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 500ms cubic-bezier(.22, .72, .22, 1);
+  }
+
+  .living-room.is-revealed .living-room__curtain {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .living-room.is-exiting .living-room__curtain {
+    opacity: 1;
+    pointer-events: auto;
+    transition-duration: 350ms;
+  }
+
+  @media (max-width: 767px) {
+    .living-room__stage {
+      --stage-offset-x: -43%;
+    }
+
+    .living-room__back {
+      left: max(.7rem, env(safe-area-inset-left));
+      top: max(.7rem, env(safe-area-inset-top));
+    }
+
+    .living-room__theme-toggle {
+      right: max(.7rem, env(safe-area-inset-right));
+      top: max(.7rem, env(safe-area-inset-top));
+    }
+
+    .living-room__photo-label {
+      bottom: -2.65rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .living-room__photo-glow,
+    .living-room__photo-label,
+    .living-room__back,
+    .living-room__theme-toggle,
+    .living-room__video,
+    .living-room__curtain {
+      transition-duration: 1ms !important;
+    }
+  }
+</style>
