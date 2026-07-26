@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "master": {
+    "width": 1672,
+    "height": 941
+  },
+  "layerOrderBackToFront": [
+    "00-far-trees-v6.png (far-only tree plate)",
+    "car-near-scene-alpha-mask-v4.png (road, fence and architecture)",
+    "localized-contact-shadow",
+    "car-foreground-alpha-mask-v3.png",
+    "moving-door-inner-surface",
+    "moving-door-thickness",
+    "car-driver-door-outer-mask-v3.png",
+    "car-driver-door-glazing-mask-v3.png"
+  ],
+  "motion": {
+    "durationSeconds": 4,
+    "frameRate": 30,
+    "cameraZoom": 1,
+    "farTreeScale": 0.7,
+    "farTreeX": {
+      "start": -12,
+      "end": 12
+    },
+    "nearSceneAndCarX": {
+      "start": -38,
+      "end": 38
+    },
+    "door": {
+      "hinge": "vertical-front-edge",
+      "hingeX": 950,
+      "rotation": "upright-horizontal-foreshortening",
+      "visibleFace": "painted-exterior",
+      "openAngleDegrees": 68
+    }
+  }
+}
