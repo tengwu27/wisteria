@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "master": {
+    "width": 1672,
+    "height": 941
+  },
+  "layerOrderBackToFront": [
+    "01-sky.png",
+    "02-cafe-landscape.png",
+    "03-middle-garden.png",
+    "04-foreground-garden.png"
+  ],
+  "ownership": {
+    "01-sky.png": [
+      "sky",
+      "clouds"
+    ],
+    "02-cafe-landscape.png": [
+      "coffee shop",
+      "open gallery entrance",
+      "distant trees",
+      "ground",
+      "patio",
+      "lamp post",
+      "brick path"
+    ],
+    "03-middle-garden.png": [
+      "flower beds",
+      "flowering shrubs",
+      "small potted plants",
+      "decorative grasses"
+    ],
+    "04-foreground-garden.png": [
+      "near-camera roses",
+      "hydrangeas",
+      "broad leaves",
+      "ferns",
+      "dense foreground bushes"
+    ]
+  },
+  "motion": {
+    "direction": "left",
+    "loop": false,
+    "sky": 0,
+    "cafe": 58,
+    "middleGarden": 132,
+    "foregroundGarden": 690
+  }
+}

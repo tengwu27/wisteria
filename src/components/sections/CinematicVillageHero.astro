@@ -56,6 +56,19 @@ const mediaRoot = '/media/village';
         <small>DRIVE</small>
       </span>
     </button>
+
+    <button
+      class="cinematic-village__cafe"
+      type="button"
+      data-cafe-trigger
+      aria-label="穿过花园进入咖啡馆画廊"
+    >
+      <span class="cinematic-village__hotspot-ring" aria-hidden="true"></span>
+      <span class="cinematic-village__hotspot-label" aria-hidden="true">
+        <span>进入画廊</span>
+        <small>VISIT</small>
+      </span>
+    </button>
   </div>
 
   <div class="cinematic-village__controls">
@@ -69,7 +82,7 @@ const mediaRoot = '/media/village';
       <span class="cinematic-village__toggle-icon" data-toggle-icon aria-hidden="true">☀</span>
       <span data-toggle-label>白昼</span>
     </button>
-    <p class="cinematic-village__hint" aria-hidden="true">点击主屋进入生活，或点击汽车开始旅行</p>
+    <p class="cinematic-village__hint" aria-hidden="true">探索主屋、咖啡馆画廊，或开车去旅行</p>
   </div>
 
   <p class="sr-only" data-village-status aria-live="polite"></p>
@@ -110,6 +123,28 @@ const mediaRoot = '/media/village';
     ></video>
     <video
       class="cinematic-village__transition-video"
+      data-interaction-video="cafe"
+      data-environment="day"
+      src="/media/art/transition/cafe-reveal-day-v1.mp4"
+      poster="/media/art/transition/cafe-reveal-day-v1-poster.jpg"
+      muted
+      playsinline
+      preload="auto"
+      aria-hidden="true"
+    ></video>
+    <video
+      class="cinematic-village__transition-video"
+      data-interaction-video="cafe"
+      data-environment="night"
+      src="/media/art/transition/cafe-reveal-night-v1.mp4"
+      poster="/media/art/transition/cafe-reveal-night-v1-poster.jpg"
+      muted
+      playsinline
+      preload="auto"
+      aria-hidden="true"
+    ></video>
+    <video
+      class="cinematic-village__transition-video"
       data-interaction-video="car"
       data-environment="night"
       src={`${mediaRoot}/interactions/car/driver-door-night-v2.mp4`}
@@ -130,11 +165,12 @@ const mediaRoot = '/media/village';
   const SESSION_KEY = 'wisteria-hero-environment';
 
   type Environment = 'day' | 'night';
-  type Interaction = 'house' | 'car';
+  type Interaction = 'house' | 'car' | 'cafe';
 
   const destinations: Record<Interaction, string> = {
     house: '/lifestyle',
-    car: '/travel'
+    car: '/travel',
+    cafe: '/art'
   };
 
   function getStoredEnvironment(): Environment | null {
@@ -160,6 +196,7 @@ const mediaRoot = '/media/village';
     const stage = root.querySelector<HTMLElement>('[data-village-stage]');
     const houseTrigger = root.querySelector<HTMLButtonElement>('[data-house-trigger]');
     const carTrigger = root.querySelector<HTMLButtonElement>('[data-car-trigger]');
+    const cafeTrigger = root.querySelector<HTMLButtonElement>('[data-cafe-trigger]');
     const environmentToggle = root.querySelector<HTMLButtonElement>('[data-environment-toggle]');
     const toggleIcon = root.querySelector<HTMLElement>('[data-toggle-icon]');
     const toggleLabel = root.querySelector<HTMLElement>('[data-toggle-label]');
@@ -175,11 +212,14 @@ const mediaRoot = '/media/village';
     const houseNightVideo = getInteractionVideo('house', 'night');
     const carDayVideo = getInteractionVideo('car', 'day');
     const carNightVideo = getInteractionVideo('car', 'night');
+    const cafeDayVideo = getInteractionVideo('cafe', 'day');
+    const cafeNightVideo = getInteractionVideo('cafe', 'night');
 
     if (
       !stage ||
       !houseTrigger ||
       !carTrigger ||
+      !cafeTrigger ||
       !environmentToggle ||
       !toggleIcon ||
       !toggleLabel ||
@@ -190,7 +230,9 @@ const mediaRoot = '/media/village';
       !houseDayVideo ||
       !houseNightVideo ||
       !carDayVideo ||
-      !carNightVideo
+      !carNightVideo ||
+      !cafeDayVideo ||
+      !cafeNightVideo
     ) return;
 
     const lifecycle = new AbortController();
@@ -208,6 +250,10 @@ const mediaRoot = '/media/village';
       car: {
         day: carDayVideo,
         night: carNightVideo
+      },
+      cafe: {
+        day: cafeDayVideo,
+        night: cafeNightVideo
       }
     };
     const allInteractionVideos = Object.values(interactionVideos).flatMap((videos) =>
@@ -307,8 +353,14 @@ const mediaRoot = '/media/village';
       document.body.classList.add('is-entering-cinematic');
       houseTrigger.disabled = true;
       carTrigger.disabled = true;
+      cafeTrigger.disabled = true;
       environmentToggle.disabled = true;
-      status.textContent = interaction === 'house' ? '正在进入主屋' : '正在走向汽车';
+      status.textContent =
+        interaction === 'house'
+          ? '正在进入主屋'
+          : interaction === 'cafe'
+            ? '正在穿过花园前往咖啡馆画廊'
+            : '正在走向汽车';
       sceneVideos[environment].pause();
       overlay.setAttribute('aria-hidden', 'false');
       overlay.classList.add('is-active');
@@ -326,7 +378,10 @@ const mediaRoot = '/media/village';
         window.setTimeout(finishEntry, 600);
       });
 
-      fallbackTimer = window.setTimeout(finishEntry, 4200);
+      fallbackTimer = window.setTimeout(
+        finishEntry,
+        interaction === 'cafe' ? 5400 : 4200
+      );
     };
 
     updateEnvironment(environment);
@@ -360,6 +415,7 @@ const mediaRoot = '/media/village';
 
     bindInteractionTrigger(houseTrigger, 'house');
     bindInteractionTrigger(carTrigger, 'car');
+    bindInteractionTrigger(cafeTrigger, 'cafe');
     allInteractionVideos.forEach((video) => {
       video.addEventListener('ended', () => {
         if (video === activeTransitionVideo) finishEntry();
@@ -419,6 +475,10 @@ const mediaRoot = '/media/village';
     transform-origin: 43% 64%;
   }
 
+  .cinematic-village[data-interaction='cafe'] .cinematic-village__stage {
+    transform-origin: 16% 48%;
+  }
+
   @supports (height: 100svh) {
     .cinematic-village__stage {
       width: max(100vw, calc(100svh * 16 / 9));
@@ -463,7 +523,8 @@ const mediaRoot = '/media/village';
   }
 
   .cinematic-village__house,
-  .cinematic-village__car {
+  .cinematic-village__car,
+  .cinematic-village__cafe {
     position: absolute;
     border: 0;
     background: transparent;
@@ -487,8 +548,17 @@ const mediaRoot = '/media/village';
     border-radius: 44%;
   }
 
+  .cinematic-village__cafe {
+    left: 7.4%;
+    top: 32.4%;
+    width: 16.3%;
+    height: 28.8%;
+    border-radius: 42% 42% 20% 20%;
+  }
+
   .cinematic-village__house::before,
-  .cinematic-village__car::before {
+  .cinematic-village__car::before,
+  .cinematic-village__cafe::before {
     content: '';
     position: absolute;
     inset: 7% 8% 4%;
@@ -504,6 +574,11 @@ const mediaRoot = '/media/village';
   .cinematic-village__car::before {
     inset: 8% 3%;
     border-radius: 44%;
+  }
+
+  .cinematic-village__cafe::before {
+    inset: 5% 5% 2%;
+    border-radius: 40% 40% 18% 18%;
   }
 
   .cinematic-village__hotspot-ring {
@@ -522,6 +597,11 @@ const mediaRoot = '/media/village';
   .cinematic-village__car .cinematic-village__hotspot-ring {
     left: 50%;
     top: 56%;
+  }
+
+  .cinematic-village__cafe .cinematic-village__hotspot-ring {
+    left: 52%;
+    top: 74%;
   }
 
   .cinematic-village__hotspot-ring::after {
@@ -555,6 +635,11 @@ const mediaRoot = '/media/village';
     top: calc(56% + clamp(1.8rem, 2.8vw, 3rem));
   }
 
+  .cinematic-village__cafe .cinematic-village__hotspot-label {
+    left: 52%;
+    top: calc(74% + clamp(1.8rem, 2.8vw, 3rem));
+  }
+
   .cinematic-village__hotspot-label span {
     font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
     font-size: clamp(.68rem, .9vw, .82rem);
@@ -572,7 +657,9 @@ const mediaRoot = '/media/village';
   .cinematic-village__house:hover::before,
   .cinematic-village__house:focus-visible::before,
   .cinematic-village__car:hover::before,
-  .cinematic-village__car:focus-visible::before {
+  .cinematic-village__car:focus-visible::before,
+  .cinematic-village__cafe:hover::before,
+  .cinematic-village__cafe:focus-visible::before {
     border-color: rgba(255, 248, 231, .52);
     background: rgba(255, 214, 79, .06);
     box-shadow: 0 0 38px 8px rgba(255, 214, 79, .18);
@@ -581,7 +668,9 @@ const mediaRoot = '/media/village';
   .cinematic-village__house:hover .cinematic-village__hotspot-ring,
   .cinematic-village__house:focus-visible .cinematic-village__hotspot-ring,
   .cinematic-village__car:hover .cinematic-village__hotspot-ring,
-  .cinematic-village__car:focus-visible .cinematic-village__hotspot-ring {
+  .cinematic-village__car:focus-visible .cinematic-village__hotspot-ring,
+  .cinematic-village__cafe:hover .cinematic-village__hotspot-ring,
+  .cinematic-village__cafe:focus-visible .cinematic-village__hotspot-ring {
     box-shadow: 0 0 0 10px rgba(255, 214, 79, .25), 0 5px 24px rgba(10, 24, 20, .4);
     transform: translate(-50%, -50%) scale(1.08);
   }
@@ -589,13 +678,16 @@ const mediaRoot = '/media/village';
   .cinematic-village__house:hover .cinematic-village__hotspot-label,
   .cinematic-village__house:focus-visible .cinematic-village__hotspot-label,
   .cinematic-village__car:hover .cinematic-village__hotspot-label,
-  .cinematic-village__car:focus-visible .cinematic-village__hotspot-label {
+  .cinematic-village__car:focus-visible .cinematic-village__hotspot-label,
+  .cinematic-village__cafe:hover .cinematic-village__hotspot-label,
+  .cinematic-village__cafe:focus-visible .cinematic-village__hotspot-label {
     background: rgba(16, 35, 32, .9);
     transform: translateX(-50%) translateY(-3px);
   }
 
   .cinematic-village__house:focus-visible,
-  .cinematic-village__car:focus-visible {
+  .cinematic-village__car:focus-visible,
+  .cinematic-village__cafe:focus-visible {
     outline: 3px solid #ffd64f;
     outline-offset: 5px;
   }

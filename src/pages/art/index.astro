@@ -1,21 +1,12 @@
 ---
-import ArtGallery from '@/components/sections/ArtGallery.astro';
-import SectionIntroduction from '@/components/sections/SectionIntroduction.astro';
+import VisualNovelCafeGallery from '@/components/sections/VisualNovelCafeGallery.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getPublishedEntries } from '@/lib/content';
-import { byOrder } from '@/utils/content';
-
-const entries = (await getPublishedEntries('art')).sort(byOrder);
 ---
 
-<BaseLayout title="艺术 | 我们的生活收藏" description="一组安静的视觉档案，收藏作品、习作、照片与实验。">
-  <div class="pt-20">
-    <SectionIntroduction
-      theme="art"
-      eyebrow="艺术"
-      title="随时间聚拢的作品、习作与实验。"
-      text="这个画廊适合收纳不同尺寸的作品、过程图片、文字故事、标签，以及未来新增的分类。"
-    />
-    <ArtGallery entries={entries} />
-  </div>
+<BaseLayout
+  title="咖啡馆画廊 | 我们的生活收藏"
+  description="走进花园尽头的复古未来咖啡馆，在画作、陶器、雕塑与咖啡香之间探索艺术收藏。"
+  immersive
+>
+  <VisualNovelCafeGallery />
 </BaseLayout>
