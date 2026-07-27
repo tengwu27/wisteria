@@ -1,4 +1,6 @@
 ---
+import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOverlay.astro';
+
 const mediaRoot = '/media/art/ambient';
 ---
 
@@ -65,11 +67,24 @@ const mediaRoot = '/media/art/ambient';
   </button>
 
   <p class="sr-only" data-gallery-status aria-live="polite">正在进入咖啡馆画廊</p>
+  <CinematicSceneExitOverlay
+    label="从咖啡馆画廊返回村庄的过渡动画"
+    day={{
+      src: '/media/art/transition/cafe-reveal-day-v1-reverse.mp4',
+      poster: '/media/art/transition/cafe-reveal-day-v1-reverse-poster.jpg'
+    }}
+    night={{
+      src: '/media/art/transition/cafe-reveal-night-v1-reverse.mp4',
+      poster:
+        '/media/art/transition/cafe-reveal-night-v1-reverse-poster.jpg'
+    }}
+  />
   <div class="cafe-gallery__curtain" data-gallery-curtain aria-hidden="true"></div>
 </section>
 
 <script>
   import { navigate } from 'astro:transitions/client';
+  import { createCinematicExitSequence } from '@/utils/cinematicExitSequence';
 
   const SESSION_KEY = 'wisteria-hero-environment';
 
@@ -102,6 +117,9 @@ const mediaRoot = '/media/art/ambient';
     const themeIcon = root.querySelector<HTMLElement>('[data-gallery-theme-icon]');
     const themeLabel = root.querySelector<HTMLElement>('[data-gallery-theme-label]');
     const status = root.querySelector<HTMLElement>('[data-gallery-status]');
+    const exitOverlay = root.querySelector<HTMLElement>(
+      '[data-cinematic-scene-exit]'
+    );
 
     if (
       !dayVideo ||
@@ -111,7 +129,8 @@ const mediaRoot = '/media/art/ambient';
       !themeToggle ||
       !themeIcon ||
       !themeLabel ||
-      !status
+      !status ||
+      !exitOverlay
     ) return;
 
     root.dataset.ready = 'true';
@@ -233,7 +252,14 @@ const mediaRoot = '/media/art/ambient';
       }
     };
 
-    const startExit = (destination: string, message: string) => {
+    const exitSequence = createCinematicExitSequence({
+      overlay: exitOverlay,
+      reduceMotion,
+      signal,
+      onComplete: () => navigateTo('/')
+    });
+
+    const startCurtainExit = (destination: string, message: string) => {
       if (state !== 'idle') return;
       setState('exiting');
       root.classList.remove('is-interactive');
@@ -248,11 +274,26 @@ const mediaRoot = '/media/art/ambient';
       );
     };
 
+    const startVillageExit = () => {
+      if (state !== 'idle') return;
+      setState('exiting');
+      root.classList.remove('is-interactive');
+      root.classList.add('is-returning');
+      artworkTrigger.disabled = true;
+      themeToggle.disabled = true;
+      backLink.setAttribute('aria-disabled', 'true');
+      status.textContent = '正在离开咖啡馆画廊并返回村庄';
+      Object.values(videos).forEach((video) => video.pause());
+      exitSequence.start(environment);
+    };
+
     const resetAfterRestore = () => {
       window.clearTimeout(arrivalTimer);
       window.clearTimeout(navigationTimer);
       window.clearTimeout(themeTimer);
       root.classList.remove('is-exiting');
+      root.classList.remove('is-returning');
+      exitSequence.reset();
       root.classList.add('is-revealed', 'is-interactive');
       backLink.removeAttribute('aria-disabled');
       artworkTrigger.disabled = false;
@@ -296,13 +337,13 @@ const mediaRoot = '/media/art/ambient';
     }, { signal });
 
     artworkTrigger.addEventListener('click', () => {
-      startExit('/art/archive', '正在打开艺术档案');
+      startCurtainExit('/art/archive', '正在打开艺术档案');
     }, { signal });
 
     artworkTrigger.addEventListener('keydown', (event) => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
-      startExit('/art/archive', '正在打开艺术档案');
+      startCurtainExit('/art/archive', '正在打开艺术档案');
     }, { signal });
 
     backLink.addEventListener('click', (event) => {
@@ -312,7 +353,7 @@ const mediaRoot = '/media/art/ambient';
       }
 
       event.preventDefault();
-      startExit('/', '正在返回村庄');
+      startVillageExit();
     }, { signal });
 
     document.addEventListener('visibilitychange', () => {
@@ -332,6 +373,7 @@ const mediaRoot = '/media/art/ambient';
       window.clearTimeout(arrivalTimer);
       window.clearTimeout(navigationTimer);
       window.clearTimeout(themeTimer);
+      exitSequence.pause();
       Object.values(videos).forEach((video) => video.pause());
     }, { once: true, signal });
   }

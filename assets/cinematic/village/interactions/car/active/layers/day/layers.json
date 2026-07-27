@@ -19,6 +19,7 @@
     "frameRate": 30,
     "cameraZoom": 1,
     "farTreeScale": 0.7,
+    "farTreeBlurRadiusPx": 3.2,
     "farTreeX": {
       "start": -12,
       "end": 12

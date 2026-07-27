@@ -6,8 +6,9 @@ road. A registered matte assigns that complete near scene—including the
 umbrella, fence and ground—to the same horizontal translation as the car. The
 separate `00-far-trees-v6.png` plates contain only distant foliage and move at
 roughly one third of the foreground speed. The renderer reduces these far
-plates to 70% visual scale with mirrored overscan while the foreground remains
-at 100%. The camera remains locked at 1×.
+plates to 70% visual scale with mirrored overscan, then applies a 3.2 px
+Gaussian depth blur to that plate only. The car, road, fence, architecture and
+door remain sharp at 100%. The camera remains locked at 1×.
 
 The moving driver door uses exact v3 metal/frame and glazing masks. The outer
 handle is on the rear side, so the conventional hinge is on the opposite front
@@ -23,6 +24,10 @@ Back-to-front ownership:
 3. Localized contact shadow and night headlight spill
 4. Car body and visible interior through `car-foreground-alpha-mask-v3.png`
 5. Rigid exterior door metal/frame, mirror and exact glazing aperture
+
+Depth-of-field rule: blur a registered, reconstructed far plate before its
+horizontal transform. Never blur the flattened frame or the car/ground group;
+doing so creates halos at masks and makes rigid near objects look detached.
 
 Rebuild masks and render with:
 

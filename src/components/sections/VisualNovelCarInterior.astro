@@ -1,0 +1,814 @@
+---
+import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOverlay.astro';
+
+const mediaRoot = '/media/travel';
+---
+
+<section
+  class="travel-cockpit"
+  data-travel-cockpit
+  data-state="arriving"
+  aria-label="复古未来汽车里的旅行驾驶舱"
+>
+  <div class="travel-cockpit__stage">
+    <video
+      class="travel-cockpit__video travel-cockpit__arrival is-active"
+      data-arrival-video="day"
+      src={`${mediaRoot}/transition/car-interior-rise-day-v1.mp4`}
+      poster={`${mediaRoot}/transition/car-interior-rise-day-v1-poster.jpg`}
+      muted
+      playsinline
+      preload="auto"
+      aria-hidden="true"
+    ></video>
+    <video
+      class="travel-cockpit__video travel-cockpit__arrival"
+      data-arrival-video="night"
+      src={`${mediaRoot}/transition/car-interior-rise-night-v1.mp4`}
+      poster={`${mediaRoot}/transition/car-interior-rise-night-v1-poster.jpg`}
+      muted
+      playsinline
+      preload="auto"
+      aria-hidden="true"
+    ></video>
+    <video
+      class="travel-cockpit__video travel-cockpit__ambient"
+      data-ambient-video="day"
+      src={`${mediaRoot}/ambient/car-interior-day-v1.mp4`}
+      poster={`${mediaRoot}/ambient/car-interior-day-v1-poster.jpg`}
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      aria-hidden="true"
+    ></video>
+    <video
+      class="travel-cockpit__video travel-cockpit__ambient"
+      data-ambient-video="night"
+      src={`${mediaRoot}/ambient/car-interior-night-v1.mp4`}
+      poster={`${mediaRoot}/ambient/car-interior-night-v1-poster.jpg`}
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      aria-hidden="true"
+    ></video>
+
+    <button
+      class="travel-cockpit__map"
+      type="button"
+      data-map-trigger
+      aria-label="查看副驾驶仪表台上的地图，打开旅行档案"
+      disabled
+    >
+      <span class="travel-cockpit__map-glow" aria-hidden="true"></span>
+      <span class="travel-cockpit__map-label" aria-hidden="true">
+        <span>查看地图</span>
+        <small>TRAVEL LOG</small>
+      </span>
+    </button>
+  </div>
+
+  <a
+    class="travel-cockpit__back"
+    href="/"
+    data-cockpit-back
+    aria-label="返回村庄"
+  >
+    <span aria-hidden="true">←</span>
+    <span>返回村庄</span>
+  </a>
+
+  <button
+    class="travel-cockpit__theme-toggle"
+    type="button"
+    data-cockpit-theme-toggle
+    aria-label="切换为夜晚驾驶舱"
+    aria-pressed="false"
+    disabled
+  >
+    <span
+      class="travel-cockpit__theme-icon"
+      data-cockpit-theme-icon
+      aria-hidden="true"
+    >☀</span>
+    <span data-cockpit-theme-label>白昼</span>
+  </button>
+
+  <p class="sr-only" data-cockpit-status aria-live="polite">
+    正在坐进汽车
+  </p>
+  <CinematicSceneExitOverlay
+    label="从汽车驾驶舱返回村庄的过渡动画"
+    day={{
+      src:
+        '/media/village/interactions/car/driver-door-day-v6-reverse.mp4',
+      poster:
+        '/media/village/interactions/car/driver-door-day-v6-reverse-poster.jpg'
+    }}
+    night={{
+      src:
+        '/media/village/interactions/car/driver-door-night-v6-reverse.mp4',
+      poster:
+        '/media/village/interactions/car/driver-door-night-v6-reverse-poster.jpg'
+    }}
+  />
+  <div
+    class="travel-cockpit__curtain"
+    data-cockpit-curtain
+    aria-hidden="true"
+  ></div>
+</section>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+  import { createCinematicExitSequence } from '@/utils/cinematicExitSequence';
+
+  const SESSION_KEY = 'wisteria-hero-environment';
+
+  type Environment = 'day' | 'night';
+  type CockpitState = 'arriving' | 'idle' | 'exiting';
+
+  function getStoredEnvironment(): Environment | null {
+    try {
+      const stored = window.sessionStorage.getItem(SESSION_KEY);
+      return stored === 'day' || stored === 'night' ? stored : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function getLocalEnvironment(): Environment {
+    const hour = new Date().getHours();
+    return hour >= 7 && hour < 19 ? 'day' : 'night';
+  }
+
+  function initialiseTravelCockpit() {
+    const root = document.querySelector<HTMLElement>('[data-travel-cockpit]');
+    if (!root || root.dataset.ready === 'true') return;
+
+    const dayArrival = root.querySelector<HTMLVideoElement>(
+      '[data-arrival-video="day"]'
+    );
+    const nightArrival = root.querySelector<HTMLVideoElement>(
+      '[data-arrival-video="night"]'
+    );
+    const dayAmbient = root.querySelector<HTMLVideoElement>(
+      '[data-ambient-video="day"]'
+    );
+    const nightAmbient = root.querySelector<HTMLVideoElement>(
+      '[data-ambient-video="night"]'
+    );
+    const mapTrigger = root.querySelector<HTMLButtonElement>(
+      '[data-map-trigger]'
+    );
+    const backLink = root.querySelector<HTMLAnchorElement>(
+      '[data-cockpit-back]'
+    );
+    const themeToggle = root.querySelector<HTMLButtonElement>(
+      '[data-cockpit-theme-toggle]'
+    );
+    const themeIcon = root.querySelector<HTMLElement>(
+      '[data-cockpit-theme-icon]'
+    );
+    const themeLabel = root.querySelector<HTMLElement>(
+      '[data-cockpit-theme-label]'
+    );
+    const status = root.querySelector<HTMLElement>(
+      '[data-cockpit-status]'
+    );
+    const exitOverlay = root.querySelector<HTMLElement>(
+      '[data-cinematic-scene-exit]'
+    );
+
+    if (
+      !dayArrival ||
+      !nightArrival ||
+      !dayAmbient ||
+      !nightAmbient ||
+      !mapTrigger ||
+      !backLink ||
+      !themeToggle ||
+      !themeIcon ||
+      !themeLabel ||
+      !status ||
+      !exitOverlay
+    ) return;
+
+    root.dataset.ready = 'true';
+
+    const lifecycle = new AbortController();
+    const { signal } = lifecycle;
+    const reduceMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    );
+    const arrivals: Record<Environment, HTMLVideoElement> = {
+      day: dayArrival,
+      night: nightArrival
+    };
+    const ambients: Record<Environment, HTMLVideoElement> = {
+      day: dayAmbient,
+      night: nightAmbient
+    };
+    const allVideos = [
+      ...Object.values(arrivals),
+      ...Object.values(ambients)
+    ];
+
+    let environment: Environment =
+      getStoredEnvironment() ?? getLocalEnvironment();
+    let activeArrival = arrivals[environment];
+    let activeAmbient = ambients[environment];
+    let state: CockpitState = 'arriving';
+    let arrivalStarted = false;
+    let settling = false;
+    let readyTimer = 0;
+    let arrivalTimer = 0;
+    let navigationTimer = 0;
+    let themeTimer = 0;
+
+    const setState = (next: CockpitState) => {
+      state = next;
+      root.dataset.state = next;
+    };
+
+    const pauseAll = () => {
+      allVideos.forEach((video) => video.pause());
+    };
+
+    const safelyPlay = (video: HTMLVideoElement) => {
+      if (reduceMotion.matches || document.hidden || state === 'exiting') {
+        return Promise.resolve();
+      }
+
+      const playback = video.play();
+      return playback ?? Promise.resolve();
+    };
+
+    const updateThemeControls = (
+      announce = false,
+      persist = false
+    ) => {
+      root.dataset.environment = environment;
+      const showingNight = environment === 'night';
+      themeToggle.setAttribute('aria-pressed', String(showingNight));
+      themeToggle.setAttribute(
+        'aria-label',
+        showingNight
+          ? '切换为白昼驾驶舱'
+          : '切换为夜晚驾驶舱'
+      );
+      themeIcon.textContent = showingNight ? '☾' : '☀';
+      themeLabel.textContent = showingNight ? '夜晚' : '白昼';
+
+      if (announce) {
+        status.textContent = showingNight
+          ? '已切换为夜晚驾驶舱'
+          : '已切换为白昼驾驶舱';
+      }
+
+      if (persist) {
+        try {
+          window.sessionStorage.setItem(SESSION_KEY, environment);
+        } catch {
+          // Theme switching remains available when storage is blocked.
+        }
+      }
+    };
+
+    const enableInteraction = () => {
+      setState('idle');
+      root.classList.add('is-interactive');
+      mapTrigger.disabled = false;
+      themeToggle.disabled = false;
+      backLink.removeAttribute('aria-disabled');
+      status.textContent =
+        '已坐进汽车。可以查看副驾驶仪表台上的地图。';
+    };
+
+    const settleToAmbient = (posterOnly = false) => {
+      if (settling || state === 'exiting') return;
+      settling = true;
+      window.clearTimeout(readyTimer);
+      window.clearTimeout(arrivalTimer);
+
+      activeAmbient.currentTime = 0;
+      activeAmbient.classList.add('is-active');
+      root.classList.add('is-revealed', 'is-settled');
+
+      if (!posterOnly && !reduceMotion.matches && !document.hidden) {
+        safelyPlay(activeAmbient).catch(() => {
+          root.dataset.playback = `${environment}-ambient-poster`;
+        });
+      } else {
+        activeAmbient.pause();
+        root.dataset.playback = `${environment}-ambient-poster`;
+      }
+
+      window.setTimeout(() => {
+        activeArrival.pause();
+        activeArrival.classList.remove('is-active');
+        enableInteraction();
+      }, reduceMotion.matches ? 1 : 520);
+    };
+
+    const beginArrival = () => {
+      if (arrivalStarted || settling || state !== 'arriving') return;
+      arrivalStarted = true;
+      window.clearTimeout(readyTimer);
+      root.classList.add('is-revealed');
+
+      activeArrival.currentTime = 0;
+      safelyPlay(activeArrival).catch(() => settleToAmbient(true));
+      arrivalTimer = window.setTimeout(
+        () => settleToAmbient(false),
+        4400
+      );
+    };
+
+    const setInitialEnvironment = () => {
+      activeArrival = arrivals[environment];
+      activeAmbient = ambients[environment];
+      (Object.entries(arrivals) as [Environment, HTMLVideoElement][]).forEach(
+        ([name, video]) => {
+          video.classList.toggle('is-active', name === environment);
+        }
+      );
+      Object.values(ambients).forEach((video) => {
+        video.classList.remove('is-active');
+      });
+      updateThemeControls();
+    };
+
+    const switchEnvironment = (next: Environment) => {
+      if (state !== 'idle' || next === environment) return;
+      const previous = activeAmbient;
+      window.clearTimeout(themeTimer);
+      environment = next;
+      activeAmbient = ambients[next];
+
+      if (
+        Number.isFinite(previous.currentTime) &&
+        Number.isFinite(activeAmbient.duration) &&
+        activeAmbient.duration > 0
+      ) {
+        activeAmbient.currentTime =
+          previous.currentTime % activeAmbient.duration;
+      }
+
+      activeAmbient.classList.add('is-active');
+      safelyPlay(activeAmbient).catch(() => {
+        root.dataset.playback = `${environment}-ambient-poster`;
+      });
+      requestAnimationFrame(() => {
+        previous.classList.remove('is-active');
+      });
+      themeTimer = window.setTimeout(() => previous.pause(), 560);
+      updateThemeControls(true, true);
+    };
+
+    const navigateTo = async (destination: string) => {
+      window.clearTimeout(navigationTimer);
+      window.clearTimeout(themeTimer);
+      pauseAll();
+
+      try {
+        await navigate(destination);
+      } catch {
+        window.location.assign(destination);
+      }
+    };
+
+    const exitSequence = createCinematicExitSequence({
+      overlay: exitOverlay,
+      reduceMotion,
+      signal,
+      onComplete: () => navigateTo('/')
+    });
+
+    const startCurtainExit = (destination: string, message: string) => {
+      if (state !== 'idle') return;
+      setState('exiting');
+      root.classList.remove('is-interactive');
+      root.classList.add('is-exiting');
+      mapTrigger.disabled = true;
+      themeToggle.disabled = true;
+      backLink.setAttribute('aria-disabled', 'true');
+      status.textContent = message;
+      navigationTimer = window.setTimeout(
+        () => navigateTo(destination),
+        reduceMotion.matches ? 1 : 360
+      );
+    };
+
+    const startVillageExit = () => {
+      if (state !== 'idle') return;
+      setState('exiting');
+      root.classList.remove('is-interactive');
+      root.classList.add('is-returning');
+      mapTrigger.disabled = true;
+      themeToggle.disabled = true;
+      backLink.setAttribute('aria-disabled', 'true');
+      status.textContent = '正在离开汽车并返回村庄';
+      pauseAll();
+      exitSequence.start(environment);
+    };
+
+    const resetAfterRestore = () => {
+      window.clearTimeout(readyTimer);
+      window.clearTimeout(arrivalTimer);
+      window.clearTimeout(navigationTimer);
+      window.clearTimeout(themeTimer);
+      settling = true;
+      arrivalStarted = true;
+      root.classList.remove('is-exiting');
+      root.classList.remove('is-returning');
+      exitSequence.reset();
+      root.classList.add(
+        'is-revealed',
+        'is-settled',
+        'is-interactive'
+      );
+      Object.values(arrivals).forEach((video) => {
+        video.pause();
+        video.classList.remove('is-active');
+      });
+      environment = getStoredEnvironment() ?? environment;
+      activeAmbient = ambients[environment];
+      (Object.entries(ambients) as [Environment, HTMLVideoElement][]).forEach(
+        ([name, video]) => {
+          video.classList.toggle('is-active', name === environment);
+          if (name !== environment) video.pause();
+        }
+      );
+      mapTrigger.disabled = false;
+      themeToggle.disabled = false;
+      backLink.removeAttribute('aria-disabled');
+      setState('idle');
+      updateThemeControls();
+      status.textContent =
+        '已回到汽车。可以查看副驾驶仪表台上的地图。';
+      if (!reduceMotion.matches && !document.hidden) {
+        safelyPlay(activeAmbient).catch(() => undefined);
+      }
+    };
+
+    allVideos.forEach((video) => {
+      video.muted = true;
+      video.load();
+    });
+    setInitialEnvironment();
+
+    activeArrival.addEventListener('loadeddata', beginArrival, {
+      signal
+    });
+    activeArrival.addEventListener('canplay', beginArrival, {
+      signal
+    });
+    activeArrival.addEventListener(
+      'ended',
+      () => settleToAmbient(false),
+      { signal }
+    );
+    activeArrival.addEventListener(
+      'error',
+      () => settleToAmbient(true),
+      { signal }
+    );
+    Object.values(ambients).forEach((video) => {
+      video.addEventListener('error', () => {
+        if (video === activeAmbient) {
+          root.dataset.playback = `${environment}-ambient-poster`;
+        }
+      }, { signal });
+    });
+
+    if (reduceMotion.matches) {
+      settleToAmbient(true);
+    } else if (
+      activeArrival.readyState >=
+      HTMLMediaElement.HAVE_CURRENT_DATA
+    ) {
+      requestAnimationFrame(beginArrival);
+    } else {
+      readyTimer = window.setTimeout(
+        () => settleToAmbient(true),
+        1400
+      );
+    }
+
+    themeToggle.addEventListener('click', () => {
+      switchEnvironment(environment === 'day' ? 'night' : 'day');
+    }, { signal });
+
+    mapTrigger.addEventListener('click', () => {
+      startCurtainExit('/travel/archive', '正在打开旅行档案');
+    }, { signal });
+
+    mapTrigger.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      startCurtainExit('/travel/archive', '正在打开旅行档案');
+    }, { signal });
+
+    backLink.addEventListener('click', (event) => {
+      event.preventDefault();
+      startVillageExit();
+    }, { signal });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        pauseAll();
+      } else if (state === 'idle') {
+        safelyPlay(activeAmbient).catch(() => undefined);
+      } else if (state === 'arriving' && arrivalStarted) {
+        safelyPlay(activeArrival).catch(() => settleToAmbient(true));
+      }
+    }, { signal });
+
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) resetAfterRestore();
+    }, { signal });
+
+    document.addEventListener('astro:before-swap', () => {
+      lifecycle.abort();
+      window.clearTimeout(readyTimer);
+      window.clearTimeout(arrivalTimer);
+      window.clearTimeout(navigationTimer);
+      window.clearTimeout(themeTimer);
+      exitSequence.pause();
+      pauseAll();
+    }, { once: true, signal });
+  }
+
+  initialiseTravelCockpit();
+  document.addEventListener(
+    'astro:page-load',
+    initialiseTravelCockpit
+  );
+</script>
+
+<style>
+  .travel-cockpit {
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    isolation: isolate;
+    background: #101d1b;
+    color: #fff8e7;
+  }
+
+  .travel-cockpit__stage {
+    --stage-offset-x: -50%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100vw, calc(100vh * 16 / 9));
+    height: max(100vh, calc(100vw * 9 / 16));
+    overflow: hidden;
+    transform: translate(var(--stage-offset-x), -50%);
+  }
+
+  @supports (height: 100svh) {
+    .travel-cockpit__stage {
+      width: max(100vw, calc(100svh * 16 / 9));
+      height: max(100svh, calc(100vw * 9 / 16));
+    }
+  }
+
+  .travel-cockpit__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: fill;
+    opacity: 0;
+    transition: opacity 520ms ease;
+  }
+
+  .travel-cockpit__video.is-active {
+    opacity: 1;
+  }
+
+  .travel-cockpit__ambient {
+    z-index: 1;
+  }
+
+  .travel-cockpit__arrival {
+    z-index: 2;
+  }
+
+  .travel-cockpit__map {
+    position: absolute;
+    z-index: 4;
+    left: 62.1%;
+    top: 53.6%;
+    width: 13.8%;
+    height: 25.6%;
+    border: 0;
+    border-radius: 5%;
+    background: transparent;
+    color: #fff8e7;
+    cursor: pointer;
+  }
+
+  .travel-cockpit__map-glow {
+    position: absolute;
+    inset: -5%;
+    border: 2px solid transparent;
+    border-radius: 8%;
+    background: transparent;
+    box-shadow: 0 0 0 0 transparent;
+    transform: rotate(.8deg);
+    transition:
+      border-color 180ms ease,
+      background 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .travel-cockpit__map-label {
+    position: absolute;
+    left: 50%;
+    bottom: -3rem;
+    display: grid;
+    min-width: max-content;
+    border: 1px solid rgba(255, 248, 231, .72);
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .84);
+    box-shadow: 0 8px 24px rgba(8, 22, 20, .34);
+    padding: .4rem .72rem .32rem;
+    opacity: 0;
+    text-align: center;
+    transform: translate(-50%, .35rem);
+    backdrop-filter: blur(8px);
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .travel-cockpit__map-label span {
+    font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
+    font-size: clamp(.66rem, .88vw, .82rem);
+    line-height: 1;
+  }
+
+  .travel-cockpit__map-label small {
+    margin-top: .2rem;
+    font-size: .46rem;
+    font-weight: 900;
+    letter-spacing: .16em;
+    opacity: .72;
+  }
+
+  .travel-cockpit__map:hover .travel-cockpit__map-glow,
+  .travel-cockpit__map:focus-visible .travel-cockpit__map-glow {
+    border-color: rgba(255, 248, 231, .82);
+    background: rgba(255, 214, 79, .1);
+    box-shadow:
+      0 0 0 7px rgba(255, 214, 79, .12),
+      0 0 34px 12px rgba(255, 214, 79, .3);
+    transform: rotate(.8deg) scale(1.025);
+  }
+
+  .travel-cockpit__map:hover .travel-cockpit__map-label,
+  .travel-cockpit__map:focus-visible .travel-cockpit__map-label {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .travel-cockpit__map:focus-visible {
+    outline: 3px solid #ffd64f;
+    outline-offset: 5px;
+  }
+
+  .travel-cockpit__map:disabled {
+    cursor: default;
+  }
+
+  .travel-cockpit__back,
+  .travel-cockpit__theme-toggle {
+    position: fixed;
+    z-index: 6;
+    top: max(1rem, env(safe-area-inset-top));
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: .55rem;
+    border: 1px solid rgba(255, 248, 231, .68);
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .72);
+    box-shadow: 0 8px 24px rgba(8, 22, 20, .3);
+    color: #fff8e7;
+    font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
+    font-size: .78rem;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-.35rem);
+    backdrop-filter: blur(8px);
+    transition:
+      opacity 220ms ease,
+      transform 220ms ease,
+      background 180ms ease;
+  }
+
+  .travel-cockpit__back {
+    left: max(1rem, env(safe-area-inset-left));
+    padding: .5rem .85rem;
+    text-decoration: none;
+  }
+
+  .travel-cockpit__theme-toggle {
+    right: max(1rem, env(safe-area-inset-right));
+    padding: .45rem .8rem .45rem .48rem;
+    cursor: pointer;
+  }
+
+  .travel-cockpit.is-interactive .travel-cockpit__back,
+  .travel-cockpit.is-interactive .travel-cockpit__theme-toggle {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .travel-cockpit__back:hover,
+  .travel-cockpit__back:focus-visible,
+  .travel-cockpit__theme-toggle:hover,
+  .travel-cockpit__theme-toggle:focus-visible {
+    background: rgba(13, 34, 32, .94);
+    transform: translateY(-2px);
+  }
+
+  .travel-cockpit__back[aria-disabled='true'] {
+    pointer-events: none;
+  }
+
+  .travel-cockpit__theme-icon {
+    display: grid;
+    width: 1.9rem;
+    height: 1.9rem;
+    place-items: center;
+    border-radius: 50%;
+    background: #ffd64f;
+    color: #24231f;
+    font-size: 1rem;
+  }
+
+  .travel-cockpit[data-environment='night']
+  .travel-cockpit__theme-icon {
+    background: #b8caff;
+    color: #14233a;
+  }
+
+  .travel-cockpit__curtain {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    background: #101d1b;
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 500ms cubic-bezier(.22, .72, .22, 1);
+  }
+
+  .travel-cockpit.is-revealed .travel-cockpit__curtain {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .travel-cockpit.is-exiting .travel-cockpit__curtain {
+    opacity: 1;
+    pointer-events: auto;
+    transition-duration: 350ms;
+  }
+
+  @media (max-width: 767px) {
+    .travel-cockpit__stage {
+      --stage-offset-x: -62%;
+    }
+
+    .travel-cockpit__back {
+      left: max(.7rem, env(safe-area-inset-left));
+      top: max(.7rem, env(safe-area-inset-top));
+    }
+
+    .travel-cockpit__theme-toggle {
+      right: max(.7rem, env(safe-area-inset-right));
+      top: max(.7rem, env(safe-area-inset-top));
+    }
+
+    .travel-cockpit__map-label {
+      bottom: -2.65rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .travel-cockpit__video,
+    .travel-cockpit__map-glow,
+    .travel-cockpit__map-label,
+    .travel-cockpit__back,
+    .travel-cockpit__theme-toggle,
+    .travel-cockpit__curtain {
+      transition-duration: 1ms !important;
+    }
+  }
+</style>

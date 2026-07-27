@@ -1,4 +1,6 @@
 ---
+import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOverlay.astro';
+
 const mediaRoot = '/media/lifestyle/ambient';
 ---
 
@@ -65,11 +67,25 @@ const mediaRoot = '/media/lifestyle/ambient';
   </button>
 
   <p class="sr-only" data-room-status aria-live="polite">正在进入客厅</p>
+  <CinematicSceneExitOverlay
+    label="从主屋返回村庄的过渡动画"
+    day={{
+      src: '/media/village/interactions/house/door-day-v4-reverse.mp4',
+      poster:
+        '/media/village/interactions/house/door-day-v4-reverse-poster.jpg'
+    }}
+    night={{
+      src: '/media/village/interactions/house/door-night-v4-reverse.mp4',
+      poster:
+        '/media/village/interactions/house/door-night-v4-reverse-poster.jpg'
+    }}
+  />
   <div class="living-room__curtain" data-room-curtain aria-hidden="true"></div>
 </section>
 
 <script>
   import { navigate } from 'astro:transitions/client';
+  import { createCinematicExitSequence } from '@/utils/cinematicExitSequence';
 
   const SESSION_KEY = 'wisteria-hero-environment';
 
@@ -102,6 +118,9 @@ const mediaRoot = '/media/lifestyle/ambient';
     const themeIcon = root.querySelector<HTMLElement>('[data-room-theme-icon]');
     const themeLabel = root.querySelector<HTMLElement>('[data-room-theme-label]');
     const status = root.querySelector<HTMLElement>('[data-room-status]');
+    const exitOverlay = root.querySelector<HTMLElement>(
+      '[data-cinematic-scene-exit]'
+    );
 
     if (
       !dayVideo ||
@@ -111,7 +130,8 @@ const mediaRoot = '/media/lifestyle/ambient';
       !themeToggle ||
       !themeIcon ||
       !themeLabel ||
-      !status
+      !status ||
+      !exitOverlay
     ) return;
 
     root.dataset.ready = 'true';
@@ -233,7 +253,14 @@ const mediaRoot = '/media/lifestyle/ambient';
       }
     };
 
-    const startExit = (destination: string, message: string) => {
+    const exitSequence = createCinematicExitSequence({
+      overlay: exitOverlay,
+      reduceMotion,
+      signal,
+      onComplete: () => navigateTo('/')
+    });
+
+    const startCurtainExit = (destination: string, message: string) => {
       if (state !== 'idle') return;
       setState('exiting');
       root.classList.remove('is-interactive');
@@ -248,11 +275,26 @@ const mediaRoot = '/media/lifestyle/ambient';
       );
     };
 
+    const startVillageExit = () => {
+      if (state !== 'idle') return;
+      setState('exiting');
+      root.classList.remove('is-interactive');
+      root.classList.add('is-returning');
+      photoTrigger.disabled = true;
+      themeToggle.disabled = true;
+      backLink.setAttribute('aria-disabled', 'true');
+      status.textContent = '正在离开主屋并返回村庄';
+      Object.values(videos).forEach((video) => video.pause());
+      exitSequence.start(environment);
+    };
+
     const resetAfterRestore = () => {
       window.clearTimeout(arrivalTimer);
       window.clearTimeout(navigationTimer);
       window.clearTimeout(themeTimer);
       root.classList.remove('is-exiting');
+      root.classList.remove('is-returning');
+      exitSequence.reset();
       root.classList.add('is-revealed', 'is-interactive');
       backLink.removeAttribute('aria-disabled');
       photoTrigger.disabled = false;
@@ -296,13 +338,13 @@ const mediaRoot = '/media/lifestyle/ambient';
     }, { signal });
 
     photoTrigger.addEventListener('click', () => {
-      startExit('/lifestyle/archive', '正在打开生活档案');
+      startCurtainExit('/lifestyle/archive', '正在打开生活档案');
     }, { signal });
 
     photoTrigger.addEventListener('keydown', (event) => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
-      startExit('/lifestyle/archive', '正在打开生活档案');
+      startCurtainExit('/lifestyle/archive', '正在打开生活档案');
     }, { signal });
 
     backLink.addEventListener('click', (event) => {
@@ -312,7 +354,7 @@ const mediaRoot = '/media/lifestyle/ambient';
       }
 
       event.preventDefault();
-      startExit('/', '正在返回村庄');
+      startVillageExit();
     }, { signal });
 
     document.addEventListener('visibilitychange', () => {
@@ -332,6 +374,7 @@ const mediaRoot = '/media/lifestyle/ambient';
       window.clearTimeout(arrivalTimer);
       window.clearTimeout(navigationTimer);
       window.clearTimeout(themeTimer);
+      exitSequence.pause();
       Object.values(videos).forEach((video) => video.pause());
     }, { once: true, signal });
   }

@@ -13,6 +13,7 @@ OUTPUT_SIZE = (1920, 1080)
 FPS = 30
 DURATION_SECONDS = 4.0
 FAR_BACKGROUND_SCALE = 0.70
+FAR_BACKGROUND_BLUR_RADIUS = 3.2
 
 # The complete painted door—including its exact glazing aperture—remains one
 # rigid exterior-facing leaf. The outer handle is on its rear edge, so the hinge
@@ -159,7 +160,10 @@ def edge_shifted_layer(
 def scaled_far_background(layer: Image.Image) -> Image.Image:
     # Reduce the apparent size of the distant foliage by 30%. Mirror the
     # downscaled plate across its far edges so the master remains fully covered
-    # without stretching pixels or introducing a hard tile seam.
+    # without stretching pixels or introducing a hard tile seam. Blur only this
+    # declared far-depth plate; the car, ground, fence and architecture stay
+    # sharp so the focus cue reinforces the existing parallax instead of
+    # smearing the subject.
     scaled_size = (
         round(MASTER_SIZE[0] * FAR_BACKGROUND_SCALE),
         round(MASTER_SIZE[1] * FAR_BACKGROUND_SCALE),
@@ -185,7 +189,10 @@ def scaled_far_background(layer: Image.Image) -> Image.Image:
         top.transpose(Image.Transpose.FLIP_TOP_BOTTOM),
         (0, top.height),
     )
-    return mosaic.crop((0, 0, MASTER_SIZE[0], MASTER_SIZE[1]))
+    registered = mosaic.crop((0, 0, MASTER_SIZE[0], MASTER_SIZE[1]))
+    return registered.filter(
+        ImageFilter.GaussianBlur(FAR_BACKGROUND_BLUR_RADIUS)
+    )
 
 
 def make_near_scene(

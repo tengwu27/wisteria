@@ -163,6 +163,7 @@ const mediaRoot = '/media/village';
   import { navigate } from 'astro:transitions/client';
 
   const SESSION_KEY = 'wisteria-hero-environment';
+  const RETURN_SESSION_KEY = 'wisteria-village-return';
 
   type Environment = 'day' | 'night';
   type Interaction = 'house' | 'car' | 'cafe';
@@ -259,6 +260,20 @@ const mediaRoot = '/media/village';
     const allInteractionVideos = Object.values(interactionVideos).flatMap((videos) =>
       Object.values(videos)
     );
+    let returningFromScene = document.documentElement.classList.contains(
+      'is-returning-to-village'
+    );
+    try {
+      returningFromScene =
+        returningFromScene ||
+        window.sessionStorage.getItem(RETURN_SESSION_KEY) === '1';
+      window.sessionStorage.removeItem(RETURN_SESSION_KEY);
+    } catch {
+      // The document-level veil remains authoritative when storage is blocked.
+    }
+    if (returningFromScene) {
+      document.documentElement.classList.add('is-returning-to-village');
+    }
     Object.values(sceneVideos).forEach((video) => video.load());
     allInteractionVideos.forEach((video) => video.load());
     let environment: Environment = getStoredEnvironment() ?? getLocalEnvironment();
@@ -268,6 +283,9 @@ const mediaRoot = '/media/village';
     let entering = false;
     let finishing = false;
     let fallbackTimer = 0;
+    let returnRevealTimer = 0;
+    let returnCleanupTimer = 0;
+    let returnRevealed = false;
 
     const safelyPlay = (video: HTMLVideoElement) => {
       const playback = video.play();
@@ -278,6 +296,23 @@ const mediaRoot = '/media/village';
     const resumeActiveScene = () => {
       if (entering || document.hidden || !root.isConnected) return;
       safelyPlay(sceneVideos[environment]);
+    };
+
+    const revealReturnedVillage = () => {
+      if (!returningFromScene || returnRevealed) return;
+      returnRevealed = true;
+      window.clearTimeout(returnRevealTimer);
+      requestAnimationFrame(() => {
+        document.documentElement.classList.add(
+          'is-returning-to-village-ready'
+        );
+        returnCleanupTimer = window.setTimeout(() => {
+          document.documentElement.classList.remove(
+            'is-returning-to-village',
+            'is-returning-to-village-ready'
+          );
+        }, reduceMotion.matches ? 20 : 540);
+      });
     };
 
     const selectInteraction = (interaction: Interaction) => {
@@ -389,11 +424,24 @@ const mediaRoot = '/media/village';
       root.classList.add('is-ready');
       window.setTimeout(resumeActiveScene, 80);
       window.setTimeout(resumeActiveScene, 500);
+      if (
+        returningFromScene &&
+        sceneVideos[environment].readyState >=
+          HTMLMediaElement.HAVE_CURRENT_DATA
+      ) {
+        requestAnimationFrame(revealReturnedVillage);
+      }
     });
+    if (returningFromScene) {
+      returnRevealTimer = window.setTimeout(revealReturnedVillage, 900);
+    }
 
     Object.values(sceneVideos).forEach((video) => {
       video.addEventListener('canplay', () => {
-        if (video === sceneVideos[environment]) resumeActiveScene();
+        if (video === sceneVideos[environment]) {
+          resumeActiveScene();
+          revealReturnedVillage();
+        }
       }, { signal });
     });
 
@@ -438,6 +486,8 @@ const mediaRoot = '/media/village';
     document.addEventListener('astro:before-swap', () => {
       lifecycle.abort();
       window.clearTimeout(fallbackTimer);
+      window.clearTimeout(returnRevealTimer);
+      window.clearTimeout(returnCleanupTimer);
       Object.values(sceneVideos).forEach((video) => video.pause());
       allInteractionVideos.forEach((video) => video.pause());
       document.body.classList.remove('is-entering-cinematic');
