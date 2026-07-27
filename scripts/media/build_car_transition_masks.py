@@ -1,55 +1,139 @@
 from pathlib import Path
 
+import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 
 SIZE = (1672, 941)
+SUPERSAMPLE = 4
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "assets/cinematic/village/interactions/car/masks"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
+# These registered contours describe the complete driver-door leaf and exact
+# glazing aperture. The outer handle is on the rear side, which identifies the
+# opposite front side as the hinge. The renderer owns that nearly vertical
+# hinge axis and keeps the door upright while it swings.
+DOOR_CONTOUR = [
+    (601, 278),
+    (829, 278),
+    (847, 282),
+    (863, 291),
+    (878, 306),
+    (891, 327),
+    (905, 352),
+    (920, 380),
+    (936, 408),
+    (948, 429),
+    (950, 642),
+    (947, 655),
+    (939, 664),
+    (929, 668),
+    (578, 647),
+    (566, 642),
+    (559, 631),
+    (556, 617),
+    (556, 438),
+    (562, 418),
+    (574, 394),
+    (586, 366),
+    (591, 339),
+    (592, 311),
+    (595, 291),
+]
 
-def save_mask(name: str, polygon: list[tuple[int, int]], feather: float) -> None:
-    mask = Image.new("L", SIZE, 0)
-    draw = ImageDraw.Draw(mask)
-    draw.polygon(polygon, fill=255)
-    # The side mirror and its stem are attached to the moving driver door.
-    draw.ellipse((875, 384, 932, 449), fill=255)
-    draw.polygon([(900, 426), (929, 449), (918, 458), (891, 433)], fill=255)
-    mask = mask.filter(ImageFilter.GaussianBlur(feather))
-    mask.save(OUT_DIR / name)
+WINDOW_APERTURE = [
+    (633, 291),
+    (817, 292),
+    (833, 294),
+    (846, 301),
+    (857, 313),
+    (869, 331),
+    (881, 353),
+    (894, 377),
+    (905, 397),
+    (912, 411),
+    (909, 418),
+    (899, 422),
+    (883, 424),
+    (634, 410),
+    (623, 408),
+    (615, 402),
+    (610, 392),
+    (607, 378),
+    (608, 321),
+    (611, 307),
+    (618, 298),
+]
+
+MIRROR_BODY = (875, 384, 932, 449)
+MIRROR_STEM = [(900, 426), (929, 449), (918, 458), (891, 433)]
 
 
-save_mask(
-    "car-driver-door-leaf-mask-v1.png",
-    [(558, 278), (888, 278), (951, 431), (949, 655), (565, 634), (554, 316)],
-    1.15,
-)
-save_mask(
-    "car-driver-door-opening-mask-v1.png",
-    [(563, 284), (884, 284), (944, 435), (943, 647), (570, 627), (560, 318)],
-    1.8,
-)
+def scaled_points(points: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    return [(x * SUPERSAMPLE, y * SUPERSAMPLE) for x, y in points]
 
-# The 3D renderer treats the metal skin/window frame and transparent glass as
-# separate surfaces. This prevents the scenery visible through the closed
-# window from being rotated as if it were painted onto the door.
-leaf_polygon = [(558, 278), (888, 278), (951, 431), (949, 655), (565, 634), (554, 316)]
-window_polygon = [(691, 293), (869, 293), (928, 423), (692, 418)]
 
-outer_mask = Image.new("L", SIZE, 0)
-outer_draw = ImageDraw.Draw(outer_mask)
-outer_draw.polygon(leaf_polygon, fill=255)
-outer_draw.polygon(window_polygon, fill=0)
-outer_draw.ellipse((875, 384, 932, 449), fill=255)
-outer_draw.polygon([(900, 426), (929, 449), (918, 458), (891, 433)], fill=255)
-outer_mask.filter(ImageFilter.GaussianBlur(1.0)).save(
-    OUT_DIR / "car-driver-door-outer-mask-v2.png"
-)
+def detailed_mask(
+    polygon: list[tuple[int, int]],
+    *,
+    include_mirror: bool = False,
+    feather: float = 0.55,
+) -> Image.Image:
+    large = Image.new(
+        "L",
+        (SIZE[0] * SUPERSAMPLE, SIZE[1] * SUPERSAMPLE),
+        0,
+    )
+    draw = ImageDraw.Draw(large)
+    draw.polygon(scaled_points(polygon), fill=255)
+    if include_mirror:
+        draw.ellipse(
+            tuple(value * SUPERSAMPLE for value in MIRROR_BODY),
+            fill=255,
+        )
+        draw.polygon(scaled_points(MIRROR_STEM), fill=255)
 
-window_mask = Image.new("L", SIZE, 0)
-window_draw = ImageDraw.Draw(window_mask)
-window_draw.polygon(window_polygon, fill=150)
-window_mask.filter(ImageFilter.GaussianBlur(1.2)).save(
-    OUT_DIR / "car-driver-door-window-mask-v2.png"
-)
+    mask = large.resize(SIZE, Image.Resampling.LANCZOS)
+    if feather:
+        mask = mask.filter(ImageFilter.GaussianBlur(feather))
+    return mask
+
+
+def main() -> None:
+    glazing = detailed_mask(WINDOW_APERTURE, feather=0.45)
+    glazing.save(OUT_DIR / "car-driver-door-glazing-mask-v3.png")
+
+    outer = detailed_mask(DOOR_CONTOUR, include_mirror=True)
+    # Preserve the complete painted frame and rubber seal, but make the exact
+    # inner glazing aperture transparent.
+    outer = Image.fromarray(
+        np.minimum(
+            np.asarray(outer),
+            255 - np.asarray(glazing),
+        ).astype("uint8")
+    )
+    # The mirror and its stem overlap the glazing aperture and remain opaque.
+    mirror = Image.new(
+        "L",
+        (SIZE[0] * SUPERSAMPLE, SIZE[1] * SUPERSAMPLE),
+        0,
+    )
+    mirror_draw = ImageDraw.Draw(mirror)
+    mirror_draw.ellipse(
+        tuple(value * SUPERSAMPLE for value in MIRROR_BODY),
+        fill=255,
+    )
+    mirror_draw.polygon(scaled_points(MIRROR_STEM), fill=255)
+    mirror = mirror.resize(SIZE, Image.Resampling.LANCZOS)
+    outer = Image.fromarray(
+        np.maximum(
+            np.asarray(outer),
+            np.asarray(mirror),
+        ).astype("uint8")
+    )
+    outer.save(OUT_DIR / "car-driver-door-outer-mask-v3.png")
+
+
+if __name__ == "__main__":
+    main()

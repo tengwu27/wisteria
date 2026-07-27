@@ -1,0 +1,123 @@
+---
+interface ExitClip {
+  src: string;
+  poster: string;
+}
+
+interface Props {
+  day: ExitClip;
+  night: ExitClip;
+  label: string;
+}
+
+const { day, night, label } = Astro.props;
+const clips = { day, night };
+---
+
+<div
+  class="cinematic-scene-exit"
+  data-cinematic-scene-exit
+  aria-label={label}
+  aria-hidden="true"
+>
+  {
+    Object.entries(clips).map(([environment, clip]) => (
+      <video
+        class="cinematic-scene-exit__video"
+        data-exit-environment={environment}
+        src={clip.src}
+        poster={clip.poster}
+        muted
+        playsinline
+        preload="auto"
+        aria-hidden="true"
+      />
+    ))
+  }
+  <div class="cinematic-scene-exit__vignette" aria-hidden="true"></div>
+  <div class="cinematic-scene-exit__curtain" aria-hidden="true"></div>
+</div>
+
+<style>
+  .cinematic-scene-exit {
+    position: fixed;
+    z-index: 40;
+    inset: 0;
+    overflow: hidden;
+    visibility: hidden;
+    background: #101d1b;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 420ms cubic-bezier(.22, .72, .22, 1),
+      visibility 0s linear 420ms;
+  }
+
+  .cinematic-scene-exit.is-active {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: 0s;
+  }
+
+  .cinematic-scene-exit__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: 50% 50%;
+    opacity: 0;
+    transform: scale(1.01);
+    transition:
+      opacity 360ms ease,
+      transform 3s linear;
+  }
+
+  .cinematic-scene-exit__video.is-active {
+    z-index: 1;
+  }
+
+  .cinematic-scene-exit.is-playing
+  .cinematic-scene-exit__video.is-active {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .cinematic-scene-exit__vignette {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    background:
+      radial-gradient(
+        circle at 50% 47%,
+        transparent 44%,
+        rgba(9, 24, 22, .22) 100%
+      );
+    pointer-events: none;
+  }
+
+  .cinematic-scene-exit__curtain {
+    position: absolute;
+    z-index: 3;
+    inset: 0;
+    background: #101d1b;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 280ms ease;
+  }
+
+  .cinematic-scene-exit.is-closing
+  .cinematic-scene-exit__curtain {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cinematic-scene-exit,
+    .cinematic-scene-exit__video,
+    .cinematic-scene-exit__curtain {
+      transition-duration: 1ms !important;
+    }
+  }
+</style>

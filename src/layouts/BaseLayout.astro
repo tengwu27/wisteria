@@ -14,11 +14,13 @@ interface Props {
   description?: string;
   image?: string;
   type?: 'website' | 'article';
+  immersive?: boolean;
 }
 
 const title = Astro.props.title ?? site.seo.title;
 const description = Astro.props.description ?? site.seo.description;
 const type = Astro.props.type ?? 'website';
+const immersive = Astro.props.immersive ?? false;
 const canonical = absoluteUrl(Astro.url.pathname);
 ---
 
@@ -38,12 +40,28 @@ const canonical = absoluteUrl(Astro.url.pathname);
     <meta name="twitter:card" content="summary_large_image" />
     <title>{title}</title>
     <ClientRouter />
+    <script is:inline data-astro-rerun>
+      try {
+        const returning =
+          window.location.pathname === '/' &&
+          window.sessionStorage.getItem('wisteria-village-return') === '1';
+        document.documentElement.classList.toggle(
+          'is-returning-to-village',
+          returning
+        );
+        document.documentElement.classList.remove(
+          'is-returning-to-village-ready'
+        );
+      } catch {
+        // Direct navigation still renders against the page background.
+      }
+    </script>
   </head>
-  <body class="min-h-screen bg-paper text-ink antialiased">
-    <Header />
-    <main>
+  <body class:list={['min-h-screen text-ink antialiased', immersive ? 'bg-[#101d1b]' : 'bg-paper']}>
+    {!immersive && <Header />}
+    <main class:list={{ 'min-h-screen': immersive }}>
       <slot />
     </main>
-    <SiteFooter />
+    {!immersive && <SiteFooter />}
   </body>
 </html>

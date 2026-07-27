@@ -1,0 +1,664 @@
+---
+import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOverlay.astro';
+
+const mediaRoot = '/media/art/ambient';
+---
+
+<section
+  class="cafe-gallery"
+  data-cafe-gallery
+  data-state="arriving"
+  aria-label="花园咖啡馆里的复古未来艺术画廊"
+>
+  <div class="cafe-gallery__stage">
+    <video
+      class="cafe-gallery__video is-active"
+      data-gallery-video="day"
+      src={`${mediaRoot}/cafe-gallery-day-v1.mp4`}
+      poster={`${mediaRoot}/cafe-gallery-day-v1-poster.jpg`}
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      aria-hidden="true"
+    ></video>
+    <video
+      class="cafe-gallery__video"
+      data-gallery-video="night"
+      src={`${mediaRoot}/cafe-gallery-night-v1.mp4`}
+      poster={`${mediaRoot}/cafe-gallery-night-v1-poster.jpg`}
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      aria-hidden="true"
+    ></video>
+
+    <button
+      class="cafe-gallery__artwork"
+      type="button"
+      data-artwork-trigger
+      aria-label="欣赏中央画作，打开艺术档案"
+      disabled
+    >
+      <span class="cafe-gallery__artwork-glow" aria-hidden="true"></span>
+      <span class="cafe-gallery__artwork-label" aria-hidden="true">
+        <span>欣赏画作</span>
+        <small>EXAMINE</small>
+      </span>
+    </button>
+  </div>
+
+  <a class="cafe-gallery__back" href="/" data-gallery-back aria-label="返回村庄">
+    <span aria-hidden="true">←</span>
+    <span>返回村庄</span>
+  </a>
+
+  <button
+    class="cafe-gallery__theme-toggle"
+    type="button"
+    data-gallery-theme-toggle
+    aria-label="切换为夜晚咖啡馆画廊"
+    aria-pressed="false"
+    disabled
+  >
+    <span class="cafe-gallery__theme-icon" data-gallery-theme-icon aria-hidden="true">☀</span>
+    <span data-gallery-theme-label>白昼</span>
+  </button>
+
+  <p class="sr-only" data-gallery-status aria-live="polite">正在进入咖啡馆画廊</p>
+  <CinematicSceneExitOverlay
+    label="从咖啡馆画廊返回村庄的过渡动画"
+    day={{
+      src: '/media/art/transition/cafe-reveal-day-v1-reverse.mp4',
+      poster: '/media/art/transition/cafe-reveal-day-v1-reverse-poster.jpg'
+    }}
+    night={{
+      src: '/media/art/transition/cafe-reveal-night-v1-reverse.mp4',
+      poster:
+        '/media/art/transition/cafe-reveal-night-v1-reverse-poster.jpg'
+    }}
+  />
+  <div class="cafe-gallery__curtain" data-gallery-curtain aria-hidden="true"></div>
+</section>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+  import { createCinematicExitSequence } from '@/utils/cinematicExitSequence';
+
+  const SESSION_KEY = 'wisteria-hero-environment';
+
+  type Environment = 'day' | 'night';
+  type RoomState = 'arriving' | 'idle' | 'exiting';
+
+  function getStoredEnvironment(): Environment | null {
+    try {
+      const stored = window.sessionStorage.getItem(SESSION_KEY);
+      return stored === 'day' || stored === 'night' ? stored : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function getLocalEnvironment(): Environment {
+    const hour = new Date().getHours();
+    return hour >= 7 && hour < 19 ? 'day' : 'night';
+  }
+
+  function initialiseCafeGallery() {
+    const root = document.querySelector<HTMLElement>('[data-cafe-gallery]');
+    if (!root || root.dataset.ready === 'true') return;
+
+    const dayVideo = root.querySelector<HTMLVideoElement>('[data-gallery-video="day"]');
+    const nightVideo = root.querySelector<HTMLVideoElement>('[data-gallery-video="night"]');
+    const artworkTrigger = root.querySelector<HTMLButtonElement>('[data-artwork-trigger]');
+    const backLink = root.querySelector<HTMLAnchorElement>('[data-gallery-back]');
+    const themeToggle = root.querySelector<HTMLButtonElement>('[data-gallery-theme-toggle]');
+    const themeIcon = root.querySelector<HTMLElement>('[data-gallery-theme-icon]');
+    const themeLabel = root.querySelector<HTMLElement>('[data-gallery-theme-label]');
+    const status = root.querySelector<HTMLElement>('[data-gallery-status]');
+    const exitOverlay = root.querySelector<HTMLElement>(
+      '[data-cinematic-scene-exit]'
+    );
+
+    if (
+      !dayVideo ||
+      !nightVideo ||
+      !artworkTrigger ||
+      !backLink ||
+      !themeToggle ||
+      !themeIcon ||
+      !themeLabel ||
+      !status ||
+      !exitOverlay
+    ) return;
+
+    root.dataset.ready = 'true';
+
+    const lifecycle = new AbortController();
+    const { signal } = lifecycle;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const videos: Record<Environment, HTMLVideoElement> = {
+      day: dayVideo,
+      night: nightVideo
+    };
+    let environment: Environment = getStoredEnvironment() ?? getLocalEnvironment();
+    let activeVideo = videos[environment];
+    let state: RoomState = 'arriving';
+    let arrivalTimer = 0;
+    let navigationTimer = 0;
+    let themeTimer = 0;
+
+    const setState = (next: RoomState) => {
+      state = next;
+      root.dataset.state = next;
+    };
+
+    const safelyPlay = (video = activeVideo) => {
+      if (reduceMotion.matches || document.hidden || state === 'exiting') return;
+      const playback = video.play();
+      playback
+        ?.then(() => delete root.dataset.playback)
+        .catch(() => {
+          root.dataset.playback = `${environment}-poster`;
+        });
+    };
+
+    const updateEnvironment = (
+      next: Environment,
+      persist = false,
+      announce = false,
+      initial = false
+    ) => {
+      const previousVideo = activeVideo;
+      environment = next;
+      activeVideo = videos[next];
+      root.dataset.environment = next;
+
+      if (initial) {
+        (Object.entries(videos) as [Environment, HTMLVideoElement][]).forEach(
+          ([name, video]) => {
+            video.classList.toggle('is-active', name === next);
+            if (name !== next) video.pause();
+          }
+        );
+      } else if (previousVideo !== activeVideo) {
+        window.clearTimeout(themeTimer);
+        if (
+          Number.isFinite(previousVideo.currentTime) &&
+          Number.isFinite(activeVideo.duration) &&
+          activeVideo.duration > 0
+        ) {
+          activeVideo.currentTime = previousVideo.currentTime % activeVideo.duration;
+        }
+        activeVideo.classList.add('is-active');
+        safelyPlay(activeVideo);
+        requestAnimationFrame(() => previousVideo.classList.remove('is-active'));
+        themeTimer = window.setTimeout(() => previousVideo.pause(), 560);
+      }
+
+      const showingNight = next === 'night';
+      themeToggle.setAttribute('aria-pressed', String(showingNight));
+      themeToggle.setAttribute(
+        'aria-label',
+        showingNight ? '切换为白昼咖啡馆画廊' : '切换为夜晚咖啡馆画廊'
+      );
+      themeIcon.textContent = showingNight ? '☾' : '☀';
+      themeLabel.textContent = showingNight ? '夜晚' : '白昼';
+
+      if (announce) {
+        status.textContent = showingNight ? '已切换为夜晚咖啡馆画廊' : '已切换为白昼咖啡馆画廊';
+      }
+
+      if (persist) {
+        try {
+          window.sessionStorage.setItem(SESSION_KEY, next);
+        } catch {
+          // Theme switching remains available when storage is blocked.
+        }
+      }
+
+      if (reduceMotion.matches || document.hidden || state === 'exiting') {
+        Object.values(videos).forEach((video) => video.pause());
+      } else if (initial || previousVideo === activeVideo) {
+        safelyPlay(activeVideo);
+      }
+    };
+
+    const finishArrival = () => {
+      if (state !== 'arriving') return;
+      window.clearTimeout(arrivalTimer);
+      root.classList.add('is-revealed');
+      status.textContent = '已进入咖啡馆画廊。可以查看中央画作。';
+
+      window.setTimeout(() => {
+        if (state !== 'arriving') return;
+        setState('idle');
+        root.classList.add('is-interactive');
+        artworkTrigger.disabled = false;
+        themeToggle.disabled = false;
+      }, reduceMotion.matches ? 1 : 500);
+    };
+
+    const navigateTo = async (destination: string) => {
+      window.clearTimeout(navigationTimer);
+      window.clearTimeout(themeTimer);
+      Object.values(videos).forEach((video) => video.pause());
+
+      try {
+        await navigate(destination);
+      } catch {
+        window.location.assign(destination);
+      }
+    };
+
+    const exitSequence = createCinematicExitSequence({
+      overlay: exitOverlay,
+      reduceMotion,
+      signal,
+      onComplete: () => navigateTo('/')
+    });
+
+    const startCurtainExit = (destination: string, message: string) => {
+      if (state !== 'idle') return;
+      setState('exiting');
+      root.classList.remove('is-interactive');
+      root.classList.add('is-exiting');
+      artworkTrigger.disabled = true;
+      themeToggle.disabled = true;
+      backLink.setAttribute('aria-disabled', 'true');
+      status.textContent = message;
+      navigationTimer = window.setTimeout(
+        () => navigateTo(destination),
+        reduceMotion.matches ? 1 : 360
+      );
+    };
+
+    const startVillageExit = () => {
+      if (state !== 'idle') return;
+      setState('exiting');
+      root.classList.remove('is-interactive');
+      root.classList.add('is-returning');
+      artworkTrigger.disabled = true;
+      themeToggle.disabled = true;
+      backLink.setAttribute('aria-disabled', 'true');
+      status.textContent = '正在离开咖啡馆画廊并返回村庄';
+      Object.values(videos).forEach((video) => video.pause());
+      exitSequence.start(environment);
+    };
+
+    const resetAfterRestore = () => {
+      window.clearTimeout(arrivalTimer);
+      window.clearTimeout(navigationTimer);
+      window.clearTimeout(themeTimer);
+      root.classList.remove('is-exiting');
+      root.classList.remove('is-returning');
+      exitSequence.reset();
+      root.classList.add('is-revealed', 'is-interactive');
+      backLink.removeAttribute('aria-disabled');
+      artworkTrigger.disabled = false;
+      themeToggle.disabled = false;
+      setState('idle');
+      status.textContent = '已回到咖啡馆画廊。可以查看中央画作。';
+      updateEnvironment(getStoredEnvironment() ?? environment, false, false, true);
+    };
+
+    Object.values(videos).forEach((video) => {
+      video.muted = true;
+      video.load();
+      video.addEventListener('loadeddata', () => {
+        if (video === activeVideo) finishArrival();
+      }, { signal });
+      video.addEventListener('canplay', () => {
+        if (video === activeVideo) finishArrival();
+      }, { signal });
+      video.addEventListener('error', () => {
+        if (video !== activeVideo) return;
+        root.dataset.playback = `${environment}-poster`;
+        finishArrival();
+      }, { signal });
+    });
+
+    updateEnvironment(environment, false, false, true);
+
+    if (reduceMotion.matches) {
+      finishArrival();
+    } else {
+      if (activeVideo.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        requestAnimationFrame(finishArrival);
+      }
+
+      arrivalTimer = window.setTimeout(finishArrival, 1400);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      if (state !== 'idle') return;
+      updateEnvironment(environment === 'day' ? 'night' : 'day', true, true);
+    }, { signal });
+
+    artworkTrigger.addEventListener('click', () => {
+      startCurtainExit('/art/archive', '正在打开艺术档案');
+    }, { signal });
+
+    artworkTrigger.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      startCurtainExit('/art/archive', '正在打开艺术档案');
+    }, { signal });
+
+    backLink.addEventListener('click', (event) => {
+      if (state !== 'idle') {
+        event.preventDefault();
+        return;
+      }
+
+      event.preventDefault();
+      startVillageExit();
+    }, { signal });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        Object.values(videos).forEach((video) => video.pause());
+      } else if (state === 'idle') {
+        safelyPlay(activeVideo);
+      }
+    }, { signal });
+
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) resetAfterRestore();
+    }, { signal });
+
+    document.addEventListener('astro:before-swap', () => {
+      lifecycle.abort();
+      window.clearTimeout(arrivalTimer);
+      window.clearTimeout(navigationTimer);
+      window.clearTimeout(themeTimer);
+      exitSequence.pause();
+      Object.values(videos).forEach((video) => video.pause());
+    }, { once: true, signal });
+  }
+
+  initialiseCafeGallery();
+  document.addEventListener('astro:page-load', initialiseCafeGallery);
+</script>
+
+<style>
+  .cafe-gallery {
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    isolation: isolate;
+    background: #101d1b;
+    color: #fff8e7;
+  }
+
+  .cafe-gallery__stage {
+    --stage-offset-x: -50%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100vw, calc(100vh * 16 / 9));
+    height: max(100vh, calc(100vw * 9 / 16));
+    overflow: hidden;
+    transform: translate(var(--stage-offset-x), -50%);
+  }
+
+  @supports (height: 100svh) {
+    .cafe-gallery__stage {
+      width: max(100vw, calc(100svh * 16 / 9));
+      height: max(100svh, calc(100vw * 9 / 16));
+    }
+  }
+
+  .cafe-gallery__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: fill;
+    opacity: 0;
+    transition: opacity 520ms ease;
+  }
+
+  .cafe-gallery__video.is-active {
+    opacity: 1;
+  }
+
+  .cafe-gallery__artwork {
+    position: absolute;
+    left: 44.1%;
+    top: 15.2%;
+    width: 14.8%;
+    height: 30.4%;
+    border: 0;
+    border-radius: 12% 12% 8% 8%;
+    background: transparent;
+    color: #fff8e7;
+    cursor: pointer;
+  }
+
+  .cafe-gallery__artwork-glow {
+    position: absolute;
+    inset: -8%;
+    border: 2px solid rgba(255, 248, 231, 0);
+    border-radius: 14%;
+    background: rgba(255, 214, 79, 0);
+    box-shadow: 0 0 0 0 rgba(255, 214, 79, 0);
+    transition:
+      border-color 180ms ease,
+      background 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .cafe-gallery__artwork-label {
+    position: absolute;
+    left: 50%;
+    bottom: -3rem;
+    display: grid;
+    min-width: max-content;
+    border: 1px solid rgba(255, 248, 231, .72);
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .82);
+    box-shadow: 0 8px 24px rgba(8, 22, 20, .34);
+    padding: .4rem .72rem .32rem;
+    opacity: 0;
+    text-align: center;
+    transform: translate(-50%, .35rem);
+    backdrop-filter: blur(8px);
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .cafe-gallery__artwork-label span {
+    font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
+    font-size: clamp(.66rem, .88vw, .82rem);
+    line-height: 1;
+  }
+
+  .cafe-gallery__artwork-label small {
+    margin-top: .2rem;
+    font-size: .46rem;
+    font-weight: 900;
+    letter-spacing: .18em;
+    opacity: .72;
+  }
+
+  .cafe-gallery__artwork:hover .cafe-gallery__artwork-glow,
+  .cafe-gallery__artwork:focus-visible .cafe-gallery__artwork-glow {
+    border-color: rgba(255, 248, 231, .8);
+    background: rgba(255, 214, 79, .1);
+    box-shadow:
+      0 0 0 7px rgba(255, 214, 79, .12),
+      0 0 32px 12px rgba(255, 214, 79, .34);
+    transform: scale(1.04);
+  }
+
+  .cafe-gallery__artwork:hover .cafe-gallery__artwork-label,
+  .cafe-gallery__artwork:focus-visible .cafe-gallery__artwork-label {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .cafe-gallery__artwork:focus-visible {
+    outline: 3px solid #ffd64f;
+    outline-offset: 5px;
+  }
+
+  .cafe-gallery__artwork:disabled {
+    cursor: default;
+  }
+
+  .cafe-gallery__back {
+    position: fixed;
+    z-index: 5;
+    left: max(1rem, env(safe-area-inset-left));
+    top: max(1rem, env(safe-area-inset-top));
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: .55rem;
+    border: 1px solid rgba(255, 248, 231, .68);
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .72);
+    box-shadow: 0 8px 24px rgba(8, 22, 20, .3);
+    padding: .5rem .85rem;
+    color: #fff8e7;
+    font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
+    font-size: .78rem;
+    text-decoration: none;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-.35rem);
+    backdrop-filter: blur(8px);
+    transition:
+      opacity 220ms ease,
+      transform 220ms ease,
+      background 180ms ease;
+  }
+
+  .cafe-gallery.is-interactive .cafe-gallery__back {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .cafe-gallery__back:hover,
+  .cafe-gallery__back:focus-visible {
+    background: rgba(13, 34, 32, .94);
+    transform: translateY(-2px);
+  }
+
+  .cafe-gallery__back[aria-disabled='true'] {
+    pointer-events: none;
+  }
+
+  .cafe-gallery__theme-toggle {
+    position: fixed;
+    z-index: 5;
+    right: max(1rem, env(safe-area-inset-right));
+    top: max(1rem, env(safe-area-inset-top));
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: .55rem;
+    border: 1px solid rgba(255, 248, 231, .68);
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .72);
+    box-shadow: 0 8px 24px rgba(8, 22, 20, .3);
+    padding: .45rem .8rem .45rem .48rem;
+    color: #fff8e7;
+    cursor: pointer;
+    font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
+    font-size: .78rem;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-.35rem);
+    backdrop-filter: blur(8px);
+    transition:
+      opacity 220ms ease,
+      transform 220ms ease,
+      background 180ms ease;
+  }
+
+  .cafe-gallery.is-interactive .cafe-gallery__theme-toggle {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .cafe-gallery__theme-toggle:hover,
+  .cafe-gallery__theme-toggle:focus-visible {
+    background: rgba(13, 34, 32, .94);
+    transform: translateY(-2px);
+  }
+
+  .cafe-gallery__theme-icon {
+    display: grid;
+    width: 1.9rem;
+    height: 1.9rem;
+    place-items: center;
+    border-radius: 50%;
+    background: #ffd64f;
+    color: #24231f;
+    font-size: 1rem;
+  }
+
+  .cafe-gallery[data-environment='night'] .cafe-gallery__theme-icon {
+    background: #b8caff;
+    color: #14233a;
+  }
+
+  .cafe-gallery__curtain {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    background: #101d1b;
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 500ms cubic-bezier(.22, .72, .22, 1);
+  }
+
+  .cafe-gallery.is-revealed .cafe-gallery__curtain {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .cafe-gallery.is-exiting .cafe-gallery__curtain {
+    opacity: 1;
+    pointer-events: auto;
+    transition-duration: 350ms;
+  }
+
+  @media (max-width: 767px) {
+    .cafe-gallery__stage {
+      --stage-offset-x: -50%;
+    }
+
+    .cafe-gallery__back {
+      left: max(.7rem, env(safe-area-inset-left));
+      top: max(.7rem, env(safe-area-inset-top));
+    }
+
+    .cafe-gallery__theme-toggle {
+      right: max(.7rem, env(safe-area-inset-right));
+      top: max(.7rem, env(safe-area-inset-top));
+    }
+
+    .cafe-gallery__artwork-label {
+      bottom: -2.65rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cafe-gallery__artwork-glow,
+    .cafe-gallery__artwork-label,
+    .cafe-gallery__back,
+    .cafe-gallery__theme-toggle,
+    .cafe-gallery__video,
+    .cafe-gallery__curtain {
+      transition-duration: 1ms !important;
+    }
+  }
+</style>

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "master": {
+    "width": 1672,
+    "height": 941
+  },
+  "layerOrderBackToFront": [
+    "registered-house-and-interior",
+    "moving-door-leaf",
+    "01-left-garden.png",
+    "02-right-garden.png"
+  ],
+  "motion": {
+    "durationSeconds": 4,
+    "frameRate": 30,
+    "camera": "forward-push",
+    "leftGarden": {
+      "xStart": -480,
+      "xEnd": -1180
+    },
+    "rightGarden": {
+      "xStart": 480,
+      "xEnd": 1180
+    },
+    "door": {
+      "hinge": "right",
+      "openAngleDegrees": 82
+    }
+  }
+}
