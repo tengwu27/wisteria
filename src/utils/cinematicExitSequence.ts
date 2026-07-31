@@ -101,6 +101,13 @@ export function createCinematicExitSequence({
     }, { signal });
   });
 
+  overlay.addEventListener('pointerdown', (event) => {
+    if (!running || overlay.classList.contains('is-closing')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    finish();
+  }, { signal });
+
   document.addEventListener('visibilitychange', () => {
     if (!running || !currentVideo) return;
     if (document.hidden) {

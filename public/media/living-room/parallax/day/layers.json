@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "theme": "day",
+  "canvas": [
+    1672,
+    941
+  ],
+  "aperture": {
+    "owner": "room-shell",
+    "bbox": [
+      616,
+      8,
+      1110,
+      399
+    ],
+    "alphaSource": "assets/cinematic/scenes/living-room/interior/sources/day/04-foreground-interior.png"
+  },
+  "registration": {
+    "tableTargetBbox": [
+      555,
+      545,
+      1265,
+      885
+    ],
+    "boatPosition": [
+      970,
+      187
+    ],
+    "boatSize": [
+      61,
+      76
+    ],
+    "boatPivot": [
+      1000.5,
+      255.4
+    ]
+  },
+  "layers": [
+    {
+      "id": "sky",
+      "file": "01-sky.png",
+      "owner": "exterior-far",
+      "z": 10,
+      "maxShiftPercent": 0.15
+    },
+    {
+      "id": "harbor",
+      "file": "03-harbor.png",
+      "owner": "exterior-mid",
+      "z": 30,
+      "maxShiftPercent": 0.35,
+      "effects": []
+    },
+    {
+      "id": "sailboat",
+      "file": "04-sailboat.png",
+      "owner": "exterior-boat",
+      "z": 40,
+      "maxShiftPercent": 0.45,
+      "ambient": {
+        "rockDegrees": 0.9,
+        "bobPixels": 0.55,
+        "durationSeconds": 4,
+        "horizontalTravel": 0
+      }
+    },
+    {
+      "id": "room",
+      "file": "05-room-shell.png",
+      "owner": "interior-shell",
+      "z": 50,
+      "maxShiftPercent": 0.75,
+      "hotspots": [
+        "photo-frame"
+      ]
+    },
+    {
+      "id": "table-shadow",
+      "file": "06-table-shadow.png",
+      "owner": "table-contact-shadow",
+      "z": 60,
+      "maxShiftPercent": 1.05
+    },
+    {
+      "id": "table",
+      "file": "07-coffee-table.png",
+      "owner": "foreground-table",
+      "z": 70,
+      "maxShiftPercent": 1.5,
+      "effects": [
+        "coffee-steam"
+      ]
+    }
+  ]
+}

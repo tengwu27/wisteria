@@ -1,0 +1,63 @@
+{
+  "theme": "day",
+  "canvas": [
+    1672,
+    941
+  ],
+  "overscanPercent": 1.8,
+  "registration": "full-canvas",
+  "layers": [
+    {
+      "id": "exterior",
+      "file": "01-exterior.png",
+      "owner": "exterior",
+      "z": 1,
+      "maxShiftPercent": 0.3,
+      "includes": [],
+      "excludes": [],
+      "repairSource": null,
+      "matteSource": null,
+      "sourceArt": null,
+      "registrationTransform": null
+    },
+    {
+      "id": "cockpit-shell",
+      "file": "02-cockpit-shell.png",
+      "owner": "cockpit-shell",
+      "z": 2,
+      "maxShiftPercent": 0.75,
+      "includes": [],
+      "excludes": [],
+      "repairSource": null,
+      "matteSource": null,
+      "sourceArt": null,
+      "registrationTransform": null
+    },
+    {
+      "id": "hanging-charm",
+      "file": "03-buddha-charm.png",
+      "owner": "hanging-charm",
+      "z": 3,
+      "maxShiftPercent": 1.05,
+      "includes": [],
+      "excludes": [],
+      "repairSource": null,
+      "matteSource": null,
+      "sourceArt": null,
+      "registrationTransform": null
+    },
+    {
+      "id": "front-seat",
+      "file": "04-front-seat.png",
+      "owner": "front-seat",
+      "z": 4,
+      "maxShiftPercent": 1.5,
+      "includes": [],
+      "excludes": [],
+      "repairSource": null,
+      "matteSource": null,
+      "sourceArt": null,
+      "registrationTransform": null
+    }
+  ]
+}

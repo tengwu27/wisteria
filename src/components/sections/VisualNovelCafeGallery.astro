@@ -1,53 +1,114 @@
 ---
 import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOverlay.astro';
 
-const mediaRoot = '/media/art/ambient';
+const mediaRoot = '/media/cafe-gallery/ambient';
+const parallaxRoot = '/media/cafe-gallery/parallax';
 ---
 
 <section
-  class="cafe-gallery"
+  class="cafe-gallery is-ambient-paused"
   data-cafe-gallery
   data-state="arriving"
+  data-renderer="fallback"
   aria-label="花园咖啡馆里的复古未来艺术画廊"
 >
-  <div class="cafe-gallery__stage">
-    <video
-      class="cafe-gallery__video is-active"
-      data-gallery-video="day"
-      src={`${mediaRoot}/cafe-gallery-day-v1.mp4`}
-      poster={`${mediaRoot}/cafe-gallery-day-v1-poster.jpg`}
-      muted
-      loop
-      playsinline
-      preload="metadata"
-      aria-hidden="true"
-    ></video>
-    <video
-      class="cafe-gallery__video"
-      data-gallery-video="night"
-      src={`${mediaRoot}/cafe-gallery-night-v1.mp4`}
-      poster={`${mediaRoot}/cafe-gallery-night-v1-poster.jpg`}
-      muted
-      loop
-      playsinline
-      preload="metadata"
-      aria-hidden="true"
-    ></video>
+  <div
+    class="cafe-gallery__viewport"
+    data-gallery-viewport
+    tabindex="0"
+    aria-label="咖啡馆画廊全景；画面较宽时可以左右探索"
+  >
+    <div class="cafe-gallery__stage" data-gallery-stage>
+      <div class="cafe-gallery__camera">
+        <video
+          class="cafe-gallery__video is-active"
+          data-gallery-video="day"
+          src={`${mediaRoot}/cafe-gallery-day-v1.mp4`}
+          poster={`${mediaRoot}/cafe-gallery-day-v1-poster.jpg`}
+          muted
+          loop
+          playsinline
+          preload="none"
+          aria-hidden="true"
+        ></video>
+        <video
+          class="cafe-gallery__video"
+          data-gallery-video="night"
+          src={`${mediaRoot}/cafe-gallery-night-v1.mp4`}
+          poster={`${mediaRoot}/cafe-gallery-night-v1-poster.jpg`}
+          muted
+          loop
+          playsinline
+          preload="none"
+          aria-hidden="true"
+        ></video>
 
-    <button
-      class="cafe-gallery__artwork"
-      type="button"
-      data-artwork-trigger
-      aria-label="欣赏中央画作，打开艺术档案"
-      disabled
-    >
-      <span class="cafe-gallery__artwork-glow" aria-hidden="true"></span>
-      <span class="cafe-gallery__artwork-label" aria-hidden="true">
-        <span>欣赏画作</span>
-        <small>EXAMINE</small>
-      </span>
-    </button>
+        {(['day', 'night'] as const).map((theme) => (
+          <div
+            class="cafe-gallery__stack"
+            data-gallery-stack={theme}
+            aria-hidden="true"
+          >
+            <div class="cafe-gallery__plane cafe-gallery__plane--exterior">
+              <img
+                data-gallery-layer-image={theme}
+                data-src={`${parallaxRoot}/${theme}/01-garden-bay-exterior.png`}
+                alt=""
+              />
+            </div>
+            <div class="cafe-gallery__plane cafe-gallery__plane--shell">
+              <img
+                data-gallery-layer-image={theme}
+                data-src={`${parallaxRoot}/${theme}/02-gallery-shell.png`}
+                alt=""
+              />
+              {theme === 'night' && (
+                <>
+                  <span class="cafe-gallery__lamp-glow is-center"></span>
+                  <span class="cafe-gallery__lamp-glow is-right"></span>
+                </>
+              )}
+            </div>
+            <div class="cafe-gallery__plane cafe-gallery__plane--tables">
+              <img
+                data-gallery-layer-image={theme}
+                data-src={`${parallaxRoot}/${theme}/03-foreground-tables.png`}
+                alt=""
+              />
+              <div class="cafe-gallery__steam" aria-hidden="true">
+                {Array.from({ length: 6 }, (_, index) => (
+                  <span style={`--steam-index:${index}`}></span>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <div class="cafe-gallery__hotspot-plane">
+          <button
+            class="cafe-gallery__artwork"
+            type="button"
+            data-artwork-trigger
+            aria-label="欣赏中央画作，打开艺术档案"
+            disabled
+          >
+            <span class="cafe-gallery__artwork-glow" aria-hidden="true"></span>
+            <span class="cafe-gallery__artwork-label" aria-hidden="true">
+              <span>欣赏画作</span>
+              <small>EXAMINE</small>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <p class="cafe-gallery__explore-cue" aria-hidden="true">
+    <span>←</span>
+    <span class="cafe-gallery__swipe-copy">左右滑动探索</span>
+    <span class="cafe-gallery__edge-copy">将光标移至边缘探索</span>
+    <span>→</span>
+  </p>
 
   <a class="cafe-gallery__back" href="/" data-gallery-back aria-label="返回村庄">
     <span aria-hidden="true">←</span>
@@ -70,13 +131,14 @@ const mediaRoot = '/media/art/ambient';
   <CinematicSceneExitOverlay
     label="从咖啡馆画廊返回村庄的过渡动画"
     day={{
-      src: '/media/art/transition/cafe-reveal-day-v1-reverse.mp4',
-      poster: '/media/art/transition/cafe-reveal-day-v1-reverse-poster.jpg'
+      src: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1-reverse.mp4',
+      poster:
+        '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1-reverse-poster.jpg'
     }}
     night={{
-      src: '/media/art/transition/cafe-reveal-night-v1-reverse.mp4',
+      src: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1-reverse.mp4',
       poster:
-        '/media/art/transition/cafe-reveal-night-v1-reverse-poster.jpg'
+        '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1-reverse-poster.jpg'
     }}
   />
   <div class="cafe-gallery__curtain" data-gallery-curtain aria-hidden="true"></div>
@@ -84,9 +146,12 @@ const mediaRoot = '/media/art/ambient';
 
 <script>
   import { navigate } from 'astro:transitions/client';
+  import { createAdaptiveCinematicViewport } from '@/utils/adaptiveCinematicViewport';
   import { createCinematicExitSequence } from '@/utils/cinematicExitSequence';
+  import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
 
   const SESSION_KEY = 'wisteria-hero-environment';
+  const BUNDLE_TIMEOUT = 4000;
 
   type Environment = 'day' | 'night';
   type RoomState = 'arriving' | 'idle' | 'exiting';
@@ -109,8 +174,12 @@ const mediaRoot = '/media/art/ambient';
     const root = document.querySelector<HTMLElement>('[data-cafe-gallery]');
     if (!root || root.dataset.ready === 'true') return;
 
+    const viewport = root.querySelector<HTMLElement>('[data-gallery-viewport]');
+    const stage = root.querySelector<HTMLElement>('[data-gallery-stage]');
     const dayVideo = root.querySelector<HTMLVideoElement>('[data-gallery-video="day"]');
     const nightVideo = root.querySelector<HTMLVideoElement>('[data-gallery-video="night"]');
+    const dayStack = root.querySelector<HTMLElement>('[data-gallery-stack="day"]');
+    const nightStack = root.querySelector<HTMLElement>('[data-gallery-stack="night"]');
     const artworkTrigger = root.querySelector<HTMLButtonElement>('[data-artwork-trigger]');
     const backLink = root.querySelector<HTMLAnchorElement>('[data-gallery-back]');
     const themeToggle = root.querySelector<HTMLButtonElement>('[data-gallery-theme-toggle]');
@@ -122,8 +191,12 @@ const mediaRoot = '/media/art/ambient';
     );
 
     if (
+      !viewport ||
+      !stage ||
       !dayVideo ||
       !nightVideo ||
+      !dayStack ||
+      !nightStack ||
       !artworkTrigger ||
       !backLink ||
       !themeToggle ||
@@ -142,20 +215,133 @@ const mediaRoot = '/media/art/ambient';
       day: dayVideo,
       night: nightVideo
     };
+    const stacks: Record<Environment, HTMLElement> = {
+      day: dayStack,
+      night: nightStack
+    };
+    const bundlePromises = new Map<Environment, Promise<boolean>>();
     let environment: Environment = getStoredEnvironment() ?? getLocalEnvironment();
     let activeVideo = videos[environment];
     let state: RoomState = 'arriving';
+    let renderer: 'layers' | 'fallback' = 'fallback';
+    let themeLoading = false;
     let arrivalTimer = 0;
     let navigationTimer = 0;
     let themeTimer = 0;
 
+    const adaptiveViewport = createAdaptiveCinematicViewport({
+      root,
+      viewport,
+      world: stage,
+      signal,
+      initialCenterRatio: 0.5,
+      isInteractive: () => state === 'idle'
+    });
+
+    const depth = createHorizontalDepthParallax({
+      root,
+      viewport,
+      world: stage,
+      signal,
+      neutralCenterRatio: 0.5,
+      isInteractive: () =>
+        state === 'idle' &&
+        renderer === 'layers' &&
+        !themeLoading,
+      planes: [
+        { property: '--depth-exterior-x', maximumPercent: 0.22 },
+        { property: '--depth-shell-x', maximumPercent: 0.55 },
+        { property: '--depth-tables-x', maximumPercent: 1.35 }
+      ]
+    });
+
     const setState = (next: RoomState) => {
       state = next;
       root.dataset.state = next;
+      root.classList.toggle('is-ambient-paused', next !== 'idle');
+      depth.setSuspended(
+        next !== 'idle' || renderer !== 'layers' || themeLoading,
+        next !== 'idle'
+      );
+    };
+
+    const waitForImage = (image: HTMLImageElement) =>
+      new Promise<void>((resolve, reject) => {
+        if (image.complete && image.naturalWidth > 0) {
+          if (typeof image.decode === 'function') {
+            image.decode().then(resolve).catch(resolve);
+          } else {
+            resolve();
+          }
+          return;
+        }
+        image.addEventListener('load', () => {
+          if (typeof image.decode === 'function') {
+            image.decode().then(resolve).catch(resolve);
+          } else {
+            resolve();
+          }
+        }, { once: true });
+        image.addEventListener('error', () => {
+          reject(new Error('Café parallax layer failed to load'));
+        }, { once: true });
+      });
+
+    const loadBundle = (theme: Environment) => {
+      const existing = bundlePromises.get(theme);
+      if (existing) return existing;
+      const promise = new Promise<boolean>((resolve) => {
+        const images = Array.from(
+          stacks[theme].querySelectorAll<HTMLImageElement>(
+            '[data-gallery-layer-image]'
+          )
+        );
+        images.forEach((image) => {
+          if (!image.src && image.dataset.src) image.src = image.dataset.src;
+        });
+        let settled = false;
+        const timeout = window.setTimeout(() => {
+          settled = true;
+          bundlePromises.delete(theme);
+          resolve(false);
+        }, BUNDLE_TIMEOUT);
+        Promise.all(images.map(waitForImage))
+          .then(() => {
+            window.clearTimeout(timeout);
+            stacks[theme].dataset.loaded = 'true';
+            if (settled) bundlePromises.delete(theme);
+            resolve(true);
+          })
+          .catch(() => {
+            window.clearTimeout(timeout);
+            stacks[theme].dataset.failed = 'true';
+            bundlePromises.delete(theme);
+            resolve(false);
+          });
+      });
+      bundlePromises.set(theme, promise);
+      return promise;
+    };
+
+    const setRenderer = (next: 'layers' | 'fallback') => {
+      renderer = next;
+      root.dataset.renderer = next;
+      if (next === 'layers') {
+        Object.values(videos).forEach((video) => video.pause());
+      }
+      depth.setSuspended(
+        state !== 'idle' || next !== 'layers' || themeLoading,
+        true
+      );
     };
 
     const safelyPlay = (video = activeVideo) => {
-      if (reduceMotion.matches || document.hidden || state === 'exiting') return;
+      if (
+        renderer !== 'fallback' ||
+        reduceMotion.matches ||
+        document.hidden ||
+        state === 'exiting'
+      ) return;
       const playback = video.play();
       playback
         ?.then(() => delete root.dataset.playback)
@@ -174,15 +360,17 @@ const mediaRoot = '/media/art/ambient';
       environment = next;
       activeVideo = videos[next];
       root.dataset.environment = next;
+      stacks.day.classList.toggle('is-active', next === 'day');
+      stacks.night.classList.toggle('is-active', next === 'night');
 
-      if (initial) {
+      if (renderer === 'fallback' && initial) {
         (Object.entries(videos) as [Environment, HTMLVideoElement][]).forEach(
           ([name, video]) => {
             video.classList.toggle('is-active', name === next);
             if (name !== next) video.pause();
           }
         );
-      } else if (previousVideo !== activeVideo) {
+      } else if (renderer === 'fallback' && previousVideo !== activeVideo) {
         window.clearTimeout(themeTimer);
         if (
           Number.isFinite(previousVideo.currentTime) &&
@@ -218,7 +406,12 @@ const mediaRoot = '/media/art/ambient';
         }
       }
 
-      if (reduceMotion.matches || document.hidden || state === 'exiting') {
+      if (
+        renderer === 'layers' ||
+        reduceMotion.matches ||
+        document.hidden ||
+        state === 'exiting'
+      ) {
         Object.values(videos).forEach((video) => video.pause());
       } else if (initial || previousVideo === activeVideo) {
         safelyPlay(activeVideo);
@@ -237,6 +430,8 @@ const mediaRoot = '/media/art/ambient';
         root.classList.add('is-interactive');
         artworkTrigger.disabled = false;
         themeToggle.disabled = false;
+        depth.setSuspended(renderer !== 'layers');
+        depth.recalculate();
       }, reduceMotion.matches ? 1 : 500);
     };
 
@@ -268,6 +463,7 @@ const mediaRoot = '/media/art/ambient';
       themeToggle.disabled = true;
       backLink.setAttribute('aria-disabled', 'true');
       status.textContent = message;
+      adaptiveViewport.stopMotion(true);
       navigationTimer = window.setTimeout(
         () => navigateTo(destination),
         reduceMotion.matches ? 1 : 360
@@ -283,6 +479,7 @@ const mediaRoot = '/media/art/ambient';
       themeToggle.disabled = true;
       backLink.setAttribute('aria-disabled', 'true');
       status.textContent = '正在离开咖啡馆画廊并返回村庄';
+      adaptiveViewport.stopMotion(true);
       Object.values(videos).forEach((video) => video.pause());
       exitSequence.start(environment);
     };
@@ -299,6 +496,8 @@ const mediaRoot = '/media/art/ambient';
       artworkTrigger.disabled = false;
       themeToggle.disabled = false;
       setState('idle');
+      adaptiveViewport.recalculate(true);
+      depth.recalculate();
       status.textContent = '已回到咖啡馆画廊。可以查看中央画作。';
       updateEnvironment(getStoredEnvironment() ?? environment, false, false, true);
     };
@@ -320,6 +519,17 @@ const mediaRoot = '/media/art/ambient';
     });
 
     updateEnvironment(environment, false, false, true);
+    void loadBundle(environment).then((ready) => {
+      if (signal.aborted || state === 'exiting') return;
+      setRenderer(ready ? 'layers' : 'fallback');
+      updateEnvironment(environment, false, false, true);
+      finishArrival();
+      if (ready) {
+        const inactive: Environment =
+          environment === 'day' ? 'night' : 'day';
+        window.setTimeout(() => void loadBundle(inactive), 700);
+      }
+    });
 
     if (reduceMotion.matches) {
       finishArrival();
@@ -331,9 +541,22 @@ const mediaRoot = '/media/art/ambient';
       arrivalTimer = window.setTimeout(finishArrival, 1400);
     }
 
-    themeToggle.addEventListener('click', () => {
-      if (state !== 'idle') return;
-      updateEnvironment(environment === 'day' ? 'night' : 'day', true, true);
+    themeToggle.addEventListener('click', async () => {
+      if (state !== 'idle' || themeLoading) return;
+      const next: Environment = environment === 'day' ? 'night' : 'day';
+      themeLoading = true;
+      themeToggle.disabled = true;
+      depth.setSuspended(true);
+      const ready = await loadBundle(next);
+      if (signal.aborted || state !== 'idle') return;
+      setRenderer(ready ? 'layers' : 'fallback');
+      updateEnvironment(next, true, true);
+      window.clearTimeout(themeTimer);
+      themeTimer = window.setTimeout(() => {
+        themeLoading = false;
+        themeToggle.disabled = false;
+        depth.setSuspended(renderer !== 'layers');
+      }, reduceMotion.matches ? 1 : 540);
     }, { signal });
 
     artworkTrigger.addEventListener('click', () => {
@@ -357,10 +580,13 @@ const mediaRoot = '/media/art/ambient';
     }, { signal });
 
     document.addEventListener('visibilitychange', () => {
+      root.classList.toggle('is-document-hidden', document.hidden);
       if (document.hidden) {
         Object.values(videos).forEach((video) => video.pause());
+        depth.setSuspended(true, true);
       } else if (state === 'idle') {
         safelyPlay(activeVideo);
+        depth.setSuspended(renderer !== 'layers');
       }
     }, { signal });
 
@@ -384,6 +610,9 @@ const mediaRoot = '/media/art/ambient';
 
 <style>
   .cafe-gallery {
+    --depth-exterior-x: 0px;
+    --depth-shell-x: 0px;
+    --depth-tables-x: 0px;
     position: relative;
     height: 100vh;
     height: 100svh;
@@ -394,14 +623,55 @@ const mediaRoot = '/media/art/ambient';
   }
 
   .cafe-gallery__stage {
-    --stage-offset-x: -50%;
     position: absolute;
     left: 50%;
     top: 50%;
     width: max(100vw, calc(100vh * 16 / 9));
     height: max(100vh, calc(100vw * 9 / 16));
     overflow: hidden;
-    transform: translate(var(--stage-offset-x), -50%);
+    transform: translate(-50%, -50%);
+  }
+
+  .cafe-gallery__camera {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    transform: scale(1.035);
+    transform-origin: 50% 50%;
+  }
+
+  .cafe-gallery__viewport {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    overflow: hidden;
+    outline: none;
+    overscroll-behavior: contain;
+  }
+
+  .cafe-gallery__viewport:focus-visible {
+    outline: 3px solid #ffd64f;
+    outline-offset: -5px;
+  }
+
+  .cafe-gallery.has-world-overflow .cafe-gallery__viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cafe-gallery.has-world-overflow
+  .cafe-gallery__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cafe-gallery.has-world-overflow .cafe-gallery__stage {
+    position: relative;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   @supports (height: 100svh) {
@@ -411,19 +681,156 @@ const mediaRoot = '/media/art/ambient';
     }
   }
 
-  .cafe-gallery__video {
+  .cafe-gallery__video,
+  .cafe-gallery__stack,
+  .cafe-gallery__plane,
+  .cafe-gallery__plane > img,
+  .cafe-gallery__hotspot-plane {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     max-width: none;
+  }
+
+  .cafe-gallery__video {
+    z-index: 1;
     object-fit: fill;
     opacity: 0;
     transition: opacity 520ms ease;
   }
 
-  .cafe-gallery__video.is-active {
+  .cafe-gallery[data-renderer='fallback'] .cafe-gallery__video.is-active {
     opacity: 1;
+  }
+
+  .cafe-gallery__stack {
+    z-index: 2;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 520ms ease;
+  }
+
+  .cafe-gallery[data-renderer='layers'] .cafe-gallery__stack.is-active {
+    opacity: 1;
+  }
+
+  .cafe-gallery__plane > img {
+    display: block;
+    object-fit: fill;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .cafe-gallery__plane--shell {
+    z-index: 10;
+    transform: translate3d(var(--depth-shell-x), 0, 0);
+  }
+
+  .cafe-gallery__plane--exterior {
+    z-index: 5;
+    transform: translate3d(var(--depth-exterior-x), 0, 0);
+  }
+
+  .cafe-gallery__plane--tables {
+    z-index: 20;
+    transform: translate3d(var(--depth-tables-x), 0, 0);
+  }
+
+  .cafe-gallery__hotspot-plane {
+    z-index: 30;
+    transform: translate3d(var(--depth-shell-x), 0, 0);
+    pointer-events: none;
+  }
+
+  .cafe-gallery__artwork {
+    pointer-events: auto;
+  }
+
+  .cafe-gallery__steam {
+    position: absolute;
+    left: 65.5%;
+    top: 77.5%;
+    width: 4.4%;
+    height: 9%;
+    pointer-events: none;
+  }
+
+  .cafe-gallery__steam span {
+    --steam-index: 0;
+    position: absolute;
+    left: 35%;
+    bottom: 0;
+    width: 32%;
+    height: 34%;
+    border-radius: 48% 58% 45% 56%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(248, 241, 222, .48),
+      rgba(248, 241, 222, 0) 72%
+    );
+    filter: blur(3.2px);
+    opacity: 0;
+    animation: cafe-gallery-steam 2.8s ease-out infinite;
+    animation-delay: calc(var(--steam-index) * -.46s);
+  }
+
+  .cafe-gallery__steam span:nth-child(even) {
+    left: 50%;
+    animation-direction: alternate;
+  }
+
+  @keyframes cafe-gallery-steam {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, 8%, 0) rotate(-8deg) scale(.45);
+    }
+    24% {
+      opacity: .38;
+    }
+    58% {
+      opacity: .3;
+      transform: translate3d(-42%, -110%, 0) rotate(24deg) scale(1.12);
+    }
+    100% {
+      opacity: 0;
+      transform: translate3d(52%, -230%, 0) rotate(-24deg) scale(1.65);
+    }
+  }
+
+  .cafe-gallery__lamp-glow {
+    position: absolute;
+    width: 9%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: rgba(255, 174, 72, .14);
+    filter: blur(25px);
+    mix-blend-mode: screen;
+    animation: cafe-gallery-flicker 3.4s ease-in-out infinite;
+  }
+
+  .cafe-gallery__lamp-glow.is-center {
+    left: 47.8%;
+    top: 0;
+  }
+
+  .cafe-gallery__lamp-glow.is-right {
+    right: 1.5%;
+    top: 12%;
+    animation-delay: -1.2s;
+  }
+
+  @keyframes cafe-gallery-flicker {
+    0%, 20%, 26%, 72%, 100% { opacity: .72; }
+    23% { opacity: .54; }
+    76% { opacity: .82; }
+  }
+
+  .cafe-gallery.is-ambient-paused .cafe-gallery__steam span,
+  .cafe-gallery.is-ambient-paused .cafe-gallery__lamp-glow,
+  .cafe-gallery.is-document-hidden .cafe-gallery__steam span,
+  .cafe-gallery.is-document-hidden .cafe-gallery__lamp-glow {
+    animation-play-state: paused;
   }
 
   .cafe-gallery__artwork {
@@ -631,11 +1038,48 @@ const mediaRoot = '/media/art/ambient';
     transition-duration: 350ms;
   }
 
-  @media (max-width: 767px) {
-    .cafe-gallery__stage {
-      --stage-offset-x: -50%;
-    }
+  .cafe-gallery__explore-cue {
+    position: fixed;
+    z-index: 4;
+    left: 50%;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: 0;
+    border: 1px solid rgba(255, 248, 231, .42);
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .68);
+    padding: .4rem .72rem;
+    color: rgba(255, 248, 231, .82);
+    font-size: .66rem;
+    letter-spacing: .06em;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, .4rem);
+    backdrop-filter: blur(8px);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
 
+  .cafe-gallery.has-world-overflow.is-interactive:not(.has-explored)
+  .cafe-gallery__explore-cue {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .cafe-gallery__edge-copy {
+    display: none;
+  }
+
+  .cafe-gallery.has-fine-pointer .cafe-gallery__swipe-copy {
+    display: none;
+  }
+
+  .cafe-gallery.has-fine-pointer .cafe-gallery__edge-copy {
+    display: inline;
+  }
+
+  @media (max-width: 767px) {
     .cafe-gallery__back {
       left: max(.7rem, env(safe-area-inset-left));
       top: max(.7rem, env(safe-area-inset-top));
@@ -657,6 +1101,7 @@ const mediaRoot = '/media/art/ambient';
     .cafe-gallery__back,
     .cafe-gallery__theme-toggle,
     .cafe-gallery__video,
+    .cafe-gallery__explore-cue,
     .cafe-gallery__curtain {
       transition-duration: 1ms !important;
     }

@@ -1,53 +1,201 @@
 ---
 import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOverlay.astro';
 
-const mediaRoot = '/media/lifestyle/ambient';
+const ambientRoot = '/media/living-room/ambient';
+const parallaxRoot = '/media/living-room/parallax';
 ---
 
 <section
-  class="living-room"
+  class="living-room is-ambient-paused"
   data-living-room
   data-state="arriving"
+  data-renderer="fallback"
   aria-label="港湾主屋的复古未来客厅"
 >
-  <div class="living-room__stage">
-    <video
-      class="living-room__video is-active"
-      data-room-video="day"
-      src={`${mediaRoot}/living-room-multilayer-v6.mp4`}
-      poster={`${mediaRoot}/living-room-multilayer-v6-poster.jpg`}
-      muted
-      loop
-      playsinline
-      preload="metadata"
-      aria-hidden="true"
-    ></video>
-    <video
-      class="living-room__video"
-      data-room-video="night"
-      src={`${mediaRoot}/living-room-night-v5.mp4`}
-      poster={`${mediaRoot}/living-room-night-v5-poster.jpg`}
-      muted
-      loop
-      playsinline
-      preload="metadata"
-      aria-hidden="true"
-    ></video>
+  <div
+    class="living-room__viewport"
+    data-room-viewport
+    tabindex="0"
+    aria-label="客厅全景；画面较宽时可以左右探索"
+  >
+    <div class="living-room__stage" data-room-stage>
+      <div class="living-room__camera">
+        <video
+          class="living-room__fallback is-active"
+          data-room-video="day"
+          src={`${ambientRoot}/living-room-multilayer-v6.mp4`}
+          poster={`${ambientRoot}/living-room-multilayer-v6-poster.jpg`}
+          muted
+          loop
+          playsinline
+          preload="none"
+          aria-hidden="true"
+        ></video>
+        <video
+          class="living-room__fallback"
+          data-room-video="night"
+          src={`${ambientRoot}/living-room-night-v5.mp4`}
+          poster={`${ambientRoot}/living-room-night-v5-poster.jpg`}
+          muted
+          loop
+          playsinline
+          preload="none"
+          aria-hidden="true"
+        ></video>
 
-    <button
-      class="living-room__photo"
-      type="button"
-      data-photo-trigger
-      aria-label="查看窗边相框，打开生活档案"
-      disabled
-    >
-      <span class="living-room__photo-glow" aria-hidden="true"></span>
-      <span class="living-room__photo-label" aria-hidden="true">
-        <span>查看照片</span>
-        <small>EXAMINE</small>
-      </span>
-    </button>
+        <div
+          class="living-room__stack"
+          data-room-stack="day"
+          aria-hidden="true"
+        >
+          <div class="living-room__plane living-room__plane--sky">
+            <img
+              data-room-layer-image="day"
+              data-src={`${parallaxRoot}/day/01-sky.png`}
+              alt=""
+            />
+          </div>
+          <div class="living-room__plane living-room__plane--harbor">
+            <img
+              data-room-layer-image="day"
+              data-src={`${parallaxRoot}/day/03-harbor.png`}
+              alt=""
+            />
+          </div>
+          <div class="living-room__plane living-room__plane--boat">
+            <div class="living-room__boat-rock">
+              <img
+                data-room-layer-image="day"
+                data-src={`${parallaxRoot}/day/04-sailboat.png`}
+                alt=""
+              />
+            </div>
+          </div>
+          <div class="living-room__plane living-room__plane--room">
+            <img
+              data-room-layer-image="day"
+              data-src={`${parallaxRoot}/day/05-room-shell.png`}
+              alt=""
+            />
+          </div>
+          <div class="living-room__plane living-room__plane--shadow">
+            <img
+              data-room-layer-image="day"
+              data-src={`${parallaxRoot}/day/06-table-shadow.png`}
+              alt=""
+            />
+          </div>
+          <div class="living-room__plane living-room__plane--table">
+            <img
+              data-room-layer-image="day"
+              data-src={`${parallaxRoot}/day/07-coffee-table.png`}
+              alt=""
+            />
+            <div class="living-room__steam" aria-hidden="true">
+              {Array.from({ length: 7 }, (_, index) => (
+                <span style={`--steam-index:${index}`}></span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="living-room__stack"
+          data-room-stack="night"
+          aria-hidden="true"
+        >
+          <div class="living-room__plane living-room__plane--sky">
+            <img
+              data-room-layer-image="night"
+              data-src={`${parallaxRoot}/night/01-sky.png`}
+              alt=""
+            />
+          </div>
+          <div class="living-room__plane living-room__plane--clouds">
+            <img
+              data-room-layer-image="night"
+              data-src={`${parallaxRoot}/night/02-clouds.png`}
+              alt=""
+            />
+          </div>
+          <div class="living-room__plane living-room__plane--harbor">
+            <img
+              data-room-layer-image="night"
+              data-src={`${parallaxRoot}/night/03-harbor.png`}
+              alt=""
+            />
+            <div class="living-room__moon-reflection" aria-hidden="true">
+              {Array.from({ length: 10 }, (_, index) => (
+                <span style={`--reflection-index:${index}`}></span>
+              ))}
+            </div>
+            <span class="living-room__lighthouse-glow" aria-hidden="true"></span>
+          </div>
+          <div class="living-room__plane living-room__plane--boat">
+            <div class="living-room__boat-rock">
+              <img
+                data-room-layer-image="night"
+                data-src={`${parallaxRoot}/night/04-sailboat.png`}
+                alt=""
+              />
+            </div>
+          </div>
+          <div class="living-room__plane living-room__plane--room">
+            <img
+              data-room-layer-image="night"
+              data-src={`${parallaxRoot}/night/05-room-shell.png`}
+              alt=""
+            />
+            <span class="living-room__lamp-glow is-left" aria-hidden="true"></span>
+            <span class="living-room__lamp-glow is-right" aria-hidden="true"></span>
+          </div>
+          <div class="living-room__plane living-room__plane--shadow">
+            <img
+              data-room-layer-image="night"
+              data-src={`${parallaxRoot}/night/06-table-shadow.png`}
+              alt=""
+            />
+          </div>
+          <div class="living-room__plane living-room__plane--table">
+            <img
+              data-room-layer-image="night"
+              data-src={`${parallaxRoot}/night/07-coffee-table.png`}
+              alt=""
+            />
+            <span class="living-room__device-glow" aria-hidden="true"></span>
+            <div class="living-room__steam" aria-hidden="true">
+              {Array.from({ length: 7 }, (_, index) => (
+                <span style={`--steam-index:${index}`}></span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div class="living-room__hotspot-plane">
+          <button
+            class="living-room__photo"
+            type="button"
+            data-photo-trigger
+            aria-label="查看窗边相框，打开生活档案"
+            disabled
+          >
+            <span class="living-room__photo-glow" aria-hidden="true"></span>
+            <span class="living-room__photo-label" aria-hidden="true">
+              <span>查看照片</span>
+              <small>EXAMINE</small>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <p class="living-room__explore-cue" aria-hidden="true">
+    <span>←</span>
+    <span class="living-room__swipe-copy">左右滑动探索</span>
+    <span class="living-room__edge-copy">将光标移至边缘探索</span>
+    <span>→</span>
+  </p>
 
   <a class="living-room__back" href="/" data-room-back aria-label="返回村庄">
     <span aria-hidden="true">←</span>
@@ -70,14 +218,14 @@ const mediaRoot = '/media/lifestyle/ambient';
   <CinematicSceneExitOverlay
     label="从主屋返回村庄的过渡动画"
     day={{
-      src: '/media/village/interactions/house/door-day-v4-reverse.mp4',
+      src: '/media/living-room/transitions/house-door/door-day-v4-reverse.mp4',
       poster:
-        '/media/village/interactions/house/door-day-v4-reverse-poster.jpg'
+        '/media/living-room/transitions/house-door/door-day-v4-reverse-poster.jpg'
     }}
     night={{
-      src: '/media/village/interactions/house/door-night-v4-reverse.mp4',
+      src: '/media/living-room/transitions/house-door/door-night-v4-reverse.mp4',
       poster:
-        '/media/village/interactions/house/door-night-v4-reverse-poster.jpg'
+        '/media/living-room/transitions/house-door/door-night-v4-reverse-poster.jpg'
     }}
   />
   <div class="living-room__curtain" data-room-curtain aria-hidden="true"></div>
@@ -85,12 +233,16 @@ const mediaRoot = '/media/lifestyle/ambient';
 
 <script>
   import { navigate } from 'astro:transitions/client';
+  import { createAdaptiveCinematicViewport } from '@/utils/adaptiveCinematicViewport';
   import { createCinematicExitSequence } from '@/utils/cinematicExitSequence';
+  import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
 
   const SESSION_KEY = 'wisteria-hero-environment';
+  const BUNDLE_TIMEOUT = 4000;
 
   type Environment = 'day' | 'night';
   type RoomState = 'arriving' | 'idle' | 'exiting';
+  type Renderer = 'layers' | 'fallback';
 
   function getStoredEnvironment(): Environment | null {
     try {
@@ -110,8 +262,8 @@ const mediaRoot = '/media/lifestyle/ambient';
     const root = document.querySelector<HTMLElement>('[data-living-room]');
     if (!root || root.dataset.ready === 'true') return;
 
-    const dayVideo = root.querySelector<HTMLVideoElement>('[data-room-video="day"]');
-    const nightVideo = root.querySelector<HTMLVideoElement>('[data-room-video="night"]');
+    const viewport = root.querySelector<HTMLElement>('[data-room-viewport]');
+    const stage = root.querySelector<HTMLElement>('[data-room-stage]');
     const photoTrigger = root.querySelector<HTMLButtonElement>('[data-photo-trigger]');
     const backLink = root.querySelector<HTMLAnchorElement>('[data-room-back]');
     const themeToggle = root.querySelector<HTMLButtonElement>('[data-room-theme-toggle]');
@@ -121,17 +273,25 @@ const mediaRoot = '/media/lifestyle/ambient';
     const exitOverlay = root.querySelector<HTMLElement>(
       '[data-cinematic-scene-exit]'
     );
+    const dayVideo = root.querySelector<HTMLVideoElement>('[data-room-video="day"]');
+    const nightVideo = root.querySelector<HTMLVideoElement>('[data-room-video="night"]');
+    const dayStack = root.querySelector<HTMLElement>('[data-room-stack="day"]');
+    const nightStack = root.querySelector<HTMLElement>('[data-room-stack="night"]');
 
     if (
-      !dayVideo ||
-      !nightVideo ||
+      !viewport ||
+      !stage ||
       !photoTrigger ||
       !backLink ||
       !themeToggle ||
       !themeIcon ||
       !themeLabel ||
       !status ||
-      !exitOverlay
+      !exitOverlay ||
+      !dayVideo ||
+      !nightVideo ||
+      !dayStack ||
+      !nightStack
     ) return;
 
     root.dataset.ready = 'true';
@@ -143,59 +303,183 @@ const mediaRoot = '/media/lifestyle/ambient';
       day: dayVideo,
       night: nightVideo
     };
+    const stacks: Record<Environment, HTMLElement> = {
+      day: dayStack,
+      night: nightStack
+    };
+    const bundlePromises = new Map<Environment, Promise<boolean>>();
+
     let environment: Environment = getStoredEnvironment() ?? getLocalEnvironment();
-    let activeVideo = videos[environment];
+    let renderer: Renderer = 'fallback';
     let state: RoomState = 'arriving';
-    let arrivalTimer = 0;
+    let themeLoading = false;
     let navigationTimer = 0;
     let themeTimer = 0;
+    let lazyTimer = 0;
+
+    const isDepthInteractive = () =>
+      state === 'idle' &&
+      !themeLoading &&
+      renderer === 'layers' &&
+      !document.hidden &&
+      !reduceMotion.matches;
+
+    const adaptiveViewport = createAdaptiveCinematicViewport({
+      root,
+      viewport,
+      world: stage,
+      signal,
+      initialCenterRatio: 0.43,
+      isInteractive: () => state === 'idle' && !themeLoading
+    });
+
+    const depth = createHorizontalDepthParallax({
+      root,
+      viewport,
+      world: stage,
+      signal,
+      neutralCenterRatio: 0.43,
+      isInteractive: isDepthInteractive,
+      planes: [
+        { property: '--depth-sky-x', maximumPercent: 0.15 },
+        { property: '--depth-clouds-x', maximumPercent: 0.25 },
+        { property: '--depth-harbor-x', maximumPercent: 0.35 },
+        { property: '--depth-boat-x', maximumPercent: 0.45 },
+        { property: '--depth-room-x', maximumPercent: 0.75 },
+        { property: '--depth-shadow-x', maximumPercent: 1.05 },
+        { property: '--depth-table-x', maximumPercent: 1.5 }
+      ]
+    });
 
     const setState = (next: RoomState) => {
       state = next;
       root.dataset.state = next;
+      root.classList.toggle('is-ambient-paused', next !== 'idle');
+      depth.setSuspended(!isDepthInteractive(), next !== 'idle');
     };
 
-    const safelyPlay = (video = activeVideo) => {
-      if (reduceMotion.matches || document.hidden || state === 'exiting') return;
+    const setRenderer = (next: Renderer) => {
+      renderer = next;
+      root.dataset.renderer = next;
+      depth.setSuspended(!isDepthInteractive(), true);
+    };
+
+    const safelyPlay = (video: HTMLVideoElement) => {
+      if (
+        renderer !== 'fallback' ||
+        reduceMotion.matches ||
+        document.hidden ||
+        state === 'exiting'
+      ) return;
+      video.muted = true;
       const playback = video.play();
-      playback
-        ?.then(() => delete root.dataset.playback)
-        .catch(() => {
-          root.dataset.playback = `${environment}-poster`;
-        });
+      playback?.catch(() => {
+        root.dataset.playback = `${environment}-poster`;
+      });
     };
 
-    const updateEnvironment = (
+    const pauseVideos = () => {
+      Object.values(videos).forEach((video) => video.pause());
+    };
+
+    const waitForImage = (image: HTMLImageElement) =>
+      new Promise<void>((resolve, reject) => {
+        if (image.complete && image.naturalWidth > 0) {
+          if (typeof image.decode === 'function') {
+            image.decode().then(resolve).catch(resolve);
+          } else {
+            resolve();
+          }
+          return;
+        }
+        const onLoad = () => {
+          cleanup();
+          if (typeof image.decode === 'function') {
+            image.decode().then(resolve).catch(resolve);
+          } else {
+            resolve();
+          }
+        };
+        const onError = () => {
+          cleanup();
+          reject(new Error(`Layer failed: ${image.dataset.src ?? 'unknown'}`));
+        };
+        const cleanup = () => {
+          image.removeEventListener('load', onLoad);
+          image.removeEventListener('error', onError);
+        };
+        image.addEventListener('load', onLoad, { once: true });
+        image.addEventListener('error', onError, { once: true });
+      });
+
+    const loadBundle = (theme: Environment) => {
+      const existing = bundlePromises.get(theme);
+      if (existing) return existing;
+
+      const promise = new Promise<boolean>((resolve) => {
+        const images = Array.from(
+          stacks[theme].querySelectorAll<HTMLImageElement>(
+            '[data-room-layer-image]'
+          )
+        );
+        for (const image of images) {
+          if (!image.getAttribute('src') && image.dataset.src) {
+            image.src = image.dataset.src;
+          }
+        }
+
+        let settled = false;
+        const timeout = window.setTimeout(() => {
+          settled = true;
+          bundlePromises.delete(theme);
+          resolve(false);
+        }, BUNDLE_TIMEOUT);
+        Promise.all(images.map(waitForImage))
+          .then(() => {
+            window.clearTimeout(timeout);
+            stacks[theme].dataset.loaded = 'true';
+            if (settled) bundlePromises.delete(theme);
+            resolve(true);
+          })
+          .catch(() => {
+            window.clearTimeout(timeout);
+            stacks[theme].dataset.failed = 'true';
+            bundlePromises.delete(theme);
+            resolve(false);
+          });
+      });
+      bundlePromises.set(theme, promise);
+      return promise;
+    };
+
+    const showTheme = (
       next: Environment,
-      persist = false,
-      announce = false,
+      nextRenderer: Renderer,
       initial = false
     ) => {
-      const previousVideo = activeVideo;
+      const previous = environment;
       environment = next;
-      activeVideo = videos[next];
       root.dataset.environment = next;
+      setRenderer(nextRenderer);
 
-      if (initial) {
-        (Object.entries(videos) as [Environment, HTMLVideoElement][]).forEach(
-          ([name, video]) => {
-            video.classList.toggle('is-active', name === next);
-            if (name !== next) video.pause();
-          }
-        );
-      } else if (previousVideo !== activeVideo) {
-        window.clearTimeout(themeTimer);
-        if (
-          Number.isFinite(previousVideo.currentTime) &&
-          Number.isFinite(activeVideo.duration) &&
-          activeVideo.duration > 0
-        ) {
-          activeVideo.currentTime = previousVideo.currentTime % activeVideo.duration;
+      if (nextRenderer === 'layers') {
+        pauseVideos();
+        stacks[next].classList.add('is-active');
+        if (initial) {
+          stacks[previous === next ? (next === 'day' ? 'night' : 'day') : previous]
+            .classList.remove('is-active');
+        } else if (previous !== next) {
+          requestAnimationFrame(() => {
+            stacks[previous].classList.remove('is-active');
+          });
         }
-        activeVideo.classList.add('is-active');
-        safelyPlay(activeVideo);
-        requestAnimationFrame(() => previousVideo.classList.remove('is-active'));
-        themeTimer = window.setTimeout(() => previousVideo.pause(), 560);
+      } else {
+        stacks.day.classList.remove('is-active');
+        stacks.night.classList.remove('is-active');
+        videos[next].classList.add('is-active');
+        videos[next === 'day' ? 'night' : 'day'].classList.remove('is-active');
+        videos[next].load();
+        safelyPlay(videos[next]);
       }
 
       const showingNight = next === 'night';
@@ -206,29 +490,18 @@ const mediaRoot = '/media/lifestyle/ambient';
       );
       themeIcon.textContent = showingNight ? '☾' : '☀';
       themeLabel.textContent = showingNight ? '夜晚' : '白昼';
+    };
 
-      if (announce) {
-        status.textContent = showingNight ? '已切换为夜晚客厅' : '已切换为白昼客厅';
-      }
-
-      if (persist) {
-        try {
-          window.sessionStorage.setItem(SESSION_KEY, next);
-        } catch {
-          // Theme switching remains available when storage is blocked.
-        }
-      }
-
-      if (reduceMotion.matches || document.hidden || state === 'exiting') {
-        Object.values(videos).forEach((video) => video.pause());
-      } else if (initial || previousVideo === activeVideo) {
-        safelyPlay(activeVideo);
+    const persistEnvironment = () => {
+      try {
+        window.sessionStorage.setItem(SESSION_KEY, environment);
+      } catch {
+        // Theme switching remains available when storage is blocked.
       }
     };
 
     const finishArrival = () => {
       if (state !== 'arriving') return;
-      window.clearTimeout(arrivalTimer);
       root.classList.add('is-revealed');
       status.textContent = '已进入客厅。可以查看窗边的相框。';
 
@@ -238,13 +511,67 @@ const mediaRoot = '/media/lifestyle/ambient';
         root.classList.add('is-interactive');
         photoTrigger.disabled = false;
         themeToggle.disabled = false;
+        depth.recalculate();
+
+        const inactive: Environment = environment === 'day' ? 'night' : 'day';
+        const lazyLoad = () => void loadBundle(inactive);
+        const requestIdle = (
+          window as Window & {
+            requestIdleCallback?: (
+              callback: () => void,
+              options?: { timeout: number }
+            ) => number;
+          }
+        ).requestIdleCallback;
+        if (typeof requestIdle === 'function') {
+          requestIdle.call(window, lazyLoad, { timeout: 2200 });
+        } else {
+          lazyTimer = globalThis.setTimeout(
+            lazyLoad,
+            900
+          ) as unknown as number;
+        }
       }, reduceMotion.matches ? 1 : 500);
+    };
+
+    const initialiseArtwork = async () => {
+      root.dataset.environment = environment;
+      showTheme(environment, 'fallback', true);
+      const layeredReady = await loadBundle(environment);
+      if (signal.aborted || state !== 'arriving') return;
+      showTheme(environment, layeredReady ? 'layers' : 'fallback', true);
+      finishArrival();
+    };
+
+    const switchTheme = async () => {
+      if (state !== 'idle' || themeLoading) return;
+      const next: Environment = environment === 'day' ? 'night' : 'day';
+      themeLoading = true;
+      root.classList.add('is-theme-loading');
+      themeToggle.disabled = true;
+      depth.setSuspended(true);
+      status.textContent = next === 'night' ? '正在准备夜晚客厅' : '正在准备白昼客厅';
+
+      const layeredReady = await loadBundle(next);
+      if (signal.aborted || state !== 'idle') return;
+      showTheme(next, layeredReady ? 'layers' : 'fallback');
+      persistEnvironment();
+      status.textContent = next === 'night' ? '已切换为夜晚客厅' : '已切换为白昼客厅';
+
+      window.clearTimeout(themeTimer);
+      themeTimer = window.setTimeout(() => {
+        themeLoading = false;
+        root.classList.remove('is-theme-loading');
+        themeToggle.disabled = false;
+        depth.setSuspended(!isDepthInteractive());
+      }, reduceMotion.matches ? 1 : 540);
     };
 
     const navigateTo = async (destination: string) => {
       window.clearTimeout(navigationTimer);
       window.clearTimeout(themeTimer);
-      Object.values(videos).forEach((video) => video.pause());
+      window.clearTimeout(lazyTimer);
+      pauseVideos();
 
       try {
         await navigate(destination);
@@ -269,6 +596,7 @@ const mediaRoot = '/media/lifestyle/ambient';
       themeToggle.disabled = true;
       backLink.setAttribute('aria-disabled', 'true');
       status.textContent = message;
+      adaptiveViewport.stopMotion(true);
       navigationTimer = window.setTimeout(
         () => navigateTo(destination),
         reduceMotion.matches ? 1 : 360
@@ -284,98 +612,75 @@ const mediaRoot = '/media/lifestyle/ambient';
       themeToggle.disabled = true;
       backLink.setAttribute('aria-disabled', 'true');
       status.textContent = '正在离开主屋并返回村庄';
-      Object.values(videos).forEach((video) => video.pause());
+      adaptiveViewport.stopMotion(true);
+      pauseVideos();
       exitSequence.start(environment);
     };
 
-    const resetAfterRestore = () => {
-      window.clearTimeout(arrivalTimer);
+    const resetAfterRestore = async () => {
       window.clearTimeout(navigationTimer);
       window.clearTimeout(themeTimer);
-      root.classList.remove('is-exiting');
-      root.classList.remove('is-returning');
+      window.clearTimeout(lazyTimer);
+      root.classList.remove('is-exiting', 'is-returning', 'is-theme-loading');
       exitSequence.reset();
+      themeLoading = false;
+      const restored = getStoredEnvironment() ?? environment;
+      const layeredReady = await loadBundle(restored);
+      if (signal.aborted) return;
+      showTheme(restored, layeredReady ? 'layers' : 'fallback', true);
       root.classList.add('is-revealed', 'is-interactive');
       backLink.removeAttribute('aria-disabled');
       photoTrigger.disabled = false;
       themeToggle.disabled = false;
       setState('idle');
+      adaptiveViewport.recalculate(true);
+      depth.recalculate();
       status.textContent = '已回到客厅。可以查看窗边的相框。';
-      updateEnvironment(getStoredEnvironment() ?? environment, false, false, true);
     };
 
-    Object.values(videos).forEach((video) => {
-      video.muted = true;
-      video.load();
-      video.addEventListener('loadeddata', () => {
-        if (video === activeVideo) finishArrival();
-      }, { signal });
-      video.addEventListener('canplay', () => {
-        if (video === activeVideo) finishArrival();
-      }, { signal });
-      video.addEventListener('error', () => {
-        if (video !== activeVideo) return;
-        root.dataset.playback = `${environment}-poster`;
-        finishArrival();
-      }, { signal });
-    });
-
-    updateEnvironment(environment, false, false, true);
-
-    if (reduceMotion.matches) {
-      finishArrival();
-    } else {
-      if (activeVideo.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-        requestAnimationFrame(finishArrival);
-      }
-
-      arrivalTimer = window.setTimeout(finishArrival, 1400);
-    }
+    void initialiseArtwork();
 
     themeToggle.addEventListener('click', () => {
-      if (state !== 'idle') return;
-      updateEnvironment(environment === 'day' ? 'night' : 'day', true, true);
+      void switchTheme();
     }, { signal });
 
     photoTrigger.addEventListener('click', () => {
       startCurtainExit('/lifestyle/archive', '正在打开生活档案');
     }, { signal });
 
-    photoTrigger.addEventListener('keydown', (event) => {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
-      event.preventDefault();
-      startCurtainExit('/lifestyle/archive', '正在打开生活档案');
-    }, { signal });
-
     backLink.addEventListener('click', (event) => {
-      if (state !== 'idle') {
-        event.preventDefault();
-        return;
-      }
-
       event.preventDefault();
-      startVillageExit();
+      if (state === 'idle') startVillageExit();
     }, { signal });
 
     document.addEventListener('visibilitychange', () => {
+      root.classList.toggle('is-document-hidden', document.hidden);
       if (document.hidden) {
-        Object.values(videos).forEach((video) => video.pause());
+        pauseVideos();
+        depth.setSuspended(true, true);
       } else if (state === 'idle') {
-        safelyPlay(activeVideo);
+        if (renderer === 'fallback') safelyPlay(videos[environment]);
+        depth.setSuspended(!isDepthInteractive());
       }
     }, { signal });
 
+    reduceMotion.addEventListener('change', () => {
+      depth.setSuspended(!isDepthInteractive(), true);
+      if (reduceMotion.matches) pauseVideos();
+      else if (renderer === 'fallback') safelyPlay(videos[environment]);
+    }, { signal });
+
     window.addEventListener('pageshow', (event) => {
-      if (event.persisted) resetAfterRestore();
+      if (event.persisted) void resetAfterRestore();
     }, { signal });
 
     document.addEventListener('astro:before-swap', () => {
       lifecycle.abort();
-      window.clearTimeout(arrivalTimer);
       window.clearTimeout(navigationTimer);
       window.clearTimeout(themeTimer);
+      window.clearTimeout(lazyTimer);
       exitSequence.pause();
-      Object.values(videos).forEach((video) => video.pause());
+      pauseVideos();
     }, { once: true, signal });
   }
 
@@ -385,6 +690,13 @@ const mediaRoot = '/media/lifestyle/ambient';
 
 <style>
   .living-room {
+    --depth-sky-x: 0px;
+    --depth-clouds-x: 0px;
+    --depth-harbor-x: 0px;
+    --depth-boat-x: 0px;
+    --depth-room-x: 0px;
+    --depth-shadow-x: 0px;
+    --depth-table-x: 0px;
     position: relative;
     height: 100vh;
     height: 100svh;
@@ -394,15 +706,56 @@ const mediaRoot = '/media/lifestyle/ambient';
     color: #fff8e7;
   }
 
+  .living-room__viewport {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    overflow: hidden;
+    outline: none;
+    overscroll-behavior: contain;
+  }
+
+  .living-room__viewport:focus-visible {
+    outline: 3px solid #ffd64f;
+    outline-offset: -5px;
+  }
+
   .living-room__stage {
-    --stage-offset-x: -50%;
     position: absolute;
     left: 50%;
     top: 50%;
     width: max(100vw, calc(100vh * 16 / 9));
     height: max(100vh, calc(100vw * 9 / 16));
     overflow: hidden;
-    transform: translate(var(--stage-offset-x), -50%);
+    transform: translate(-50%, -50%);
+  }
+
+  .living-room__camera {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    transform: scale(1.035);
+    transform-origin: 50% 50%;
+  }
+
+  .living-room.has-world-overflow .living-room__viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .living-room.has-world-overflow
+  .living-room__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .living-room.has-world-overflow .living-room__stage {
+    position: relative;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   @supports (height: 100svh) {
@@ -412,19 +765,315 @@ const mediaRoot = '/media/lifestyle/ambient';
     }
   }
 
-  .living-room__video {
+  .living-room__fallback,
+  .living-room__stack,
+  .living-room__plane,
+  .living-room__plane > img,
+  .living-room__boat-rock,
+  .living-room__boat-rock > img,
+  .living-room__hotspot-plane {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     max-width: none;
+  }
+
+  .living-room__fallback {
+    z-index: 1;
     object-fit: fill;
     opacity: 0;
     transition: opacity 520ms ease;
   }
 
-  .living-room__video.is-active {
+  .living-room[data-renderer='fallback'] .living-room__fallback.is-active {
     opacity: 1;
+  }
+
+  .living-room__stack {
+    z-index: 2;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 520ms ease;
+  }
+
+  .living-room[data-renderer='layers'] .living-room__stack.is-active {
+    opacity: 1;
+  }
+
+  .living-room__plane > img,
+  .living-room__boat-rock > img {
+    display: block;
+    object-fit: fill;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .living-room__plane--sky {
+    z-index: 10;
+    transform: translate3d(var(--depth-sky-x), 0, 0);
+  }
+
+  .living-room__plane--clouds {
+    z-index: 20;
+    transform: translate3d(var(--depth-clouds-x), 0, 0);
+  }
+
+  .living-room__plane--harbor {
+    z-index: 30;
+    transform: translate3d(var(--depth-harbor-x), 0, 0);
+  }
+
+  .living-room__plane--boat {
+    z-index: 40;
+    transform: translate3d(var(--depth-boat-x), 0, 0);
+  }
+
+  .living-room__plane--room {
+    z-index: 50;
+    transform: translate3d(var(--depth-room-x), 0, 0);
+  }
+
+  .living-room__plane--shadow {
+    z-index: 60;
+    transform: translate3d(var(--depth-shadow-x), 0, 0);
+  }
+
+  .living-room__plane--table {
+    z-index: 70;
+    transform: translate3d(var(--depth-table-x), 0, 0);
+  }
+
+  .living-room__hotspot-plane {
+    z-index: 80;
+    transform: translate3d(var(--depth-room-x), 0, 0);
+    pointer-events: none;
+  }
+
+  .living-room__boat-rock {
+    transform-origin: 59.84% 27.14%;
+    animation: living-room-boat-rock 4s ease-in-out infinite;
+  }
+
+  @keyframes living-room-boat-rock {
+    0%,
+    100% {
+      transform: translateY(.55px) rotate(0deg);
+    }
+    25% {
+      transform: translateY(0) rotate(.9deg);
+    }
+    50% {
+      transform: translateY(-.55px) rotate(0deg);
+    }
+    75% {
+      transform: translateY(0) rotate(-.9deg);
+    }
+  }
+
+  .living-room__steam {
+    position: absolute;
+    z-index: 2;
+    /* Registered mug opening: approximately (1050, 599) on 1672×941. */
+    left: 62.8%;
+    top: 53.9%;
+    width: 4.6%;
+    height: 9.8%;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .living-room__steam span {
+    --steam-index: 0;
+    --steam-sway: -38%;
+    --steam-drift: 42%;
+    --steam-turn: -24deg;
+    --steam-turn-end: 24deg;
+    position: absolute;
+    left: 34%;
+    bottom: 0;
+    width: 32%;
+    height: 34%;
+    border-radius: 48% 56% 52% 44%;
+    background:
+      radial-gradient(
+        ellipse at 48% 54%,
+        rgba(250, 244, 226, .52) 0 24%,
+        rgba(246, 238, 213, .3) 42%,
+        rgba(246, 238, 213, 0) 74%
+      );
+    filter: blur(3.5px);
+    opacity: 0;
+    animation: living-room-steam 2.8s ease-out infinite;
+    animation-delay: calc(var(--steam-index) * -0.4s);
+  }
+
+  .living-room__steam span:nth-child(even) {
+    --steam-sway: 42%;
+    --steam-drift: -48%;
+    --steam-turn: 27deg;
+    --steam-turn-end: -27deg;
+  }
+
+  .living-room__steam span:nth-child(3n) {
+    --steam-sway: -18%;
+    --steam-drift: 62%;
+    --steam-turn: -34deg;
+    --steam-turn-end: 34deg;
+  }
+
+  .living-room__steam span:nth-child(4n) {
+    --steam-sway: 24%;
+    --steam-drift: -64%;
+    --steam-turn: 32deg;
+    --steam-turn-end: -32deg;
+  }
+
+  @keyframes living-room-steam {
+    0% {
+      opacity: 0;
+      transform:
+        translate3d(0, 6%, 0)
+        rotate(0deg)
+        scale(.42, .32);
+    }
+    22% {
+      opacity: .42;
+    }
+    54% {
+      opacity: .34;
+      transform:
+        translate3d(var(--steam-sway), -102%, 0)
+        rotate(var(--steam-turn))
+        scale(1.08, 1.16);
+    }
+    100% {
+      opacity: 0;
+      transform:
+        translate3d(var(--steam-drift), -238%, 0)
+        rotate(var(--steam-turn-end))
+        scale(1.72, 1.62);
+    }
+  }
+
+  .living-room__lamp-glow,
+  .living-room__device-glow,
+  .living-room__lighthouse-glow {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    animation: living-room-practical-flicker 3.2s ease-in-out infinite;
+  }
+
+  .living-room__lamp-glow {
+    width: 11%;
+    aspect-ratio: 1;
+    top: 4.2%;
+    background: rgba(255, 174, 70, .13);
+    filter: blur(28px);
+  }
+
+  .living-room__lamp-glow.is-left {
+    left: 14.8%;
+  }
+
+  .living-room__lamp-glow.is-right {
+    right: 11.4%;
+    width: 15%;
+    opacity: .6;
+    animation-delay: -1.35s;
+  }
+
+  .living-room__device-glow {
+    left: 38.8%;
+    top: 62%;
+    width: 5%;
+    aspect-ratio: 1;
+    background: rgba(87, 170, 255, .15);
+    filter: blur(15px);
+    animation-delay: -.72s;
+  }
+
+  @keyframes living-room-practical-flicker {
+    0%,
+    18%,
+    24%,
+    66%,
+    100% {
+      opacity: .72;
+    }
+    21% {
+      opacity: .55;
+    }
+    70% {
+      opacity: .82;
+    }
+  }
+
+  .living-room__lighthouse-glow {
+    z-index: 2;
+    left: 40.1%;
+    top: 7.2%;
+    width: 4.2%;
+    aspect-ratio: 1;
+    background: rgba(255, 198, 112, .52);
+    box-shadow: 0 0 1.8rem .7rem rgba(255, 178, 72, .3);
+    filter: blur(5px);
+  }
+
+  .living-room__moon-reflection {
+    position: absolute;
+    z-index: 2;
+    left: 55.4%;
+    top: 18%;
+    width: 6%;
+    height: 19%;
+    pointer-events: none;
+    filter: blur(.35px);
+    mix-blend-mode: screen;
+  }
+
+  .living-room__moon-reflection span {
+    --reflection-index: 0;
+    position: absolute;
+    left: 50%;
+    top: calc(var(--reflection-index) * 9%);
+    width: calc(12% + var(--reflection-index) * 7%);
+    height: 1.2%;
+    border-radius: 999px;
+    background: rgba(190, 221, 255, .52);
+    opacity: .35;
+    transform: translateX(-50%);
+    animation: living-room-water-shimmer 2.8s ease-in-out infinite;
+    animation-delay: calc(var(--reflection-index) * -.19s);
+  }
+
+  @keyframes living-room-water-shimmer {
+    0%,
+    100% {
+      opacity: .22;
+      transform: translateX(-56%) scaleX(.72);
+    }
+    50% {
+      opacity: .58;
+      transform: translateX(-44%) scaleX(1.08);
+    }
+  }
+
+  .living-room.is-ambient-paused .living-room__boat-rock,
+  .living-room.is-ambient-paused .living-room__steam span,
+  .living-room.is-ambient-paused .living-room__lamp-glow,
+  .living-room.is-ambient-paused .living-room__device-glow,
+  .living-room.is-ambient-paused .living-room__lighthouse-glow,
+  .living-room.is-ambient-paused .living-room__moon-reflection span,
+  .living-room.is-document-hidden .living-room__boat-rock,
+  .living-room.is-document-hidden .living-room__steam span,
+  .living-room.is-document-hidden .living-room__lamp-glow,
+  .living-room.is-document-hidden .living-room__device-glow,
+  .living-room.is-document-hidden .living-room__lighthouse-glow,
+  .living-room.is-document-hidden .living-room__moon-reflection span {
+    animation-play-state: paused;
   }
 
   .living-room__photo {
@@ -438,6 +1087,7 @@ const mediaRoot = '/media/lifestyle/ambient';
     background: transparent;
     color: #fff8e7;
     cursor: pointer;
+    pointer-events: auto;
   }
 
   .living-room__photo-glow {
@@ -509,12 +1159,13 @@ const mediaRoot = '/media/lifestyle/ambient';
 
   .living-room__photo:disabled {
     cursor: default;
+    pointer-events: none;
   }
 
-  .living-room__back {
+  .living-room__back,
+  .living-room__theme-toggle {
     position: fixed;
     z-index: 5;
-    left: max(1rem, env(safe-area-inset-left));
     top: max(1rem, env(safe-area-inset-top));
     display: inline-flex;
     min-height: 2.75rem;
@@ -524,11 +1175,9 @@ const mediaRoot = '/media/lifestyle/ambient';
     border-radius: 999px;
     background: rgba(13, 34, 32, .72);
     box-shadow: 0 8px 24px rgba(8, 22, 20, .3);
-    padding: .5rem .85rem;
     color: #fff8e7;
     font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
     font-size: .78rem;
-    text-decoration: none;
     opacity: 0;
     pointer-events: none;
     transform: translateY(-.35rem);
@@ -539,60 +1188,36 @@ const mediaRoot = '/media/lifestyle/ambient';
       background 180ms ease;
   }
 
-  .living-room.is-interactive .living-room__back {
+  .living-room__back {
+    left: max(1rem, env(safe-area-inset-left));
+    padding: .5rem .85rem;
+    text-decoration: none;
+  }
+
+  .living-room__theme-toggle {
+    right: max(1rem, env(safe-area-inset-right));
+    padding: .45rem .8rem .45rem .48rem;
+    cursor: pointer;
+  }
+
+  .living-room.is-interactive .living-room__back,
+  .living-room.is-interactive:not(.is-theme-loading)
+  .living-room__theme-toggle {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
   }
 
   .living-room__back:hover,
-  .living-room__back:focus-visible {
+  .living-room__back:focus-visible,
+  .living-room__theme-toggle:hover,
+  .living-room__theme-toggle:focus-visible {
     background: rgba(13, 34, 32, .94);
     transform: translateY(-2px);
   }
 
   .living-room__back[aria-disabled='true'] {
     pointer-events: none;
-  }
-
-  .living-room__theme-toggle {
-    position: fixed;
-    z-index: 5;
-    right: max(1rem, env(safe-area-inset-right));
-    top: max(1rem, env(safe-area-inset-top));
-    display: inline-flex;
-    min-height: 2.75rem;
-    align-items: center;
-    gap: .55rem;
-    border: 1px solid rgba(255, 248, 231, .68);
-    border-radius: 999px;
-    background: rgba(13, 34, 32, .72);
-    box-shadow: 0 8px 24px rgba(8, 22, 20, .3);
-    padding: .45rem .8rem .45rem .48rem;
-    color: #fff8e7;
-    cursor: pointer;
-    font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
-    font-size: .78rem;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-.35rem);
-    backdrop-filter: blur(8px);
-    transition:
-      opacity 220ms ease,
-      transform 220ms ease,
-      background 180ms ease;
-  }
-
-  .living-room.is-interactive .living-room__theme-toggle {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-  }
-
-  .living-room__theme-toggle:hover,
-  .living-room__theme-toggle:focus-visible {
-    background: rgba(13, 34, 32, .94);
-    transform: translateY(-2px);
   }
 
   .living-room__theme-icon {
@@ -632,11 +1257,48 @@ const mediaRoot = '/media/lifestyle/ambient';
     transition-duration: 350ms;
   }
 
-  @media (max-width: 767px) {
-    .living-room__stage {
-      --stage-offset-x: -43%;
-    }
+  .living-room__explore-cue {
+    position: fixed;
+    z-index: 4;
+    left: 50%;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: 0;
+    border: 1px solid rgba(255, 248, 231, .42);
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .68);
+    padding: .4rem .72rem;
+    color: rgba(255, 248, 231, .82);
+    font-size: .66rem;
+    letter-spacing: .06em;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, .4rem);
+    backdrop-filter: blur(8px);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
 
+  .living-room.has-world-overflow.is-interactive:not(.has-explored)
+  .living-room__explore-cue {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .living-room__edge-copy {
+    display: none;
+  }
+
+  .living-room.has-fine-pointer .living-room__swipe-copy {
+    display: none;
+  }
+
+  .living-room.has-fine-pointer .living-room__edge-copy {
+    display: inline;
+  }
+
+  @media (max-width: 767px) {
     .living-room__back {
       left: max(.7rem, env(safe-area-inset-left));
       top: max(.7rem, env(safe-area-inset-top));
@@ -653,11 +1315,22 @@ const mediaRoot = '/media/lifestyle/ambient';
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .living-room__boat-rock,
+    .living-room__steam span,
+    .living-room__lamp-glow,
+    .living-room__device-glow,
+    .living-room__lighthouse-glow,
+    .living-room__moon-reflection span {
+      animation: none !important;
+    }
+
     .living-room__photo-glow,
     .living-room__photo-label,
     .living-room__back,
     .living-room__theme-toggle,
-    .living-room__video,
+    .living-room__fallback,
+    .living-room__stack,
+    .living-room__explore-cue,
     .living-room__curtain {
       transition-duration: 1ms !important;
     }

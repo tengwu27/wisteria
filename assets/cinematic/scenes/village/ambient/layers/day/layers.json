@@ -1,0 +1,43 @@
+{
+  "geometryMaster": {
+    "source": "assets/cinematic/scenes/village/ambient/sources/village-day-master-v3.jpg",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "16:9"
+  },
+  "ambientVideo": {
+    "publicPath": "public/media/village/ambient/day-v5.mp4",
+    "posterPath": "public/media/village/ambient/day-v5-poster.jpg",
+    "durationSeconds": 5,
+    "fps": 30,
+    "motionOwners": {
+      "airplane": "periodic parked-engine vibration",
+      "car": "periodic idle vibration",
+      "sailboat": "one periodic rock-and-bob cycle"
+    },
+    "protectedStaticRegions": [
+      "all trees and foliage",
+      "buildings and roads",
+      "shoreline and water",
+      "flags and lamps",
+      "camera and crop"
+    ],
+    "renderer": "scripts/media/render_layered_cinemagraph.py"
+  },
+  "nearCloudLayer": {
+    "file": "01-clouds-near-v2.png",
+    "publicPath": "public/media/village/ambient/clouds-day-near-v2.png",
+    "source": "../../sources/clouds-day-near-v2-keyed.png",
+    "delivery": "transparent PNG",
+    "width": 3072,
+    "height": 1728,
+    "composition": "scattered flattened cloud islands viewed from above",
+    "stageCoveragePercent": 140,
+    "overscanPercentPerEdge": 20,
+    "motion": "DOM parallax only",
+    "depth": "near foreground atmosphere",
+    "focusSpeedRatio": 1.55,
+    "horizontalExplorationExtraRatio": 0.12,
+    "toningScript": "scripts/media/tone_cloud_plate.py"
+  }
+}
