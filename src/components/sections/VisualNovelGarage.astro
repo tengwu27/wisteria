@@ -1,0 +1,780 @@
+---
+import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOverlay.astro';
+
+const mediaRoot = '/media/garage/parallax';
+---
+
+<section
+  class="garage-room is-ambient-paused"
+  data-garage-room
+  data-state="arriving"
+  data-renderer="fallback"
+  aria-label="Wisteria 村庄的复古未来摩托车工坊"
+>
+  <div
+    class="garage-room__viewport"
+    data-garage-viewport
+    tabindex="0"
+    aria-label="摩托车工坊全景；画面较宽时可以左右探索"
+  >
+    <div class="garage-room__stage" data-garage-stage>
+      <div class="garage-room__camera">
+        {(['day', 'night'] as const).map((theme) => (
+          <img
+            class="garage-room__fallback"
+            data-garage-fallback={theme}
+            src={`${mediaRoot}/${theme}/00-composite.png`}
+            alt=""
+            aria-hidden="true"
+          />
+        ))}
+
+        {(['day', 'night'] as const).map((theme) => (
+          <div
+            class="garage-room__stack"
+            data-garage-stack={theme}
+            aria-hidden="true"
+          >
+            <div class="garage-room__plane garage-room__plane--exterior">
+              <img
+                data-garage-layer-image={theme}
+                data-src={`${mediaRoot}/${theme}/01-garden-cafe-exterior.png`}
+                alt=""
+              />
+            </div>
+            <div class="garage-room__plane garage-room__plane--shell">
+              <img
+                data-garage-layer-image={theme}
+                data-src={`${mediaRoot}/${theme}/02-garage-shell.png`}
+                alt=""
+              />
+              {theme === 'night' && (
+                <>
+                  <span class="garage-room__lamp-glow is-left"></span>
+                  <span class="garage-room__lamp-glow is-center"></span>
+                  <span class="garage-room__lamp-glow is-right"></span>
+                </>
+              )}
+            </div>
+            <div class="garage-room__plane garage-room__plane--motorcycles">
+              <img
+                data-garage-layer-image={theme}
+                data-src={`${mediaRoot}/${theme}/03-motorcycles.png`}
+                alt=""
+              />
+              <span class="garage-room__motor-glint" aria-hidden="true"></span>
+            </div>
+          </div>
+        ))}
+
+        <div class="garage-room__hotspot-plane">
+          <button
+            class="garage-room__motorcycles"
+            type="button"
+            data-motorcycles-trigger
+            aria-label="查看工坊中央的两台经典摩托车"
+            disabled
+          >
+            <span class="garage-room__hotspot-ring" aria-hidden="true"></span>
+            <span class="garage-room__hotspot-label" aria-hidden="true">
+              <span>查看摩托车</span>
+              <small>INSPECT</small>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="garage-room__explore-cue" aria-hidden="true">
+    <span>←</span>
+    <span class="garage-room__swipe-copy">左右滑动探索</span>
+    <span class="garage-room__edge-copy">将光标移至边缘探索</span>
+    <span>→</span>
+  </p>
+
+  <div class="garage-room__dialogue" data-garage-dialogue aria-hidden="true">
+    <b>工坊笔记</b>
+    <span>紫色与黑色的双缸老车刚完成调校；左侧工作台上的电机还等着重新装配。</span>
+  </div>
+
+  <a class="garage-room__back" href="/" data-garage-back aria-label="返回村庄">
+    <span aria-hidden="true">←</span>
+    <span>返回村庄</span>
+  </a>
+
+  <button
+    class="garage-room__theme-toggle"
+    type="button"
+    data-garage-theme-toggle
+    aria-label="切换为夜晚工坊"
+    aria-pressed="false"
+    disabled
+  >
+    <span class="garage-room__theme-icon" data-garage-theme-icon aria-hidden="true">☀</span>
+    <span data-garage-theme-label>白昼</span>
+  </button>
+
+  <p class="sr-only" data-garage-status aria-live="polite">正在进入摩托车工坊</p>
+  <CinematicSceneExitOverlay
+    label="从摩托车工坊返回村庄的过渡动画"
+    day={{
+      src: '/media/garage/transition/garage-reveal-day-v1-reverse.mp4',
+      poster:
+        '/media/garage/transition/garage-reveal-day-v1-reverse-poster.jpg'
+    }}
+    night={{
+      src: '/media/garage/transition/garage-reveal-night-v1-reverse.mp4',
+      poster:
+        '/media/garage/transition/garage-reveal-night-v1-reverse-poster.jpg'
+    }}
+  />
+  <div class="garage-room__curtain" aria-hidden="true"></div>
+</section>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+  import { createAdaptiveCinematicViewport } from '@/utils/adaptiveCinematicViewport';
+  import { createCinematicExitSequence } from '@/utils/cinematicExitSequence';
+  import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
+
+  const SESSION_KEY = 'wisteria-hero-environment';
+  const BUNDLE_TIMEOUT = 4000;
+
+  type Environment = 'day' | 'night';
+  type GarageState = 'arriving' | 'idle' | 'exiting';
+
+  function getEnvironment(): Environment {
+    try {
+      const stored = window.sessionStorage.getItem(SESSION_KEY);
+      if (stored === 'day' || stored === 'night') return stored;
+    } catch {
+      // The local clock remains a stable fallback.
+    }
+    const hour = new Date().getHours();
+    return hour >= 7 && hour < 19 ? 'day' : 'night';
+  }
+
+  function initialiseGarageRoom() {
+    const root = document.querySelector<HTMLElement>('[data-garage-room]');
+    if (!root || root.dataset.ready === 'true') return;
+    const viewport = root.querySelector<HTMLElement>('[data-garage-viewport]');
+    const stage = root.querySelector<HTMLElement>('[data-garage-stage]');
+    const dayStack = root.querySelector<HTMLElement>('[data-garage-stack="day"]');
+    const nightStack = root.querySelector<HTMLElement>('[data-garage-stack="night"]');
+    const dayFallback = root.querySelector<HTMLImageElement>('[data-garage-fallback="day"]');
+    const nightFallback = root.querySelector<HTMLImageElement>('[data-garage-fallback="night"]');
+    const motorcycles = root.querySelector<HTMLButtonElement>('[data-motorcycles-trigger]');
+    const dialogue = root.querySelector<HTMLElement>('[data-garage-dialogue]');
+    const back = root.querySelector<HTMLAnchorElement>('[data-garage-back]');
+    const toggle = root.querySelector<HTMLButtonElement>('[data-garage-theme-toggle]');
+    const icon = root.querySelector<HTMLElement>('[data-garage-theme-icon]');
+    const label = root.querySelector<HTMLElement>('[data-garage-theme-label]');
+    const status = root.querySelector<HTMLElement>('[data-garage-status]');
+    const exitOverlay = root.querySelector<HTMLElement>('[data-cinematic-scene-exit]');
+    if (
+      !viewport || !stage || !dayStack || !nightStack ||
+      !dayFallback || !nightFallback || !motorcycles || !dialogue ||
+      !back || !toggle || !icon || !label || !status || !exitOverlay
+    ) return;
+    root.dataset.ready = 'true';
+
+    const lifecycle = new AbortController();
+    const { signal } = lifecycle;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const stacks: Record<Environment, HTMLElement> = {
+      day: dayStack,
+      night: nightStack
+    };
+    const fallbacks: Record<Environment, HTMLImageElement> = {
+      day: dayFallback,
+      night: nightFallback
+    };
+    const bundles = new Map<Environment, Promise<boolean>>();
+    let environment = getEnvironment();
+    let state: GarageState = 'arriving';
+    let renderer: 'layers' | 'fallback' = 'fallback';
+    let themeLoading = false;
+    let navigationTimer = 0;
+    let dialogueTimer = 0;
+
+    const adaptive = createAdaptiveCinematicViewport({
+      root,
+      viewport,
+      world: stage,
+      signal,
+      initialCenterRatio: 0.54,
+      isInteractive: () => state === 'idle' && !themeLoading
+    });
+    const depth = createHorizontalDepthParallax({
+      root,
+      viewport,
+      world: stage,
+      signal,
+      neutralCenterRatio: 0.54,
+      isInteractive: () =>
+        state === 'idle' && renderer === 'layers' && !themeLoading,
+      planes: [
+        { property: '--depth-exterior-x', maximumPercent: 0.22 },
+        { property: '--depth-shell-x', maximumPercent: 0.55 },
+        { property: '--depth-motorcycles-x', maximumPercent: 1.3 }
+      ]
+    });
+
+    const setState = (next: GarageState) => {
+      state = next;
+      root.dataset.state = next;
+      root.classList.toggle('is-ambient-paused', next !== 'idle');
+      depth.setSuspended(
+        next !== 'idle' || renderer !== 'layers' || themeLoading,
+        next !== 'idle'
+      );
+    };
+
+    const loadBundle = (theme: Environment) => {
+      const existing = bundles.get(theme);
+      if (existing) return existing;
+      const promise = new Promise<boolean>((resolve) => {
+        const images = Array.from(
+          stacks[theme].querySelectorAll<HTMLImageElement>(
+            '[data-garage-layer-image]'
+          )
+        );
+        images.forEach((image) => {
+          if (!image.src && image.dataset.src) image.src = image.dataset.src;
+        });
+        const timeout = window.setTimeout(() => resolve(false), BUNDLE_TIMEOUT);
+        Promise.all(images.map((image) => new Promise<void>((done, fail) => {
+          if (image.complete && image.naturalWidth > 0) {
+            if (typeof image.decode === 'function') {
+              image.decode().then(done).catch(done);
+            } else {
+              done();
+            }
+            return;
+          }
+          image.addEventListener('load', () => done(), { once: true });
+          image.addEventListener('error', () => fail(), { once: true });
+        }))).then(() => {
+          window.clearTimeout(timeout);
+          stacks[theme].dataset.loaded = 'true';
+          resolve(true);
+        }).catch(() => {
+          window.clearTimeout(timeout);
+          bundles.delete(theme);
+          resolve(false);
+        });
+      });
+      bundles.set(theme, promise);
+      return promise;
+    };
+
+    const showTheme = (theme: Environment, nextRenderer: 'layers' | 'fallback') => {
+      environment = theme;
+      renderer = nextRenderer;
+      root.dataset.environment = theme;
+      root.dataset.renderer = nextRenderer;
+      stacks.day.classList.toggle('is-active', theme === 'day');
+      stacks.night.classList.toggle('is-active', theme === 'night');
+      fallbacks.day.classList.toggle('is-active', theme === 'day');
+      fallbacks.night.classList.toggle('is-active', theme === 'night');
+      const night = theme === 'night';
+      toggle.setAttribute('aria-pressed', String(night));
+      toggle.setAttribute('aria-label', night ? '切换为白昼工坊' : '切换为夜晚工坊');
+      icon.textContent = night ? '☾' : '☀';
+      label.textContent = night ? '夜晚' : '白昼';
+    };
+
+    const navigateHome = async () => {
+      window.clearTimeout(navigationTimer);
+      try {
+        await navigate('/');
+      } catch {
+        window.location.assign('/');
+      }
+    };
+    const exitSequence = createCinematicExitSequence({
+      overlay: exitOverlay,
+      reduceMotion,
+      signal,
+      onComplete: navigateHome
+    });
+
+    const finishArrival = () => {
+      root.classList.add('is-revealed');
+      window.setTimeout(() => {
+        if (state !== 'arriving') return;
+        setState('idle');
+        root.classList.add('is-interactive');
+        motorcycles.disabled = false;
+        toggle.disabled = false;
+        depth.recalculate();
+        status.textContent = '已进入摩托车工坊。可以查看中央的两台摩托车。';
+      }, reduceMotion.matches ? 1 : 500);
+    };
+
+    void loadBundle(environment).then((ready) => {
+      if (signal.aborted) return;
+      showTheme(environment, ready ? 'layers' : 'fallback');
+      finishArrival();
+      const inactive: Environment = environment === 'day' ? 'night' : 'day';
+      window.setTimeout(() => void loadBundle(inactive), 800);
+    });
+
+    toggle.addEventListener('click', async () => {
+      if (state !== 'idle' || themeLoading) return;
+      themeLoading = true;
+      toggle.disabled = true;
+      depth.setSuspended(true);
+      const next: Environment = environment === 'day' ? 'night' : 'day';
+      const ready = await loadBundle(next);
+      if (signal.aborted || state !== 'idle') return;
+      showTheme(next, ready ? 'layers' : 'fallback');
+      try {
+        window.sessionStorage.setItem(SESSION_KEY, next);
+      } catch {
+        // Theme switching still works with blocked storage.
+      }
+      window.setTimeout(() => {
+        themeLoading = false;
+        toggle.disabled = false;
+        depth.setSuspended(renderer !== 'layers');
+      }, reduceMotion.matches ? 1 : 540);
+    }, { signal });
+
+    motorcycles.addEventListener('click', () => {
+      if (state !== 'idle') return;
+      window.clearTimeout(dialogueTimer);
+      dialogue.setAttribute('aria-hidden', 'false');
+      root.classList.add('has-dialogue');
+      status.textContent =
+        '紫色与黑色的双缸老车刚完成调校；左侧电机仍在维修。';
+      dialogueTimer = window.setTimeout(() => {
+        root.classList.remove('has-dialogue');
+        dialogue.setAttribute('aria-hidden', 'true');
+      }, 5200);
+    }, { signal });
+
+    back.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (state !== 'idle') return;
+      setState('exiting');
+      root.classList.remove('is-interactive');
+      root.classList.add('is-returning');
+      motorcycles.disabled = true;
+      toggle.disabled = true;
+      back.setAttribute('aria-disabled', 'true');
+      adaptive.stopMotion(true);
+      exitSequence.start(environment);
+    }, { signal });
+
+    document.addEventListener('visibilitychange', () => {
+      root.classList.toggle('is-document-hidden', document.hidden);
+      depth.setSuspended(
+        document.hidden || state !== 'idle' || renderer !== 'layers',
+        document.hidden
+      );
+    }, { signal });
+
+    window.addEventListener('pageshow', (event) => {
+      if (!event.persisted) return;
+      exitSequence.reset();
+      root.classList.remove('is-returning');
+      root.classList.add('is-revealed', 'is-interactive');
+      back.removeAttribute('aria-disabled');
+      motorcycles.disabled = false;
+      toggle.disabled = false;
+      setState('idle');
+      adaptive.recalculate(true);
+      depth.recalculate();
+    }, { signal });
+
+    document.addEventListener('astro:before-swap', () => {
+      lifecycle.abort();
+      window.clearTimeout(navigationTimer);
+      window.clearTimeout(dialogueTimer);
+      exitSequence.pause();
+    }, { once: true, signal });
+  }
+
+  initialiseGarageRoom();
+  document.addEventListener('astro:page-load', initialiseGarageRoom);
+</script>
+
+<style>
+  .garage-room {
+    --depth-exterior-x: 0px;
+    --depth-shell-x: 0px;
+    --depth-motorcycles-x: 0px;
+    position: relative;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    isolation: isolate;
+    background: #101d1b;
+    color: #fff8e7;
+  }
+
+  .garage-room__viewport {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    overflow: hidden;
+    outline: none;
+    overscroll-behavior: contain;
+  }
+
+  .garage-room__viewport:focus-visible {
+    outline: 3px solid #ffd64f;
+    outline-offset: -5px;
+  }
+
+  .garage-room__stage {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100vw, calc(100vh * 16 / 9));
+    height: max(100vh, calc(100vw * 9 / 16));
+    overflow: hidden;
+    transform: translate(-50%, -50%);
+  }
+
+  .garage-room__camera {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    transform: scale(1.035);
+    transform-origin: 50% 50%;
+  }
+
+  .garage-room.has-world-overflow .garage-room__viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .garage-room.has-world-overflow .garage-room__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .garage-room.has-world-overflow .garage-room__stage {
+    position: relative;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  @supports (height: 100svh) {
+    .garage-room__stage {
+      width: max(100vw, calc(100svh * 16 / 9));
+      height: max(100svh, calc(100vw * 9 / 16));
+    }
+  }
+
+  .garage-room__fallback,
+  .garage-room__stack,
+  .garage-room__plane,
+  .garage-room__plane > img,
+  .garage-room__hotspot-plane {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+  }
+
+  .garage-room__fallback {
+    z-index: 1;
+    object-fit: fill;
+    opacity: 0;
+    transition: opacity 520ms ease;
+  }
+
+  .garage-room[data-renderer='fallback'] .garage-room__fallback.is-active,
+  .garage-room[data-renderer='layers'] .garage-room__stack.is-active {
+    opacity: 1;
+  }
+
+  .garage-room__stack {
+    z-index: 2;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 520ms ease;
+  }
+
+  .garage-room__plane > img {
+    display: block;
+    object-fit: fill;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .garage-room__plane--exterior {
+    z-index: 5;
+    transform: translate3d(var(--depth-exterior-x), 0, 0);
+  }
+
+  .garage-room__plane--shell {
+    z-index: 10;
+    transform: translate3d(var(--depth-shell-x), 0, 0);
+  }
+
+  .garage-room__plane--motorcycles {
+    z-index: 20;
+    transform: translate3d(var(--depth-motorcycles-x), 0, 0);
+  }
+
+  .garage-room__hotspot-plane {
+    z-index: 30;
+    transform: translate3d(var(--depth-motorcycles-x), 0, 0);
+    pointer-events: none;
+  }
+
+  .garage-room__motorcycles {
+    position: absolute;
+    left: 38%;
+    top: 43%;
+    width: 39%;
+    height: 43%;
+    border: 0;
+    border-radius: 40%;
+    background: transparent;
+    color: #fff8e7;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .garage-room__hotspot-ring {
+    position: absolute;
+    left: 55%;
+    top: 64%;
+    width: clamp(2.25rem, 3.6vw, 4.2rem);
+    aspect-ratio: 1;
+    border: 2px solid rgba(255, 248, 231, .88);
+    border-radius: 50%;
+    box-shadow: 0 0 0 7px rgba(255, 214, 79, .18);
+    transform: translate(-50%, -50%);
+  }
+
+  .garage-room__hotspot-ring::after {
+    content: '';
+    position: absolute;
+    inset: 34%;
+    border-radius: 50%;
+    background: #ffd64f;
+    box-shadow: 0 0 12px rgba(255, 214, 79, .9);
+  }
+
+  .garage-room__hotspot-label {
+    position: absolute;
+    left: 55%;
+    top: 78%;
+    display: grid;
+    min-width: max-content;
+    border: 1px solid rgba(255, 248, 231, .65);
+    border-radius: 999px;
+    background: rgba(16, 35, 32, .78);
+    padding: .42rem .75rem .36rem;
+    opacity: 0;
+    text-align: center;
+    transform: translate(-50%, .35rem);
+    backdrop-filter: blur(8px);
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .garage-room__hotspot-label small {
+    margin-top: .2rem;
+    font-size: .48rem;
+    font-weight: 900;
+    letter-spacing: .18em;
+    opacity: .7;
+  }
+
+  .garage-room__motorcycles:hover .garage-room__hotspot-label,
+  .garage-room__motorcycles:focus-visible .garage-room__hotspot-label {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .garage-room__motorcycles:focus-visible {
+    outline: 3px solid #ffd64f;
+    outline-offset: 5px;
+  }
+
+  .garage-room__lamp-glow {
+    position: absolute;
+    top: 4%;
+    width: 9%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: rgba(255, 174, 72, .14);
+    filter: blur(26px);
+    mix-blend-mode: screen;
+    animation: garage-room-flicker 3.4s ease-in-out infinite;
+  }
+
+  .garage-room__lamp-glow.is-left { left: 13.5%; }
+  .garage-room__lamp-glow.is-center { left: 47%; animation-delay: -1.1s; }
+  .garage-room__lamp-glow.is-right { right: 25%; animation-delay: -2s; }
+
+  .garage-room__motor-glint {
+    position: absolute;
+    left: 13.5%;
+    top: 48%;
+    width: 9%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: rgba(255, 179, 76, .12);
+    filter: blur(18px);
+    mix-blend-mode: screen;
+    animation: garage-room-flicker 4.2s ease-in-out infinite;
+  }
+
+  @keyframes garage-room-flicker {
+    0%, 18%, 24%, 70%, 100% { opacity: .72; }
+    21% { opacity: .52; }
+    74% { opacity: .84; }
+  }
+
+  .garage-room.is-ambient-paused .garage-room__lamp-glow,
+  .garage-room.is-ambient-paused .garage-room__motor-glint,
+  .garage-room.is-document-hidden .garage-room__lamp-glow,
+  .garage-room.is-document-hidden .garage-room__motor-glint {
+    animation-play-state: paused;
+  }
+
+  .garage-room__back,
+  .garage-room__theme-toggle {
+    position: fixed;
+    z-index: 5;
+    top: max(1rem, env(safe-area-inset-top));
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: .55rem;
+    border: 1px solid rgba(255, 248, 231, .68);
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .72);
+    padding: .48rem .82rem;
+    color: #fff8e7;
+    font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
+    font-size: .78rem;
+    opacity: 0;
+    pointer-events: none;
+    text-decoration: none;
+    transform: translateY(-.35rem);
+    backdrop-filter: blur(8px);
+    transition: opacity 220ms ease, transform 220ms ease, background 180ms ease;
+  }
+
+  .garage-room__back { left: max(1rem, env(safe-area-inset-left)); }
+  .garage-room__theme-toggle {
+    right: max(1rem, env(safe-area-inset-right));
+    cursor: pointer;
+  }
+
+  .garage-room.is-interactive .garage-room__back,
+  .garage-room.is-interactive .garage-room__theme-toggle {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .garage-room__theme-icon {
+    display: grid;
+    width: 1.9rem;
+    height: 1.9rem;
+    place-items: center;
+    border-radius: 50%;
+    background: #ffd64f;
+    color: #24231f;
+  }
+
+  .garage-room[data-environment='night'] .garage-room__theme-icon {
+    background: #b8caff;
+    color: #14233a;
+  }
+
+  .garage-room__dialogue {
+    position: fixed;
+    z-index: 6;
+    left: 50%;
+    bottom: max(1.2rem, env(safe-area-inset-bottom));
+    display: grid;
+    width: min(38rem, calc(100vw - 2rem));
+    gap: .3rem;
+    border: 1px solid rgba(255, 248, 231, .55);
+    border-radius: 1rem;
+    background: rgba(13, 34, 32, .88);
+    padding: .8rem 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, .6rem);
+    backdrop-filter: blur(10px);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+
+  .garage-room.has-dialogue .garage-room__dialogue {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .garage-room__explore-cue {
+    position: fixed;
+    z-index: 4;
+    left: 50%;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    display: flex;
+    gap: .5rem;
+    margin: 0;
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .68);
+    padding: .4rem .72rem;
+    font-size: .66rem;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, .4rem);
+  }
+
+  .garage-room.has-world-overflow.is-interactive:not(.has-explored)
+  .garage-room__explore-cue {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .garage-room__edge-copy { display: none; }
+  .garage-room.has-fine-pointer .garage-room__swipe-copy { display: none; }
+  .garage-room.has-fine-pointer .garage-room__edge-copy { display: inline; }
+
+  .garage-room__curtain {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    background: #101d1b;
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 500ms cubic-bezier(.22, .72, .22, 1);
+  }
+
+  .garage-room.is-revealed .garage-room__curtain {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .garage-room__stack,
+    .garage-room__fallback,
+    .garage-room__curtain,
+    .garage-room__dialogue,
+    .garage-room__back,
+    .garage-room__theme-toggle {
+      transition-duration: 1ms !important;
+    }
+    .garage-room__lamp-glow,
+    .garage-room__motor-glint {
+      animation: none !important;
+    }
+  }
+</style>

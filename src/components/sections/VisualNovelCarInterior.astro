@@ -2,72 +2,134 @@
 import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOverlay.astro';
 
 const mediaRoot = '/media/travel';
+const parallaxRoot = '/media/travel/parallax';
 ---
 
 <section
-  class="travel-cockpit"
+  class="travel-cockpit is-ambient-paused"
   data-travel-cockpit
   data-state="arriving"
+  data-renderer="fallback"
   aria-label="复古未来汽车里的旅行驾驶舱"
 >
-  <div class="travel-cockpit__stage">
-    <video
-      class="travel-cockpit__video travel-cockpit__arrival is-active"
-      data-arrival-video="day"
-      src={`${mediaRoot}/transition/car-interior-rise-day-v1.mp4`}
-      poster={`${mediaRoot}/transition/car-interior-rise-day-v1-poster.jpg`}
-      muted
-      playsinline
-      preload="auto"
-      aria-hidden="true"
-    ></video>
-    <video
-      class="travel-cockpit__video travel-cockpit__arrival"
-      data-arrival-video="night"
-      src={`${mediaRoot}/transition/car-interior-rise-night-v1.mp4`}
-      poster={`${mediaRoot}/transition/car-interior-rise-night-v1-poster.jpg`}
-      muted
-      playsinline
-      preload="auto"
-      aria-hidden="true"
-    ></video>
-    <video
-      class="travel-cockpit__video travel-cockpit__ambient"
-      data-ambient-video="day"
-      src={`${mediaRoot}/ambient/car-interior-day-v1.mp4`}
-      poster={`${mediaRoot}/ambient/car-interior-day-v1-poster.jpg`}
-      muted
-      loop
-      playsinline
-      preload="metadata"
-      aria-hidden="true"
-    ></video>
-    <video
-      class="travel-cockpit__video travel-cockpit__ambient"
-      data-ambient-video="night"
-      src={`${mediaRoot}/ambient/car-interior-night-v1.mp4`}
-      poster={`${mediaRoot}/ambient/car-interior-night-v1-poster.jpg`}
-      muted
-      loop
-      playsinline
-      preload="metadata"
-      aria-hidden="true"
-    ></video>
+  <div
+    class="travel-cockpit__viewport"
+    data-cockpit-viewport
+    tabindex="0"
+    aria-label="汽车驾驶舱全景；画面较宽时可以左右探索"
+  >
+    <div class="travel-cockpit__stage" data-cockpit-stage>
+      <video
+        class="travel-cockpit__video travel-cockpit__arrival is-active"
+        data-arrival-video="day"
+        src={`${mediaRoot}/transition/car-interior-rise-day-v1.mp4`}
+        poster={`${mediaRoot}/transition/car-interior-rise-day-v1-poster.jpg`}
+        muted
+        playsinline
+        preload="auto"
+        aria-hidden="true"
+      ></video>
+      <video
+        class="travel-cockpit__video travel-cockpit__arrival"
+        data-arrival-video="night"
+        src={`${mediaRoot}/transition/car-interior-rise-night-v1.mp4`}
+        poster={`${mediaRoot}/transition/car-interior-rise-night-v1-poster.jpg`}
+        muted
+        playsinline
+        preload="auto"
+        aria-hidden="true"
+      ></video>
+      <div class="travel-cockpit__camera">
+        <video
+          class="travel-cockpit__video travel-cockpit__ambient"
+          data-ambient-video="day"
+          src={`${mediaRoot}/ambient/car-interior-day-v1.mp4`}
+          poster={`${mediaRoot}/ambient/car-interior-day-v1-poster.jpg`}
+          muted
+          loop
+          playsinline
+          preload="none"
+          aria-hidden="true"
+        ></video>
+        <video
+          class="travel-cockpit__video travel-cockpit__ambient"
+          data-ambient-video="night"
+          src={`${mediaRoot}/ambient/car-interior-night-v1.mp4`}
+          poster={`${mediaRoot}/ambient/car-interior-night-v1-poster.jpg`}
+          muted
+          loop
+          playsinline
+          preload="none"
+          aria-hidden="true"
+        ></video>
 
-    <button
-      class="travel-cockpit__map"
-      type="button"
-      data-map-trigger
-      aria-label="查看副驾驶仪表台上的地图，打开旅行档案"
-      disabled
-    >
-      <span class="travel-cockpit__map-glow" aria-hidden="true"></span>
-      <span class="travel-cockpit__map-label" aria-hidden="true">
-        <span>查看地图</span>
-        <small>TRAVEL LOG</small>
-      </span>
-    </button>
+        {(['day', 'night'] as const).map((theme) => (
+          <div
+            class="travel-cockpit__stack"
+            data-cockpit-stack={theme}
+            aria-hidden="true"
+          >
+            <div class="travel-cockpit__plane travel-cockpit__plane--exterior">
+              <img
+                data-cockpit-layer-image={theme}
+                data-src={`${parallaxRoot}/${theme}/01-exterior.png`}
+                alt=""
+              />
+            </div>
+            <div class="travel-cockpit__plane travel-cockpit__plane--shell">
+              <img
+                data-cockpit-layer-image={theme}
+                data-src={`${parallaxRoot}/${theme}/02-cockpit-shell.png`}
+                alt=""
+              />
+            </div>
+            <div class="travel-cockpit__plane travel-cockpit__plane--charm">
+              <div class="travel-cockpit__charm-swing">
+                <img
+                  data-cockpit-layer-image={theme}
+                  data-src={`${parallaxRoot}/${theme}/03-buddha-charm.png`}
+                  alt=""
+                />
+              </div>
+            </div>
+            <div class="travel-cockpit__plane travel-cockpit__plane--seat">
+              <img
+                data-cockpit-layer-image={theme}
+                data-src={`${parallaxRoot}/${theme}/04-front-seat.png`}
+                alt=""
+              />
+            </div>
+          </div>
+        ))}
+
+        <div class="travel-cockpit__hotspot-plane">
+          <button
+            class="travel-cockpit__map"
+            type="button"
+            data-map-trigger
+            aria-label="查看副驾驶仪表台上的地图，打开旅行档案"
+            disabled
+          >
+            <span class="travel-cockpit__map-glow" aria-hidden="true"></span>
+            <span class="travel-cockpit__map-label" aria-hidden="true">
+              <span>查看地图</span>
+              <small>TRAVEL LOG</small>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <p class="travel-cockpit__arrival-skip" aria-hidden="true">
+    点击跳过
+  </p>
+  <p class="travel-cockpit__explore-cue" aria-hidden="true">
+    <span>←</span>
+    <span class="travel-cockpit__swipe-copy">左右滑动探索</span>
+    <span class="travel-cockpit__edge-copy">将光标移至边缘探索</span>
+    <span>→</span>
+  </p>
 
   <a
     class="travel-cockpit__back"
@@ -122,9 +184,12 @@ const mediaRoot = '/media/travel';
 
 <script>
   import { navigate } from 'astro:transitions/client';
+  import { createAdaptiveCinematicViewport } from '@/utils/adaptiveCinematicViewport';
   import { createCinematicExitSequence } from '@/utils/cinematicExitSequence';
+  import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
 
   const SESSION_KEY = 'wisteria-hero-environment';
+  const BUNDLE_TIMEOUT = 4000;
 
   type Environment = 'day' | 'night';
   type CockpitState = 'arriving' | 'idle' | 'exiting';
@@ -147,6 +212,8 @@ const mediaRoot = '/media/travel';
     const root = document.querySelector<HTMLElement>('[data-travel-cockpit]');
     if (!root || root.dataset.ready === 'true') return;
 
+    const viewport = root.querySelector<HTMLElement>('[data-cockpit-viewport]');
+    const stage = root.querySelector<HTMLElement>('[data-cockpit-stage]');
     const dayArrival = root.querySelector<HTMLVideoElement>(
       '[data-arrival-video="day"]'
     );
@@ -158,6 +225,12 @@ const mediaRoot = '/media/travel';
     );
     const nightAmbient = root.querySelector<HTMLVideoElement>(
       '[data-ambient-video="night"]'
+    );
+    const dayStack = root.querySelector<HTMLElement>(
+      '[data-cockpit-stack="day"]'
+    );
+    const nightStack = root.querySelector<HTMLElement>(
+      '[data-cockpit-stack="night"]'
     );
     const mapTrigger = root.querySelector<HTMLButtonElement>(
       '[data-map-trigger]'
@@ -182,10 +255,14 @@ const mediaRoot = '/media/travel';
     );
 
     if (
+      !viewport ||
+      !stage ||
       !dayArrival ||
       !nightArrival ||
       !dayAmbient ||
       !nightAmbient ||
+      !dayStack ||
+      !nightStack ||
       !mapTrigger ||
       !backLink ||
       !themeToggle ||
@@ -210,6 +287,11 @@ const mediaRoot = '/media/travel';
       day: dayAmbient,
       night: nightAmbient
     };
+    const stacks: Record<Environment, HTMLElement> = {
+      day: dayStack,
+      night: nightStack
+    };
+    const bundlePromises = new Map<Environment, Promise<boolean>>();
     const allVideos = [
       ...Object.values(arrivals),
       ...Object.values(ambients)
@@ -220,6 +302,8 @@ const mediaRoot = '/media/travel';
     let activeArrival = arrivals[environment];
     let activeAmbient = ambients[environment];
     let state: CockpitState = 'arriving';
+    let renderer: 'layers' | 'fallback' = 'fallback';
+    let themeLoading = false;
     let arrivalStarted = false;
     let settling = false;
     let readyTimer = 0;
@@ -227,13 +311,115 @@ const mediaRoot = '/media/travel';
     let navigationTimer = 0;
     let themeTimer = 0;
 
+    const adaptiveViewport = createAdaptiveCinematicViewport({
+      root,
+      viewport,
+      world: stage,
+      signal,
+      initialCenterRatio: 0.62,
+      isInteractive: () => state === 'idle'
+    });
+
+    const depth = createHorizontalDepthParallax({
+      root,
+      viewport,
+      world: stage,
+      signal,
+      neutralCenterRatio: 0.62,
+      isInteractive: () =>
+        state === 'idle' &&
+        renderer === 'layers' &&
+        !themeLoading,
+      planes: [
+        { property: '--depth-exterior-x', maximumPercent: 0.3 },
+        { property: '--depth-shell-x', maximumPercent: 0.75 },
+        { property: '--depth-charm-x', maximumPercent: 1.05 },
+        { property: '--depth-seat-x', maximumPercent: 1.5 }
+      ]
+    });
+
     const setState = (next: CockpitState) => {
       state = next;
       root.dataset.state = next;
+      root.classList.toggle('is-ambient-paused', next !== 'idle');
+      depth.setSuspended(
+        next !== 'idle' || renderer !== 'layers' || themeLoading,
+        next !== 'idle'
+      );
     };
 
     const pauseAll = () => {
       allVideos.forEach((video) => video.pause());
+    };
+
+    const waitForImage = (image: HTMLImageElement) =>
+      new Promise<void>((resolve, reject) => {
+        if (image.complete && image.naturalWidth > 0) {
+          if (typeof image.decode === 'function') {
+            image.decode().then(resolve).catch(resolve);
+          } else {
+            resolve();
+          }
+          return;
+        }
+        image.addEventListener('load', () => {
+          if (typeof image.decode === 'function') {
+            image.decode().then(resolve).catch(resolve);
+          } else {
+            resolve();
+          }
+        }, { once: true });
+        image.addEventListener('error', () => {
+          reject(new Error('Cockpit parallax layer failed to load'));
+        }, { once: true });
+      });
+
+    const loadBundle = (theme: Environment) => {
+      const existing = bundlePromises.get(theme);
+      if (existing) return existing;
+      const promise = new Promise<boolean>((resolve) => {
+        const images = Array.from(
+          stacks[theme].querySelectorAll<HTMLImageElement>(
+            '[data-cockpit-layer-image]'
+          )
+        );
+        images.forEach((image) => {
+          if (!image.src && image.dataset.src) image.src = image.dataset.src;
+        });
+        let settled = false;
+        const timeout = window.setTimeout(() => {
+          settled = true;
+          bundlePromises.delete(theme);
+          resolve(false);
+        }, BUNDLE_TIMEOUT);
+        Promise.all(images.map(waitForImage))
+          .then(() => {
+            window.clearTimeout(timeout);
+            stacks[theme].dataset.loaded = 'true';
+            if (settled) bundlePromises.delete(theme);
+            resolve(true);
+          })
+          .catch(() => {
+            window.clearTimeout(timeout);
+            stacks[theme].dataset.failed = 'true';
+            bundlePromises.delete(theme);
+            resolve(false);
+          });
+      });
+      bundlePromises.set(theme, promise);
+      return promise;
+    };
+
+    const setRenderer = (next: 'layers' | 'fallback') => {
+      renderer = next;
+      root.dataset.renderer = next;
+      if (next === 'layers') {
+        Object.values(ambients).forEach((video) => video.pause());
+      }
+      depth.setSuspended(
+        state !== 'idle' || next !== 'layers' || themeLoading,
+        true
+      );
     };
 
     const safelyPlay = (video: HTMLVideoElement) => {
@@ -282,27 +468,41 @@ const mediaRoot = '/media/travel';
       mapTrigger.disabled = false;
       themeToggle.disabled = false;
       backLink.removeAttribute('aria-disabled');
+      depth.setSuspended(renderer !== 'layers');
+      depth.recalculate();
       status.textContent =
         '已坐进汽车。可以查看副驾驶仪表台上的地图。';
     };
 
-    const settleToAmbient = (posterOnly = false) => {
+    const settleToAmbient = async (posterOnly = false) => {
       if (settling || state === 'exiting') return;
       settling = true;
       window.clearTimeout(readyTimer);
       window.clearTimeout(arrivalTimer);
 
-      activeAmbient.currentTime = 0;
-      activeAmbient.classList.add('is-active');
       root.classList.add('is-revealed', 'is-settled');
+      const layeredReady = await loadBundle(environment);
+      if (signal.aborted || root.dataset.state === 'exiting') return;
+      setRenderer(layeredReady ? 'layers' : 'fallback');
+      stacks.day.classList.toggle('is-active', environment === 'day');
+      stacks.night.classList.toggle('is-active', environment === 'night');
 
-      if (!posterOnly && !reduceMotion.matches && !document.hidden) {
-        safelyPlay(activeAmbient).catch(() => {
+      if (!layeredReady) {
+        activeAmbient.currentTime = 0;
+        activeAmbient.classList.add('is-active');
+        if (!posterOnly && !reduceMotion.matches && !document.hidden) {
+          safelyPlay(activeAmbient).catch(() => {
+            root.dataset.playback = `${environment}-ambient-poster`;
+          });
+        } else {
+          activeAmbient.pause();
           root.dataset.playback = `${environment}-ambient-poster`;
-        });
+        }
       } else {
-        activeAmbient.pause();
-        root.dataset.playback = `${environment}-ambient-poster`;
+        Object.values(ambients).forEach((video) => {
+          video.pause();
+          video.classList.remove('is-active');
+        });
       }
 
       window.setTimeout(() => {
@@ -337,17 +537,33 @@ const mediaRoot = '/media/travel';
       Object.values(ambients).forEach((video) => {
         video.classList.remove('is-active');
       });
+      stacks.day.classList.toggle('is-active', environment === 'day');
+      stacks.night.classList.toggle('is-active', environment === 'night');
       updateThemeControls();
+      void loadBundle(environment);
     };
 
-    const switchEnvironment = (next: Environment) => {
-      if (state !== 'idle' || next === environment) return;
+    const switchEnvironment = async (next: Environment) => {
+      if (
+        state !== 'idle' ||
+        next === environment ||
+        themeLoading
+      ) return;
       const previous = activeAmbient;
       window.clearTimeout(themeTimer);
+      themeLoading = true;
+      themeToggle.disabled = true;
+      depth.setSuspended(true);
+      const layeredReady = await loadBundle(next);
+      if (signal.aborted || state !== 'idle') return;
       environment = next;
       activeAmbient = ambients[next];
+      setRenderer(layeredReady ? 'layers' : 'fallback');
+      stacks.day.classList.toggle('is-active', next === 'day');
+      stacks.night.classList.toggle('is-active', next === 'night');
 
       if (
+        !layeredReady &&
         Number.isFinite(previous.currentTime) &&
         Number.isFinite(activeAmbient.duration) &&
         activeAmbient.duration > 0
@@ -356,15 +572,27 @@ const mediaRoot = '/media/travel';
           previous.currentTime % activeAmbient.duration;
       }
 
-      activeAmbient.classList.add('is-active');
-      safelyPlay(activeAmbient).catch(() => {
-        root.dataset.playback = `${environment}-ambient-poster`;
-      });
-      requestAnimationFrame(() => {
-        previous.classList.remove('is-active');
-      });
-      themeTimer = window.setTimeout(() => previous.pause(), 560);
+      if (!layeredReady) {
+        activeAmbient.classList.add('is-active');
+        safelyPlay(activeAmbient).catch(() => {
+          root.dataset.playback = `${environment}-ambient-poster`;
+        });
+        requestAnimationFrame(() => {
+          previous.classList.remove('is-active');
+        });
+      } else {
+        Object.values(ambients).forEach((video) => {
+          video.pause();
+          video.classList.remove('is-active');
+        });
+      }
       updateThemeControls(true, true);
+      themeTimer = window.setTimeout(() => {
+        previous.pause();
+        themeLoading = false;
+        themeToggle.disabled = false;
+        depth.setSuspended(renderer !== 'layers');
+      }, reduceMotion.matches ? 1 : 560);
     };
 
     const navigateTo = async (destination: string) => {
@@ -395,6 +623,7 @@ const mediaRoot = '/media/travel';
       themeToggle.disabled = true;
       backLink.setAttribute('aria-disabled', 'true');
       status.textContent = message;
+      adaptiveViewport.stopMotion(true);
       navigationTimer = window.setTimeout(
         () => navigateTo(destination),
         reduceMotion.matches ? 1 : 360
@@ -410,6 +639,7 @@ const mediaRoot = '/media/travel';
       themeToggle.disabled = true;
       backLink.setAttribute('aria-disabled', 'true');
       status.textContent = '正在离开汽车并返回村庄';
+      adaptiveViewport.stopMotion(true);
       pauseAll();
       exitSequence.start(environment);
     };
@@ -435,6 +665,8 @@ const mediaRoot = '/media/travel';
       });
       environment = getStoredEnvironment() ?? environment;
       activeAmbient = ambients[environment];
+      stacks.day.classList.toggle('is-active', environment === 'day');
+      stacks.night.classList.toggle('is-active', environment === 'night');
       (Object.entries(ambients) as [Environment, HTMLVideoElement][]).forEach(
         ([name, video]) => {
           video.classList.toggle('is-active', name === environment);
@@ -445,18 +677,24 @@ const mediaRoot = '/media/travel';
       themeToggle.disabled = false;
       backLink.removeAttribute('aria-disabled');
       setState('idle');
+      adaptiveViewport.recalculate(true);
+      depth.recalculate();
       updateThemeControls();
       status.textContent =
         '已回到汽车。可以查看副驾驶仪表台上的地图。';
-      if (!reduceMotion.matches && !document.hidden) {
+      if (
+        renderer === 'fallback' &&
+        !reduceMotion.matches &&
+        !document.hidden
+      ) {
         safelyPlay(activeAmbient).catch(() => undefined);
       }
     };
 
     allVideos.forEach((video) => {
       video.muted = true;
-      video.load();
     });
+    Object.values(arrivals).forEach((video) => video.load());
     setInitialEnvironment();
 
     activeArrival.addEventListener('loadeddata', beginArrival, {
@@ -498,7 +736,13 @@ const mediaRoot = '/media/travel';
     }
 
     themeToggle.addEventListener('click', () => {
-      switchEnvironment(environment === 'day' ? 'night' : 'day');
+      void switchEnvironment(environment === 'day' ? 'night' : 'day');
+    }, { signal });
+
+    viewport.addEventListener('click', () => {
+      if (state !== 'arriving' || !arrivalStarted || settling) return;
+      status.textContent = '已跳过坐进汽车的过渡动画';
+      settleToAmbient(false);
     }, { signal });
 
     mapTrigger.addEventListener('click', () => {
@@ -517,10 +761,15 @@ const mediaRoot = '/media/travel';
     }, { signal });
 
     document.addEventListener('visibilitychange', () => {
+      root.classList.toggle('is-document-hidden', document.hidden);
       if (document.hidden) {
         pauseAll();
+        depth.setSuspended(true, true);
       } else if (state === 'idle') {
-        safelyPlay(activeAmbient).catch(() => undefined);
+        if (renderer === 'fallback') {
+          safelyPlay(activeAmbient).catch(() => undefined);
+        }
+        depth.setSuspended(renderer !== 'layers');
       } else if (state === 'arriving' && arrivalStarted) {
         safelyPlay(activeArrival).catch(() => settleToAmbient(true));
       }
@@ -550,6 +799,10 @@ const mediaRoot = '/media/travel';
 
 <style>
   .travel-cockpit {
+    --depth-exterior-x: 0px;
+    --depth-shell-x: 0px;
+    --depth-charm-x: 0px;
+    --depth-seat-x: 0px;
     position: relative;
     height: 100vh;
     height: 100svh;
@@ -560,14 +813,56 @@ const mediaRoot = '/media/travel';
   }
 
   .travel-cockpit__stage {
-    --stage-offset-x: -50%;
     position: absolute;
     left: 50%;
     top: 50%;
     width: max(100vw, calc(100vh * 16 / 9));
     height: max(100vh, calc(100vw * 9 / 16));
     overflow: hidden;
-    transform: translate(var(--stage-offset-x), -50%);
+    transform: translate(-50%, -50%);
+  }
+
+  .travel-cockpit__camera {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    overflow: hidden;
+    transform: scale(1.035);
+    transform-origin: 50% 50%;
+  }
+
+  .travel-cockpit__viewport {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    overflow: hidden;
+    outline: none;
+    overscroll-behavior: contain;
+  }
+
+  .travel-cockpit__viewport:focus-visible {
+    outline: 3px solid #ffd64f;
+    outline-offset: -5px;
+  }
+
+  .travel-cockpit.has-world-overflow .travel-cockpit__viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .travel-cockpit.has-world-overflow
+  .travel-cockpit__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .travel-cockpit.has-world-overflow .travel-cockpit__stage {
+    position: relative;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   @supports (height: 100svh) {
@@ -577,18 +872,29 @@ const mediaRoot = '/media/travel';
     }
   }
 
-  .travel-cockpit__video {
+  .travel-cockpit__video,
+  .travel-cockpit__stack,
+  .travel-cockpit__plane,
+  .travel-cockpit__plane > img,
+  .travel-cockpit__charm-swing,
+  .travel-cockpit__charm-swing > img,
+  .travel-cockpit__hotspot-plane {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     max-width: none;
+  }
+
+  .travel-cockpit__video {
     object-fit: fill;
     opacity: 0;
     transition: opacity 520ms ease;
   }
 
-  .travel-cockpit__video.is-active {
+  .travel-cockpit__arrival.is-active,
+  .travel-cockpit[data-renderer='fallback']
+  .travel-cockpit__ambient.is-active {
     opacity: 1;
   }
 
@@ -597,7 +903,72 @@ const mediaRoot = '/media/travel';
   }
 
   .travel-cockpit__arrival {
+    z-index: 3;
+  }
+
+  .travel-cockpit__stack {
     z-index: 2;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 520ms ease;
+  }
+
+  .travel-cockpit[data-renderer='layers']
+  .travel-cockpit__stack.is-active {
+    opacity: 1;
+  }
+
+  .travel-cockpit__plane > img,
+  .travel-cockpit__charm-swing > img {
+    display: block;
+    object-fit: fill;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .travel-cockpit__plane--exterior {
+    z-index: 10;
+    transform: translate3d(var(--depth-exterior-x), 0, 0);
+  }
+
+  .travel-cockpit__plane--shell {
+    z-index: 20;
+    transform: translate3d(var(--depth-shell-x), 0, 0);
+  }
+
+  .travel-cockpit__plane--charm {
+    z-index: 30;
+    transform: translate3d(var(--depth-charm-x), 0, 0);
+  }
+
+  .travel-cockpit__plane--seat {
+    z-index: 40;
+    transform: translate3d(var(--depth-seat-x), 0, 0);
+  }
+
+  .travel-cockpit__hotspot-plane {
+    z-index: 50;
+    transform: translate3d(var(--depth-shell-x), 0, 0);
+    pointer-events: none;
+  }
+
+  .travel-cockpit__map {
+    pointer-events: auto;
+  }
+
+  .travel-cockpit__charm-swing {
+    transform-origin: 47.2% 24.2%;
+    animation: travel-cockpit-charm-swing 4s ease-in-out infinite;
+  }
+
+  @keyframes travel-cockpit-charm-swing {
+    0%, 100% { transform: rotate(-1.15deg); }
+    50% { transform: rotate(1.15deg); }
+  }
+
+  .travel-cockpit.is-ambient-paused .travel-cockpit__charm-swing,
+  .travel-cockpit.is-document-hidden .travel-cockpit__charm-swing {
+    animation-play-state: paused;
   }
 
   .travel-cockpit__map {
@@ -781,11 +1152,58 @@ const mediaRoot = '/media/travel';
     transition-duration: 350ms;
   }
 
-  @media (max-width: 767px) {
-    .travel-cockpit__stage {
-      --stage-offset-x: -62%;
-    }
+  .travel-cockpit__arrival-skip,
+  .travel-cockpit__explore-cue {
+    position: fixed;
+    z-index: 4;
+    left: 50%;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    margin: 0;
+    border: 1px solid rgba(255, 248, 231, .42);
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .68);
+    padding: .4rem .72rem;
+    color: rgba(255, 248, 231, .82);
+    font-size: .66rem;
+    letter-spacing: .06em;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, .4rem);
+    backdrop-filter: blur(8px);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
 
+  .travel-cockpit[data-state='arriving'].is-revealed:not(.is-settled)
+  .travel-cockpit__arrival-skip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .travel-cockpit__explore-cue {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .travel-cockpit.has-world-overflow.is-interactive:not(.has-explored)
+  .travel-cockpit__explore-cue {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .travel-cockpit__edge-copy {
+    display: none;
+  }
+
+  .travel-cockpit.has-fine-pointer .travel-cockpit__swipe-copy {
+    display: none;
+  }
+
+  .travel-cockpit.has-fine-pointer .travel-cockpit__edge-copy {
+    display: inline;
+  }
+
+  @media (max-width: 767px) {
     .travel-cockpit__back {
       left: max(.7rem, env(safe-area-inset-left));
       top: max(.7rem, env(safe-area-inset-top));
@@ -807,6 +1225,8 @@ const mediaRoot = '/media/travel';
     .travel-cockpit__map-label,
     .travel-cockpit__back,
     .travel-cockpit__theme-toggle,
+    .travel-cockpit__arrival-skip,
+    .travel-cockpit__explore-cue,
     .travel-cockpit__curtain {
       transition-duration: 1ms !important;
     }

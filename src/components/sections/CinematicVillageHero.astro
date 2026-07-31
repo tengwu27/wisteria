@@ -1,74 +1,164 @@
 ---
+import { navigation } from '@/data/navigation';
+
 const mediaRoot = '/media/village';
 ---
 
 <section class="cinematic-village" data-cinematic-village aria-label="动态村庄地图">
-  <div class="cinematic-village__stage" data-village-stage>
-    <video
-      class="cinematic-village__scene is-active"
-      data-scene-video="day"
-      src={`${mediaRoot}/ambient/day-v3.mp4`}
-      poster={`${mediaRoot}/ambient/day-v3-poster.jpg`}
-      muted
-      loop
-      autoplay
-      playsinline
-      preload="metadata"
+  <div
+    class="cinematic-village__viewport"
+    data-village-viewport
+    tabindex="0"
+    aria-label="村庄全景；在窄屏设备上可以左右滑动探索"
+  >
+    <div class="cinematic-village__camera" data-village-camera>
+      <div class="cinematic-village__stage" data-village-stage>
+        <video
+          class="cinematic-village__scene is-active"
+          data-scene-video="day"
+          src={`${mediaRoot}/ambient/day-v5.mp4`}
+          poster={`${mediaRoot}/ambient/day-v5-poster.jpg`}
+          muted
+          loop
+          autoplay
+          playsinline
+          preload="metadata"
+          aria-hidden="true"
+        ></video>
+        <video
+          class="cinematic-village__scene"
+          data-scene-video="night"
+          src={`${mediaRoot}/ambient/night-v3.mp4`}
+          poster={`${mediaRoot}/ambient/night-v3-poster.jpg`}
+          muted
+          loop
+          autoplay
+          playsinline
+          preload="metadata"
+          aria-hidden="true"
+        ></video>
+
+        <div class="cinematic-village__shade" aria-hidden="true"></div>
+
+        <button
+          class="cinematic-village__house"
+          type="button"
+          data-house-trigger
+          aria-label="进入主屋并打开生活页面"
+        >
+          <span class="cinematic-village__hotspot-ring" aria-hidden="true"></span>
+          <span class="cinematic-village__hotspot-label" aria-hidden="true">
+            <span>进入主屋</span>
+            <small>ENTER</small>
+          </span>
+        </button>
+
+        <button
+          class="cinematic-village__car"
+          type="button"
+          data-car-trigger
+          aria-label="走向汽车并打开旅行页面"
+        >
+          <span class="cinematic-village__hotspot-ring" aria-hidden="true"></span>
+          <span class="cinematic-village__hotspot-label" aria-hidden="true">
+            <span>走向汽车</span>
+            <small>DRIVE</small>
+          </span>
+        </button>
+
+        <button
+          class="cinematic-village__cafe"
+          type="button"
+          data-cafe-trigger
+          aria-label="穿过花园进入咖啡馆画廊"
+        >
+          <span class="cinematic-village__hotspot-ring" aria-hidden="true"></span>
+          <span class="cinematic-village__hotspot-label" aria-hidden="true">
+            <span>进入画廊</span>
+            <small>VISIT</small>
+          </span>
+        </button>
+
+        <button
+          class="cinematic-village__garage"
+          type="button"
+          data-garage-trigger
+          aria-label="进入摩托车工坊"
+        >
+          <span class="cinematic-village__hotspot-ring" aria-hidden="true"></span>
+          <span class="cinematic-village__hotspot-label" aria-hidden="true">
+            <span>进入工坊</span>
+            <small>WORKSHOP</small>
+          </span>
+        </button>
+      </div>
+      <div
+        class="cinematic-village__cloud-layer"
+        data-village-cloud-layer
+        aria-hidden="true"
+      >
+        <img
+          src={`${mediaRoot}/ambient/clouds-day-near-v2.png`}
+          alt=""
+          decoding="async"
+        />
+      </div>
+    </div>
+  </div>
+
+  <header class="cinematic-village__hud" data-village-hud>
+    <a
+      href="/about"
+      class="cinematic-village__profile"
+      aria-label="打开关于 Wisteria 的页面"
+    >
+      <span class="cinematic-village__profile-avatar" aria-hidden="true">★</span>
+      <span class="cinematic-village__profile-copy">
+        <b>玩家 01</b>
+        <small>世界收藏家 · Lv.12</small>
+      </span>
+    </a>
+    <details class="cinematic-village__menu">
+      <summary aria-label="打开主菜单">
+        <span aria-hidden="true">☰</span>
+        <span>菜单</span>
+      </summary>
+      <nav aria-label="主导航">
+        {navigation.map((item) => <a href={item.href}>→ {item.label}</a>)}
+      </nav>
+    </details>
+  </header>
+
+  <p class="cinematic-village__swipe-cue" data-swipe-cue aria-hidden="true">
+    <span>←</span>
+    <span class="cinematic-village__swipe-copy">左右滑动探索</span>
+    <span class="cinematic-village__edge-copy">将光标移至边缘探索</span>
+    <span>→</span>
+  </p>
+
+  <div
+    class="cinematic-village__welcome"
+    data-welcome-overlay
+    aria-hidden="true"
+    tabindex="-1"
+  >
+    <img
+      class="cinematic-village__welcome-logo"
+      data-welcome-logo
+      src="/media/village/ui/welcome-to-wisteria.png"
+      alt="Welcome to Wisteria"
+      decoding="sync"
+      fetchpriority="high"
+    />
+    <p
+      class="cinematic-village__welcome-fallback"
+      data-welcome-fallback
       aria-hidden="true"
-    ></video>
-    <video
-      class="cinematic-village__scene"
-      data-scene-video="night"
-      src={`${mediaRoot}/ambient/night-v3.mp4`}
-      poster={`${mediaRoot}/ambient/night-v3-poster.jpg`}
-      muted
-      loop
-      autoplay
-      playsinline
-      preload="metadata"
-      aria-hidden="true"
-    ></video>
-
-    <div class="cinematic-village__shade" aria-hidden="true"></div>
-
-    <button
-      class="cinematic-village__house"
-      type="button"
-      data-house-trigger
-      aria-label="进入主屋并打开生活页面"
     >
-      <span class="cinematic-village__hotspot-ring" aria-hidden="true"></span>
-      <span class="cinematic-village__hotspot-label" aria-hidden="true">
-        <span>进入主屋</span>
-        <small>ENTER</small>
-      </span>
-    </button>
-
-    <button
-      class="cinematic-village__car"
-      type="button"
-      data-car-trigger
-      aria-label="走向汽车并打开旅行页面"
-    >
-      <span class="cinematic-village__hotspot-ring" aria-hidden="true"></span>
-      <span class="cinematic-village__hotspot-label" aria-hidden="true">
-        <span>走向汽车</span>
-        <small>DRIVE</small>
-      </span>
-    </button>
-
-    <button
-      class="cinematic-village__cafe"
-      type="button"
-      data-cafe-trigger
-      aria-label="穿过花园进入咖啡馆画廊"
-    >
-      <span class="cinematic-village__hotspot-ring" aria-hidden="true"></span>
-      <span class="cinematic-village__hotspot-label" aria-hidden="true">
-        <span>进入画廊</span>
-        <small>VISIT</small>
-      </span>
-    </button>
+      <span>Welcome to</span>
+      <strong>Wisteria</strong>
+    </p>
+    <p class="sr-only">欢迎来到 Wisteria。点击、轻触或按键可以跳过开场。</p>
   </div>
 
   <div class="cinematic-village__controls">
@@ -82,12 +172,17 @@ const mediaRoot = '/media/village';
       <span class="cinematic-village__toggle-icon" data-toggle-icon aria-hidden="true">☀</span>
       <span data-toggle-label>白昼</span>
     </button>
-    <p class="cinematic-village__hint" aria-hidden="true">探索主屋、咖啡馆画廊，或开车去旅行</p>
+    <p class="cinematic-village__hint" aria-hidden="true">探索主屋、咖啡馆、摩托车工坊，或开车去旅行</p>
   </div>
 
   <p class="sr-only" data-village-status aria-live="polite"></p>
 
-  <div class="cinematic-village__entry" data-entry-overlay aria-hidden="true">
+  <div
+    class="cinematic-village__entry"
+    data-entry-overlay
+    aria-label="进入场景的过渡动画；点击可以跳过"
+    aria-hidden="true"
+  >
     <video
       class="cinematic-village__transition-video is-active"
       data-interaction-video="house"
@@ -96,7 +191,7 @@ const mediaRoot = '/media/village';
       poster={`${mediaRoot}/interactions/house/door-day-v4-poster.jpg`}
       muted
       playsinline
-      preload="auto"
+      preload="none"
       aria-hidden="true"
     ></video>
     <video
@@ -107,7 +202,7 @@ const mediaRoot = '/media/village';
       poster={`${mediaRoot}/interactions/house/door-night-v4-poster.jpg`}
       muted
       playsinline
-      preload="auto"
+      preload="none"
       aria-hidden="true"
     ></video>
     <video
@@ -118,7 +213,29 @@ const mediaRoot = '/media/village';
       poster={`${mediaRoot}/interactions/car/driver-door-day-v6-poster.jpg`}
       muted
       playsinline
-      preload="auto"
+      preload="none"
+      aria-hidden="true"
+    ></video>
+    <video
+      class="cinematic-village__transition-video"
+      data-interaction-video="garage"
+      data-environment="day"
+      src="/media/garage/transition/garage-reveal-day-v1.mp4"
+      poster="/media/garage/transition/garage-reveal-day-v1-poster.jpg"
+      muted
+      playsinline
+      preload="none"
+      aria-hidden="true"
+    ></video>
+    <video
+      class="cinematic-village__transition-video"
+      data-interaction-video="garage"
+      data-environment="night"
+      src="/media/garage/transition/garage-reveal-night-v1.mp4"
+      poster="/media/garage/transition/garage-reveal-night-v1-poster.jpg"
+      muted
+      playsinline
+      preload="none"
       aria-hidden="true"
     ></video>
     <video
@@ -129,7 +246,7 @@ const mediaRoot = '/media/village';
       poster="/media/art/transition/cafe-reveal-day-v1-poster.jpg"
       muted
       playsinline
-      preload="auto"
+      preload="none"
       aria-hidden="true"
     ></video>
     <video
@@ -140,7 +257,7 @@ const mediaRoot = '/media/village';
       poster="/media/art/transition/cafe-reveal-night-v1-poster.jpg"
       muted
       playsinline
-      preload="auto"
+      preload="none"
       aria-hidden="true"
     ></video>
     <video
@@ -151,10 +268,13 @@ const mediaRoot = '/media/village';
       poster={`${mediaRoot}/interactions/car/driver-door-night-v6-poster.jpg`}
       muted
       playsinline
-      preload="auto"
+      preload="none"
       aria-hidden="true"
     ></video>
     <div class="cinematic-village__entry-vignette" aria-hidden="true"></div>
+    <p class="cinematic-village__entry-skip" aria-hidden="true">
+      点击跳过
+    </p>
     <div class="cinematic-village__curtain" aria-hidden="true"></div>
   </div>
 </section>
@@ -164,14 +284,16 @@ const mediaRoot = '/media/village';
 
   const SESSION_KEY = 'wisteria-hero-environment';
   const RETURN_SESSION_KEY = 'wisteria-village-return';
+  const INTRO_SESSION_KEY = 'wisteria-village-intro-seen';
 
   type Environment = 'day' | 'night';
-  type Interaction = 'house' | 'car' | 'cafe';
+  type Interaction = 'house' | 'car' | 'cafe' | 'garage';
 
   const destinations: Record<Interaction, string> = {
     house: '/lifestyle',
     car: '/travel',
-    cafe: '/art'
+    cafe: '/art',
+    garage: '/garage'
   };
 
   function getStoredEnvironment(): Environment | null {
@@ -194,10 +316,23 @@ const mediaRoot = '/media/village';
 
     root.dataset.ready = 'true';
 
+    const viewport = root.querySelector<HTMLElement>('[data-village-viewport]');
+    const camera = root.querySelector<HTMLElement>('[data-village-camera]');
     const stage = root.querySelector<HTMLElement>('[data-village-stage]');
+    const cloudLayer = root.querySelector<HTMLElement>(
+      '[data-village-cloud-layer]'
+    );
+    const hud = root.querySelector<HTMLElement>('[data-village-hud]');
+    const welcome = root.querySelector<HTMLElement>('[data-welcome-overlay]');
+    const welcomeLogo = root.querySelector<HTMLImageElement>('[data-welcome-logo]');
+    const welcomeFallback = root.querySelector<HTMLElement>(
+      '[data-welcome-fallback]'
+    );
+    const swipeCue = root.querySelector<HTMLElement>('[data-swipe-cue]');
     const houseTrigger = root.querySelector<HTMLButtonElement>('[data-house-trigger]');
     const carTrigger = root.querySelector<HTMLButtonElement>('[data-car-trigger]');
     const cafeTrigger = root.querySelector<HTMLButtonElement>('[data-cafe-trigger]');
+    const garageTrigger = root.querySelector<HTMLButtonElement>('[data-garage-trigger]');
     const environmentToggle = root.querySelector<HTMLButtonElement>('[data-environment-toggle]');
     const toggleIcon = root.querySelector<HTMLElement>('[data-toggle-icon]');
     const toggleLabel = root.querySelector<HTMLElement>('[data-toggle-label]');
@@ -215,12 +350,23 @@ const mediaRoot = '/media/village';
     const carNightVideo = getInteractionVideo('car', 'night');
     const cafeDayVideo = getInteractionVideo('cafe', 'day');
     const cafeNightVideo = getInteractionVideo('cafe', 'night');
+    const garageDayVideo = getInteractionVideo('garage', 'day');
+    const garageNightVideo = getInteractionVideo('garage', 'night');
 
     if (
+      !viewport ||
+      !camera ||
       !stage ||
+      !cloudLayer ||
+      !hud ||
+      !welcome ||
+      !welcomeLogo ||
+      !welcomeFallback ||
+      !swipeCue ||
       !houseTrigger ||
       !carTrigger ||
       !cafeTrigger ||
+      !garageTrigger ||
       !environmentToggle ||
       !toggleIcon ||
       !toggleLabel ||
@@ -233,12 +379,17 @@ const mediaRoot = '/media/village';
       !carDayVideo ||
       !carNightVideo ||
       !cafeDayVideo ||
-      !cafeNightVideo
+      !cafeNightVideo ||
+      !garageDayVideo ||
+      !garageNightVideo
     ) return;
 
     const lifecycle = new AbortController();
     const { signal } = lifecycle;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const finePointer = window.matchMedia(
+      '(hover: hover) and (pointer: fine)'
+    );
     const sceneVideos: Record<Environment, HTMLVideoElement> = {
       day: dayVideo,
       night: nightVideo
@@ -255,6 +406,10 @@ const mediaRoot = '/media/village';
       cafe: {
         day: cafeDayVideo,
         night: cafeNightVideo
+      },
+      garage: {
+        day: garageDayVideo,
+        night: garageNightVideo
       }
     };
     const allInteractionVideos = Object.values(interactionVideos).flatMap((videos) =>
@@ -275,17 +430,335 @@ const mediaRoot = '/media/village';
       document.documentElement.classList.add('is-returning-to-village');
     }
     Object.values(sceneVideos).forEach((video) => video.load());
-    allInteractionVideos.forEach((video) => video.load());
     let environment: Environment = getStoredEnvironment() ?? getLocalEnvironment();
     let activeInteraction: Interaction = 'house';
     let activeTransitionVideo = interactionVideos[activeInteraction][environment];
     let activeDestination = destinations[activeInteraction];
+    let introActive = document.documentElement.classList.contains(
+      'is-village-intro-pending'
+    );
     let entering = false;
     let finishing = false;
     let fallbackTimer = 0;
     let returnRevealTimer = 0;
     let returnCleanupTimer = 0;
+    let introAssetTimer = 0;
+    let introHoldTimer = 0;
+    let introCleanupTimer = 0;
+    let cameraFrame = 0;
+    let resizeFrame = 0;
     let returnRevealed = false;
+    let viewportReady = false;
+    let worldHasOverflow = false;
+    let hasPositionedOverflow = false;
+    let viewCenterRatio = 0.5;
+    let cameraX = 0;
+    let cameraY = 0;
+    let cloudScrollX = 0;
+    let targetCameraX = 0;
+    let targetCameraY = 0;
+    let panVelocity = 0;
+    let targetPanVelocity = 0;
+    let previousCameraTime = 0;
+
+    const setSceneInteractive = (interactive: boolean) => {
+      viewport.toggleAttribute('inert', !interactive);
+      hud.toggleAttribute('inert', !interactive);
+      houseTrigger.disabled = !interactive;
+      carTrigger.disabled = !interactive;
+      cafeTrigger.disabled = !interactive;
+      garageTrigger.disabled = !interactive;
+      environmentToggle.disabled = !interactive;
+    };
+
+    const writeCameraPosition = () => {
+      camera.style.setProperty('--camera-x', `${cameraX.toFixed(2)}px`);
+      camera.style.setProperty('--camera-y', `${cameraY.toFixed(2)}px`);
+      const cloudFocusX = cameraX * 0.55 + cloudScrollX;
+      const cloudFocusY = cameraY * 0.35;
+      cloudLayer.style.setProperty(
+        '--cloud-focus-x',
+        `${cloudFocusX.toFixed(2)}px`
+      );
+      cloudLayer.style.setProperty(
+        '--cloud-focus-y',
+        `${cloudFocusY.toFixed(2)}px`
+      );
+    };
+
+    const canAnimateCamera = () =>
+      !introActive &&
+      !entering &&
+      !document.hidden &&
+      !reduceMotion.matches;
+
+    const animateCamera = (time: number) => {
+      cameraFrame = 0;
+      const elapsedSeconds = previousCameraTime
+        ? Math.min(0.05, (time - previousCameraTime) / 1000)
+        : 1 / 60;
+      previousCameraTime = time;
+      const easing = 1 - Math.exp(-elapsedSeconds * 8);
+      cameraX += (targetCameraX - cameraX) * easing;
+      cameraY += (targetCameraY - cameraY) * easing;
+      panVelocity += (targetPanVelocity - panVelocity) * easing;
+
+      if (
+        worldHasOverflow &&
+        canAnimateCamera() &&
+        Math.abs(panVelocity) >= 0.1
+      ) {
+        const maxScroll = Math.max(
+          0,
+          viewport.scrollWidth - viewport.clientWidth
+        );
+        const nextScroll = Math.min(
+          maxScroll,
+          Math.max(
+            0,
+            viewport.scrollLeft + panVelocity * elapsedSeconds
+          )
+        );
+        const reachedBoundary =
+          nextScroll === viewport.scrollLeft &&
+          ((nextScroll <= 0 && panVelocity < 0) ||
+            (nextScroll >= maxScroll && panVelocity > 0));
+        viewport.scrollLeft = nextScroll;
+        if (reachedBoundary) {
+          panVelocity = 0;
+          targetPanVelocity = 0;
+        }
+      }
+
+      const cameraSettled =
+        Math.abs(targetCameraX - cameraX) < 0.05 &&
+        Math.abs(targetCameraY - cameraY) < 0.05;
+      const panSettled =
+        Math.abs(targetPanVelocity - panVelocity) < 0.1 &&
+        Math.abs(panVelocity) < 0.1;
+
+      if (cameraSettled && panSettled) {
+        cameraX = targetCameraX;
+        cameraY = targetCameraY;
+        panVelocity = targetPanVelocity;
+        previousCameraTime = 0;
+        writeCameraPosition();
+        return;
+      }
+
+      writeCameraPosition();
+      cameraFrame = window.requestAnimationFrame(animateCamera);
+    };
+
+    const scheduleCamera = () => {
+      if (!cameraFrame) {
+        cameraFrame = window.requestAnimationFrame(animateCamera);
+      }
+    };
+
+    const resetCamera = (immediate = false) => {
+      targetCameraX = 0;
+      targetCameraY = 0;
+      targetPanVelocity = 0;
+      if (immediate) {
+        window.cancelAnimationFrame(cameraFrame);
+        cameraFrame = 0;
+        previousCameraTime = 0;
+        cameraX = 0;
+        cameraY = 0;
+        panVelocity = 0;
+        writeCameraPosition();
+        return;
+      }
+      scheduleCamera();
+    };
+
+    const canTrackCamera = () =>
+      canAnimateCamera() && finePointer.matches;
+
+    const updateViewCenterRatio = () => {
+      if (!worldHasOverflow || viewport.scrollWidth <= 0) return;
+      viewCenterRatio = Math.min(
+        1,
+        Math.max(
+          0,
+          (viewport.scrollLeft + viewport.clientWidth / 2) /
+            viewport.scrollWidth
+        )
+      );
+    };
+
+    const updateCloudScrollParallax = () => {
+      if (
+        !worldHasOverflow ||
+        reduceMotion.matches ||
+        camera.offsetWidth <= 0
+      ) {
+        cloudScrollX = 0;
+      } else {
+        const visibleCenter =
+          viewport.scrollLeft + viewport.clientWidth / 2;
+        cloudScrollX =
+          -(visibleCenter - camera.offsetWidth / 2) * 0.12;
+      }
+      writeCameraPosition();
+    };
+
+    const getDefaultViewCenterRatio = () => {
+      const worldWidth = stage.offsetWidth || camera.offsetWidth;
+      if (worldWidth <= 0) return 0.5;
+      const carCenter = carTrigger.offsetLeft + carTrigger.offsetWidth / 2;
+      return Math.min(1, Math.max(0, carCenter / worldWidth));
+    };
+
+    const positionWorldViewport = (preservePosition = true) => {
+      resetCamera(true);
+      viewportReady = false;
+      window.requestAnimationFrame(() => {
+        const measuredOverflow = Math.max(
+          0,
+          camera.offsetWidth - viewport.clientWidth
+        );
+        worldHasOverflow = measuredOverflow > 1;
+        root.classList.toggle('has-world-overflow', worldHasOverflow);
+        root.classList.toggle('has-fine-pointer', finePointer.matches);
+
+        if (!worldHasOverflow) {
+          viewport.scrollLeft = 0;
+          updateCloudScrollParallax();
+          viewportReady = true;
+          return;
+        }
+
+        const maxScroll = Math.max(
+          0,
+          camera.offsetWidth - viewport.clientWidth
+        );
+        const ratio =
+          preservePosition && hasPositionedOverflow
+            ? viewCenterRatio
+            : getDefaultViewCenterRatio();
+        viewCenterRatio = ratio;
+        hasPositionedOverflow = true;
+        viewport.scrollLeft = Math.min(
+          maxScroll,
+          Math.max(
+            0,
+            ratio * camera.offsetWidth - viewport.clientWidth / 2
+          )
+        );
+        updateCloudScrollParallax();
+        window.requestAnimationFrame(() => {
+          viewportReady = true;
+          updateViewCenterRatio();
+        });
+      });
+    };
+
+    const markWelcomeSeen = () => {
+      (
+        window as Window & { __wisteriaVillageIntroSeen?: boolean }
+      ).__wisteriaVillageIntroSeen = true;
+      try {
+        window.sessionStorage.setItem(INTRO_SESSION_KEY, '1');
+      } catch {
+        // The in-memory flag suppresses repeats when storage is unavailable.
+      }
+    };
+
+    const revealWelcomeLogo = () => {
+      if (
+        !introActive ||
+        root.classList.contains('is-intro-logo-visible') ||
+        root.classList.contains('is-intro-fallback-visible')
+      ) return;
+      window.clearTimeout(introAssetTimer);
+      window.requestAnimationFrame(() => {
+        root.classList.add('is-intro-logo-visible');
+      });
+      introHoldTimer = window.setTimeout(
+        finishWelcome,
+        reduceMotion.matches ? 360 : 1400
+      );
+    };
+
+    const revealWelcomeFallback = () => {
+      if (
+        !introActive ||
+        root.classList.contains('is-intro-logo-visible') ||
+        root.classList.contains('is-intro-fallback-visible')
+      ) return;
+      window.clearTimeout(introAssetTimer);
+      welcomeFallback.setAttribute('aria-hidden', 'false');
+      window.requestAnimationFrame(() => {
+        root.classList.add('is-intro-fallback-visible');
+      });
+      introHoldTimer = window.setTimeout(
+        finishWelcome,
+        reduceMotion.matches ? 360 : 1400
+      );
+    };
+
+    const finishWelcome = () => {
+      if (!introActive || root.classList.contains('is-intro-leaving')) return;
+      markWelcomeSeen();
+      window.clearTimeout(introAssetTimer);
+      window.clearTimeout(introHoldTimer);
+      root.classList.add('is-intro-leaving');
+      document.documentElement.classList.add(
+        'is-village-intro-revealing'
+      );
+
+      introCleanupTimer = window.setTimeout(() => {
+        introActive = false;
+        document.documentElement.classList.remove(
+          'is-village-intro-pending',
+          'is-village-intro-revealing'
+        );
+        root.classList.remove(
+          'is-intro-active',
+          'is-intro-logo-visible',
+          'is-intro-fallback-visible',
+          'is-intro-leaving'
+        );
+        welcome.setAttribute('aria-hidden', 'true');
+        welcomeFallback.setAttribute('aria-hidden', 'true');
+        welcome.blur();
+        if (!entering) setSceneInteractive(true);
+        status.textContent = '欢迎来到 Wisteria 村庄';
+        resetCamera();
+      }, reduceMotion.matches ? 20 : 650);
+    };
+
+    const startWelcome = () => {
+      if (!introActive) {
+        document.documentElement.classList.remove(
+          'is-village-intro-pending',
+          'is-village-intro-revealing'
+        );
+        setSceneInteractive(true);
+        return;
+      }
+
+      root.classList.add('is-intro-active');
+      welcome.setAttribute('aria-hidden', 'false');
+      setSceneInteractive(false);
+      resetCamera(true);
+      welcome.focus({ preventScroll: true });
+
+      if (welcomeLogo.complete && welcomeLogo.naturalWidth > 0) {
+        revealWelcomeLogo();
+      } else {
+        welcomeLogo.addEventListener('load', revealWelcomeLogo, {
+          once: true,
+          signal
+        });
+        introAssetTimer = window.setTimeout(
+          revealWelcomeFallback,
+          reduceMotion.matches ? 120 : 10000
+        );
+      }
+    };
 
     const safelyPlay = (video: HTMLVideoElement) => {
       const playback = video.play();
@@ -381,21 +854,21 @@ const mediaRoot = '/media/village';
     };
 
     const startEntry = (interaction: Interaction) => {
-      if (entering) return;
+      if (entering || introActive) return;
       selectInteraction(interaction);
       entering = true;
       root.classList.add('is-entering');
       document.body.classList.add('is-entering-cinematic');
-      houseTrigger.disabled = true;
-      carTrigger.disabled = true;
-      cafeTrigger.disabled = true;
-      environmentToggle.disabled = true;
+      setSceneInteractive(false);
+      resetCamera();
       status.textContent =
         interaction === 'house'
           ? '正在进入主屋'
           : interaction === 'cafe'
             ? '正在穿过花园前往咖啡馆画廊'
-            : '正在走向汽车';
+            : interaction === 'garage'
+              ? '正在走向摩托车工坊'
+              : '正在走向汽车';
       sceneVideos[environment].pause();
       overlay.setAttribute('aria-hidden', 'false');
       overlay.classList.add('is-active');
@@ -405,7 +878,7 @@ const mediaRoot = '/media/village';
         return;
       }
 
-      activeTransitionVideo.currentTime = 0;
+      activeTransitionVideo.load();
       requestAnimationFrame(() => overlay.classList.add('is-playing'));
 
       const playback = activeTransitionVideo.play();
@@ -419,7 +892,110 @@ const mediaRoot = '/media/village';
       );
     };
 
+    const scheduleViewportPosition = (preservePosition = true) => {
+      window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = window.requestAnimationFrame(() => {
+        positionWorldViewport(preservePosition);
+      });
+    };
+    const viewportObserver =
+      typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver(() => scheduleViewportPosition(true));
+    viewportObserver?.observe(viewport);
+    viewportObserver?.observe(camera);
+
     updateEnvironment(environment);
+    positionWorldViewport(false);
+    startWelcome();
+
+    viewport.addEventListener('pointermove', (event) => {
+      if (!canTrackCamera() || event.pointerType === 'touch') return;
+      const bounds = viewport.getBoundingClientRect();
+      const normalizedX = Math.min(
+        1,
+        Math.max(-1, ((event.clientX - bounds.left) / bounds.width) * 2 - 1)
+      );
+      const normalizedY = Math.min(
+        1,
+        Math.max(-1, ((event.clientY - bounds.top) / bounds.height) * 2 - 1)
+      );
+      targetCameraY = -normalizedY * bounds.height * 0.0075;
+
+      if (worldHasOverflow) {
+        targetCameraX = 0;
+        const pointerX = event.clientX - bounds.left;
+        const edgeZone = Math.min(
+          220,
+          Math.max(90, bounds.width * 0.2)
+        );
+        let edgeStrength = 0;
+        if (pointerX < edgeZone) {
+          edgeStrength = -(1 - pointerX / edgeZone);
+        } else if (pointerX > bounds.width - edgeZone) {
+          edgeStrength =
+            (pointerX - (bounds.width - edgeZone)) / edgeZone;
+        }
+        const maximumSpeed = Math.min(
+          850,
+          Math.max(260, bounds.width * 0.55)
+        );
+        targetPanVelocity =
+          Math.sign(edgeStrength) *
+          Math.pow(Math.abs(edgeStrength), 1.65) *
+          maximumSpeed;
+      } else {
+        targetPanVelocity = 0;
+        targetCameraX = -normalizedX * bounds.width * 0.015;
+      }
+      scheduleCamera();
+    }, { signal });
+
+    viewport.addEventListener('pointerleave', () => {
+      resetCamera();
+    }, { signal });
+
+    viewport.addEventListener('scroll', () => {
+      if (!worldHasOverflow || !viewportReady) return;
+      updateViewCenterRatio();
+      updateCloudScrollParallax();
+      root.classList.add('has-explored');
+    }, { passive: true, signal });
+
+    welcome.addEventListener('pointerdown', (event) => {
+      if (!introActive) return;
+      event.preventDefault();
+      event.stopPropagation();
+      finishWelcome();
+    }, { signal });
+
+    welcomeLogo.addEventListener('error', () => {
+      if (introActive) revealWelcomeFallback();
+    }, { once: true, signal });
+
+    document.addEventListener('keydown', (event) => {
+      if (
+        !introActive ||
+        !['Enter', ' ', 'Escape'].includes(event.key)
+      ) return;
+      event.preventDefault();
+      event.stopPropagation();
+      finishWelcome();
+    }, { signal });
+
+    window.addEventListener('resize', () => {
+      scheduleViewportPosition(true);
+    }, { passive: true, signal });
+
+    finePointer.addEventListener('change', () => {
+      scheduleViewportPosition(true);
+    }, { signal });
+
+    reduceMotion.addEventListener('change', () => {
+      resetCamera(true);
+      scheduleViewportPosition(true);
+    }, { signal });
+
     requestAnimationFrame(() => {
       root.classList.add('is-ready');
       window.setTimeout(resumeActiveScene, 80);
@@ -464,6 +1040,14 @@ const mediaRoot = '/media/village';
     bindInteractionTrigger(houseTrigger, 'house');
     bindInteractionTrigger(carTrigger, 'car');
     bindInteractionTrigger(cafeTrigger, 'cafe');
+    bindInteractionTrigger(garageTrigger, 'garage');
+    overlay.addEventListener('pointerdown', (event) => {
+      if (!entering || finishing) return;
+      event.preventDefault();
+      event.stopPropagation();
+      status.textContent = '已跳过进入场景的过渡动画';
+      finishEntry();
+    }, { signal });
     allInteractionVideos.forEach((video) => {
       video.addEventListener('ended', () => {
         if (video === activeTransitionVideo) finishEntry();
@@ -477,6 +1061,7 @@ const mediaRoot = '/media/village';
       if (document.hidden) {
         dayVideo.pause();
         nightVideo.pause();
+        resetCamera();
         return;
       }
 
@@ -488,9 +1073,19 @@ const mediaRoot = '/media/village';
       window.clearTimeout(fallbackTimer);
       window.clearTimeout(returnRevealTimer);
       window.clearTimeout(returnCleanupTimer);
+      window.clearTimeout(introAssetTimer);
+      window.clearTimeout(introHoldTimer);
+      window.clearTimeout(introCleanupTimer);
+      window.cancelAnimationFrame(cameraFrame);
+      window.cancelAnimationFrame(resizeFrame);
+      viewportObserver?.disconnect();
       Object.values(sceneVideos).forEach((video) => video.pause());
       allInteractionVideos.forEach((video) => video.pause());
       document.body.classList.remove('is-entering-cinematic');
+      document.documentElement.classList.remove(
+        'is-village-intro-pending',
+        'is-village-intro-revealing'
+      );
     }, { once: true, signal });
   }
 
@@ -500,6 +1095,7 @@ const mediaRoot = '/media/village';
 
 <style>
   .cinematic-village {
+    --transition-focal-x: 50%;
     position: relative;
     height: 100vh;
     height: 100svh;
@@ -509,16 +1105,85 @@ const mediaRoot = '/media/village';
     color: #fff8e7;
   }
 
-  .cinematic-village__stage {
-    --stage-scale: 1;
+  .cinematic-village__viewport {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    overflow: hidden;
+    outline: none;
+    overscroll-behavior: contain;
+  }
+
+  .cinematic-village__viewport:focus-visible {
+    outline: 3px solid #ffd64f;
+    outline-offset: -5px;
+  }
+
+  .cinematic-village__camera {
+    --camera-x: 0px;
+    --camera-y: 0px;
     position: absolute;
     left: 50%;
     top: 50%;
     width: max(100vw, calc(100vh * 16 / 9));
     height: max(100vh, calc(100vw * 9 / 16));
+    transform:
+      translate(
+        calc(-50% + var(--camera-x)),
+        calc(-50% + var(--camera-y))
+      )
+      scale(1.035);
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+
+  .cinematic-village__stage {
+    --stage-scale: 1;
+    position: absolute;
+    inset: 0;
     overflow: hidden;
-    transform: translate(-50%, -50%) scale(var(--stage-scale));
+    transform: scale(var(--stage-scale));
     transform-origin: 55% 31%;
+  }
+
+  .cinematic-village__cloud-layer {
+    --cloud-focus-x: 0px;
+    --cloud-focus-y: 0px;
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    overflow: hidden;
+    opacity: .36;
+    pointer-events: none;
+    transform:
+      translate3d(
+        var(--cloud-focus-x),
+        var(--cloud-focus-y),
+        0
+      )
+      scale(1);
+    transform-origin: 50% 42%;
+    mix-blend-mode: normal;
+    transition: opacity 500ms ease;
+    will-change: transform;
+  }
+
+  .cinematic-village__cloud-layer img {
+    position: absolute;
+    left: -20%;
+    top: -20%;
+    width: 140%;
+    height: 140%;
+    max-width: none;
+    object-fit: fill;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .cinematic-village[data-environment='night']
+    .cinematic-village__cloud-layer {
+    opacity: .22;
+    filter: brightness(.86) saturate(.65) contrast(.95);
   }
 
   .cinematic-village[data-interaction='car'] .cinematic-village__stage {
@@ -529,11 +1194,40 @@ const mediaRoot = '/media/village';
     transform-origin: 16% 48%;
   }
 
+  .cinematic-village[data-interaction='cafe'] {
+    --transition-focal-x: 76%;
+  }
+
   @supports (height: 100svh) {
-    .cinematic-village__stage {
+    .cinematic-village__camera {
       width: max(100vw, calc(100svh * 16 / 9));
       height: max(100svh, calc(100vw * 9 / 16));
     }
+
+  }
+
+  .cinematic-village.has-world-overflow
+    .cinematic-village__viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cinematic-village.has-world-overflow
+    .cinematic-village__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cinematic-village.has-world-overflow
+    .cinematic-village__camera {
+    position: relative;
+    left: 0;
+    top: 50%;
+    transform: translateY(calc(-50% + var(--camera-y)));
+    transform-origin: 50% 50%;
+    will-change: transform;
   }
 
   .cinematic-village.is-ready .cinematic-village__stage {
@@ -574,7 +1268,8 @@ const mediaRoot = '/media/village';
 
   .cinematic-village__house,
   .cinematic-village__car,
-  .cinematic-village__cafe {
+  .cinematic-village__cafe,
+  .cinematic-village__garage {
     position: absolute;
     border: 0;
     background: transparent;
@@ -606,9 +1301,18 @@ const mediaRoot = '/media/village';
     border-radius: 42% 42% 20% 20%;
   }
 
+  .cinematic-village__garage {
+    left: 25.2%;
+    top: 32.5%;
+    width: 15.5%;
+    height: 26%;
+    border-radius: 42% 42% 18% 18%;
+  }
+
   .cinematic-village__house::before,
   .cinematic-village__car::before,
-  .cinematic-village__cafe::before {
+  .cinematic-village__cafe::before,
+  .cinematic-village__garage::before {
     content: '';
     position: absolute;
     inset: 7% 8% 4%;
@@ -627,6 +1331,11 @@ const mediaRoot = '/media/village';
   }
 
   .cinematic-village__cafe::before {
+    inset: 5% 5% 2%;
+    border-radius: 40% 40% 18% 18%;
+  }
+
+  .cinematic-village__garage::before {
     inset: 5% 5% 2%;
     border-radius: 40% 40% 18% 18%;
   }
@@ -652,6 +1361,11 @@ const mediaRoot = '/media/village';
   .cinematic-village__cafe .cinematic-village__hotspot-ring {
     left: 52%;
     top: 74%;
+  }
+
+  .cinematic-village__garage .cinematic-village__hotspot-ring {
+    left: 52%;
+    top: 72%;
   }
 
   .cinematic-village__hotspot-ring::after {
@@ -690,6 +1404,11 @@ const mediaRoot = '/media/village';
     top: calc(74% + clamp(1.8rem, 2.8vw, 3rem));
   }
 
+  .cinematic-village__garage .cinematic-village__hotspot-label {
+    left: 52%;
+    top: calc(72% + clamp(1.8rem, 2.8vw, 3rem));
+  }
+
   .cinematic-village__hotspot-label span {
     font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
     font-size: clamp(.68rem, .9vw, .82rem);
@@ -709,7 +1428,9 @@ const mediaRoot = '/media/village';
   .cinematic-village__car:hover::before,
   .cinematic-village__car:focus-visible::before,
   .cinematic-village__cafe:hover::before,
-  .cinematic-village__cafe:focus-visible::before {
+  .cinematic-village__cafe:focus-visible::before,
+  .cinematic-village__garage:hover::before,
+  .cinematic-village__garage:focus-visible::before {
     border-color: rgba(255, 248, 231, .52);
     background: rgba(255, 214, 79, .06);
     box-shadow: 0 0 38px 8px rgba(255, 214, 79, .18);
@@ -720,7 +1441,9 @@ const mediaRoot = '/media/village';
   .cinematic-village__car:hover .cinematic-village__hotspot-ring,
   .cinematic-village__car:focus-visible .cinematic-village__hotspot-ring,
   .cinematic-village__cafe:hover .cinematic-village__hotspot-ring,
-  .cinematic-village__cafe:focus-visible .cinematic-village__hotspot-ring {
+  .cinematic-village__cafe:focus-visible .cinematic-village__hotspot-ring,
+  .cinematic-village__garage:hover .cinematic-village__hotspot-ring,
+  .cinematic-village__garage:focus-visible .cinematic-village__hotspot-ring {
     box-shadow: 0 0 0 10px rgba(255, 214, 79, .25), 0 5px 24px rgba(10, 24, 20, .4);
     transform: translate(-50%, -50%) scale(1.08);
   }
@@ -730,16 +1453,311 @@ const mediaRoot = '/media/village';
   .cinematic-village__car:hover .cinematic-village__hotspot-label,
   .cinematic-village__car:focus-visible .cinematic-village__hotspot-label,
   .cinematic-village__cafe:hover .cinematic-village__hotspot-label,
-  .cinematic-village__cafe:focus-visible .cinematic-village__hotspot-label {
+  .cinematic-village__cafe:focus-visible .cinematic-village__hotspot-label,
+  .cinematic-village__garage:hover .cinematic-village__hotspot-label,
+  .cinematic-village__garage:focus-visible .cinematic-village__hotspot-label {
     background: rgba(16, 35, 32, .9);
     transform: translateX(-50%) translateY(-3px);
   }
 
   .cinematic-village__house:focus-visible,
   .cinematic-village__car:focus-visible,
-  .cinematic-village__cafe:focus-visible {
+  .cinematic-village__cafe:focus-visible,
+  .cinematic-village__garage:focus-visible {
     outline: 3px solid #ffd64f;
     outline-offset: 5px;
+  }
+
+  .cinematic-village__hud {
+    position: absolute;
+    z-index: 12;
+    inset: 0 0 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding:
+      max(.75rem, env(safe-area-inset-top))
+      max(.75rem, env(safe-area-inset-right))
+      .75rem
+      max(.75rem, env(safe-area-inset-left));
+    pointer-events: none;
+    transition: opacity 260ms ease;
+  }
+
+  .cinematic-village__profile,
+  .cinematic-village__menu {
+    pointer-events: auto;
+  }
+
+  .cinematic-village__profile {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    border: 2px solid rgba(255, 248, 231, .76);
+    border-radius: 999px;
+    background: rgba(16, 35, 32, .78);
+    box-shadow: 0 10px 28px rgba(7, 24, 23, .28);
+    padding: .4rem .76rem .4rem .4rem;
+    color: #fff8e7;
+    font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
+    text-decoration: none;
+    backdrop-filter: blur(10px);
+    transition: background 180ms ease, transform 180ms ease;
+  }
+
+  .cinematic-village__profile:hover,
+  .cinematic-village__profile:focus-visible {
+    background: rgba(16, 35, 32, .94);
+    transform: translateY(-2px);
+  }
+
+  .cinematic-village__profile-avatar {
+    display: grid;
+    width: 2.35rem;
+    height: 2.35rem;
+    place-items: center;
+    border: 2px solid rgba(255, 248, 231, .8);
+    border-radius: 50%;
+    background: #ef5a40;
+    color: #fff8e7;
+  }
+
+  .cinematic-village__profile-copy b,
+  .cinematic-village__profile-copy small {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .cinematic-village__profile-copy b {
+    font-size: .78rem;
+  }
+
+  .cinematic-village__profile-copy small {
+    margin-top: .14rem;
+    font-family: 'LXGW WenKai', sans-serif;
+    font-size: .58rem;
+    font-weight: 800;
+    opacity: .72;
+  }
+
+  .cinematic-village__menu {
+    position: relative;
+  }
+
+  .cinematic-village__menu summary {
+    display: grid;
+    min-width: 4.15rem;
+    min-height: 4.15rem;
+    place-items: center;
+    border: 2px solid rgba(255, 248, 231, .76);
+    border-radius: 18px;
+    background: rgba(16, 35, 32, .78);
+    box-shadow: 0 10px 28px rgba(7, 24, 23, .28);
+    color: #fff8e7;
+    cursor: pointer;
+    font-family: 'ZCOOL KuaiLe', 'LXGW WenKai', sans-serif;
+    font-size: .72rem;
+    list-style: none;
+    backdrop-filter: blur(10px);
+    transition: background 180ms ease, transform 180ms ease;
+  }
+
+  .cinematic-village__menu summary:hover,
+  .cinematic-village__menu summary:focus-visible {
+    background: rgba(16, 35, 32, .94);
+    transform: translateY(-2px);
+  }
+
+  .cinematic-village__menu summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .cinematic-village__menu summary span:first-child {
+    font-size: 1.15rem;
+    line-height: 1;
+  }
+
+  .cinematic-village__menu nav {
+    position: absolute;
+    right: 0;
+    top: calc(100% + .55rem);
+    display: grid;
+    min-width: 9.5rem;
+    gap: .3rem;
+    border: 2px solid rgba(255, 248, 231, .76);
+    border-radius: 16px;
+    background: rgba(16, 35, 32, .94);
+    box-shadow: 0 12px 32px rgba(7, 24, 23, .42);
+    padding: .55rem;
+    backdrop-filter: blur(12px);
+  }
+
+  .cinematic-village__menu nav a {
+    border-radius: 9px;
+    padding: .5rem .65rem;
+    color: #fff8e7;
+    font-size: .8rem;
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .cinematic-village__menu nav a:hover,
+  .cinematic-village__menu nav a:focus-visible {
+    background: #ffd64f;
+    color: #24231f;
+  }
+
+  .cinematic-village__swipe-cue {
+    position: absolute;
+    z-index: 11;
+    left: 50%;
+    bottom: max(4.8rem, calc(env(safe-area-inset-bottom) + 4rem));
+    display: none;
+    margin: 0;
+    border: 1px solid rgba(255, 248, 231, .6);
+    border-radius: 999px;
+    background: rgba(16, 35, 32, .78);
+    box-shadow: 0 8px 24px rgba(7, 24, 23, .3);
+    padding: .45rem .8rem;
+    color: #fff8e7;
+    font-size: .68rem;
+    font-weight: 900;
+    letter-spacing: .08em;
+    opacity: 0;
+    transform: translate(-50%, 8px);
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+    transition: opacity 240ms ease, transform 240ms ease;
+  }
+
+  .cinematic-village__edge-copy {
+    display: none;
+  }
+
+  .cinematic-village.has-fine-pointer
+    .cinematic-village__swipe-copy {
+    display: none;
+  }
+
+  .cinematic-village.has-fine-pointer
+    .cinematic-village__edge-copy {
+    display: inline;
+  }
+
+  .cinematic-village.has-world-overflow:not(.has-explored):not(.is-intro-active):not(.is-entering)
+    .cinematic-village__swipe-cue {
+    display: block;
+    opacity: 1;
+    transform: translate(-50%, 0);
+    animation: village-swipe-cue 1.8s ease-in-out infinite alternate;
+  }
+
+  .cinematic-village__welcome {
+    position: fixed;
+    z-index: 90;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    visibility: hidden;
+    background:
+      radial-gradient(circle at 50% 45%, rgba(52, 106, 104, .32), transparent 38%),
+      #101d1b;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 650ms cubic-bezier(.22, .72, .22, 1),
+      visibility 0s linear 650ms;
+  }
+
+  :global(html.is-village-intro-pending) .cinematic-village__welcome {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: 0s;
+  }
+
+  .cinematic-village.is-intro-leaving .cinematic-village__welcome {
+    opacity: 0;
+    pointer-events: auto;
+  }
+
+  .cinematic-village__welcome-logo {
+    width: min(72vw, 43rem);
+    max-height: 76svh;
+    object-fit: contain;
+    opacity: 0;
+    filter: drop-shadow(0 20px 38px rgba(0, 0, 0, .45));
+    transform: translateY(12px) scale(.94);
+    transition:
+      opacity 500ms cubic-bezier(.22, .72, .22, 1),
+      transform 600ms cubic-bezier(.22, .72, .22, 1);
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .cinematic-village.is-intro-logo-visible .cinematic-village__welcome-logo {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .cinematic-village.is-intro-leaving .cinematic-village__welcome-logo {
+    opacity: 0;
+    transform: translateY(-6px) scale(1.025);
+    transition-duration: 420ms;
+  }
+
+  .cinematic-village__welcome-fallback {
+    position: absolute;
+    margin: 0;
+    color: #fff3b0;
+    opacity: 0;
+    text-align: center;
+    text-shadow:
+      0 5px 0 #173d3a,
+      0 12px 28px rgba(0, 0, 0, .48);
+    transform: translateY(12px) scale(.94);
+    transition:
+      opacity 500ms cubic-bezier(.22, .72, .22, 1),
+      transform 600ms cubic-bezier(.22, .72, .22, 1);
+  }
+
+  .cinematic-village__welcome-fallback span,
+  .cinematic-village__welcome-fallback strong {
+    display: block;
+  }
+
+  .cinematic-village__welcome-fallback span {
+    color: #ff7d61;
+    font-family: 'ZCOOL KuaiLe', sans-serif;
+    font-size: clamp(1.2rem, 4vw, 2.6rem);
+    letter-spacing: .08em;
+  }
+
+  .cinematic-village__welcome-fallback strong {
+    font-family: 'ZCOOL KuaiLe', sans-serif;
+    font-size: clamp(3.4rem, 12vw, 8.5rem);
+    letter-spacing: .02em;
+  }
+
+  .cinematic-village.is-intro-fallback-visible
+    .cinematic-village__welcome-fallback {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .cinematic-village.is-intro-leaving
+    .cinematic-village__welcome-fallback {
+    opacity: 0;
+    transform: translateY(-6px) scale(1.025);
+    transition-duration: 420ms;
+  }
+
+  .cinematic-village.is-entering .cinematic-village__hud,
+  .cinematic-village.is-entering .cinematic-village__controls,
+  .cinematic-village.is-entering .cinematic-village__swipe-cue {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .cinematic-village__controls {
@@ -750,6 +1768,7 @@ const mediaRoot = '/media/village';
     display: flex;
     align-items: center;
     gap: .75rem;
+    transition: opacity 260ms ease;
   }
 
   .cinematic-village__environment-toggle {
@@ -822,7 +1841,7 @@ const mediaRoot = '/media/village';
     height: 100%;
     max-width: none;
     object-fit: cover;
-    object-position: 50% 50%;
+    object-position: var(--transition-focal-x) 50%;
     opacity: .6;
     transform: scale(1.015);
     transition: opacity 420ms ease, transform 3s linear;
@@ -845,6 +1864,31 @@ const mediaRoot = '/media/village';
     pointer-events: none;
   }
 
+  .cinematic-village__entry-skip {
+    position: absolute;
+    z-index: 3;
+    left: 50%;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    margin: 0;
+    border: 1px solid rgba(255, 248, 231, .42);
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .68);
+    padding: .4rem .72rem;
+    color: rgba(255, 248, 231, .82);
+    font-size: .66rem;
+    letter-spacing: .06em;
+    opacity: 0;
+    transform: translate(-50%, .4rem);
+    backdrop-filter: blur(8px);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+
+  .cinematic-village__entry.is-playing
+  .cinematic-village__entry-skip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
   .cinematic-village__curtain {
     position: absolute;
     z-index: 3;
@@ -863,13 +1907,7 @@ const mediaRoot = '/media/village';
     overflow: hidden;
   }
 
-  :global(body.is-entering-cinematic .home-hud-header) {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 260ms ease;
-  }
-
-  @media (max-width: 767px) {
+  @media (max-width: 900px), (hover: none), (pointer: coarse) {
     .cinematic-village__controls {
       left: .75rem;
       right: .75rem;
@@ -881,19 +1919,67 @@ const mediaRoot = '/media/village';
       display: none;
     }
 
+    .cinematic-village__profile {
+      min-width: 2.85rem;
+      min-height: 2.85rem;
+      justify-content: center;
+      padding: .28rem;
+    }
+
+    .cinematic-village__profile-avatar {
+      width: 2.25rem;
+      height: 2.25rem;
+    }
+
+    .cinematic-village__profile-copy {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+    }
+
+    .cinematic-village__menu summary {
+      min-width: 3.45rem;
+      min-height: 3.45rem;
+      font-size: .65rem;
+    }
+
+    .cinematic-village__menu summary span:first-child {
+      font-size: 1rem;
+    }
+
     .cinematic-village__hotspot-label {
       padding: .36rem .6rem .3rem;
     }
 
-    .cinematic-village__transition-video {
-      object-position: 50% 50%;
+    .cinematic-village__welcome-logo {
+      width: min(90vw, 34rem);
+      max-height: 68svh;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .cinematic-village__camera {
+      transform:
+        translate(
+          calc(-50% + var(--camera-x)),
+          calc(-50% + var(--camera-y))
+        )
+        scale(1);
+    }
+
     .cinematic-village__stage,
     .cinematic-village__scene,
+    .cinematic-village__hud,
+    .cinematic-village__controls,
+    .cinematic-village__swipe-cue,
+    .cinematic-village__welcome,
+    .cinematic-village__welcome-logo,
+    .cinematic-village__welcome-fallback,
+    .cinematic-village__cloud-layer,
     .cinematic-village__entry,
+    .cinematic-village__entry-skip,
     .cinematic-village__transition-video,
     .cinematic-village__curtain {
       transition-duration: 1ms !important;
@@ -901,6 +1987,29 @@ const mediaRoot = '/media/village';
 
     .cinematic-village.is-entering .cinematic-village__stage {
       --stage-scale: 1;
+    }
+
+    .cinematic-village__cloud-layer {
+      transform: none;
+    }
+
+    .cinematic-village__swipe-cue {
+      animation: none !important;
+    }
+
+    .cinematic-village.has-world-overflow
+      .cinematic-village__camera {
+      transform: translateY(-50%);
+    }
+  }
+
+  @keyframes village-swipe-cue {
+    from {
+      margin-left: -.35rem;
+    }
+
+    to {
+      margin-left: .35rem;
     }
   }
 </style>

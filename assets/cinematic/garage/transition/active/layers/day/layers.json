@@ -1,0 +1,85 @@
+{
+  "theme": "day",
+  "canvas": [
+    1672,
+    941
+  ],
+  "overscanPercent": 1.8,
+  "registration": "full-canvas",
+  "layers": [
+    {
+      "id": "garage-background",
+      "file": "01-garage-background.png",
+      "owner": "garage-background",
+      "z": 1,
+      "maxShiftPercent": 0,
+      "includes": [
+        "garage exterior, lawn, path, fence, trees, and sky"
+      ],
+      "excludes": [
+        "authored street lamp and authored foreground bushes"
+      ],
+      "repairSource": null,
+      "matteSource": null,
+      "sourceArt": null,
+      "registrationTransform": null
+    },
+    {
+      "id": "near-street-lamp",
+      "file": "02-street-lamp.png",
+      "owner": "near-street-lamp",
+      "z": 2,
+      "maxShiftPercent": 0,
+      "includes": [
+        "complete independently authored teal-and-brass street lamp"
+      ],
+      "excludes": [
+        "garage, lawn, sky, fence, trees, and bushes"
+      ],
+      "repairSource": null,
+      "matteSource": null,
+      "sourceArt": [
+        "authored/day-lamp.png"
+      ],
+      "registrationTransform": null
+    },
+    {
+      "id": "near-left-bush",
+      "file": "03-left-bush.png",
+      "owner": "near-left-bush",
+      "z": 3,
+      "maxShiftPercent": 0,
+      "includes": [
+        "complete independently authored lower-left bush cluster"
+      ],
+      "excludes": [
+        "lamp, right bush, garage, lawn, sky, fence, and trees"
+      ],
+      "repairSource": null,
+      "matteSource": null,
+      "sourceArt": [
+        "authored/day-bushes.png"
+      ],
+      "registrationTransform": null
+    },
+    {
+      "id": "near-right-bush",
+      "file": "04-right-bush.png",
+      "owner": "near-right-bush",
+      "z": 4,
+      "maxShiftPercent": 0,
+      "includes": [
+        "complete independently authored lower-right bush cluster"
+      ],
+      "excludes": [
+        "lamp, left bush, garage, lawn, sky, fence, and trees"
+      ],
+      "repairSource": null,
+      "matteSource": null,
+      "sourceArt": [
+        "authored/day-bushes.png"
+      ],
+      "registrationTransform": null
+    }
+  ]
+}

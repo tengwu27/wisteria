@@ -35,6 +35,9 @@ const clips = { day, night };
     ))
   }
   <div class="cinematic-scene-exit__vignette" aria-hidden="true"></div>
+  <p class="cinematic-scene-exit__skip" aria-hidden="true">
+    点击跳过
+  </p>
   <div class="cinematic-scene-exit__curtain" aria-hidden="true"></div>
 </div>
 
@@ -98,6 +101,31 @@ const clips = { day, night };
     pointer-events: none;
   }
 
+  .cinematic-scene-exit__skip {
+    position: absolute;
+    z-index: 3;
+    left: 50%;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    margin: 0;
+    border: 1px solid rgba(255, 248, 231, .42);
+    border-radius: 999px;
+    background: rgba(13, 34, 32, .68);
+    padding: .4rem .72rem;
+    color: rgba(255, 248, 231, .82);
+    font-size: .66rem;
+    letter-spacing: .06em;
+    opacity: 0;
+    transform: translate(-50%, .4rem);
+    backdrop-filter: blur(8px);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+
+  .cinematic-scene-exit.is-playing
+  .cinematic-scene-exit__skip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
   .cinematic-scene-exit__curtain {
     position: absolute;
     z-index: 3;
@@ -116,6 +144,7 @@ const clips = { day, night };
   @media (prefers-reduced-motion: reduce) {
     .cinematic-scene-exit,
     .cinematic-scene-exit__video,
+    .cinematic-scene-exit__skip,
     .cinematic-scene-exit__curtain {
       transition-duration: 1ms !important;
     }
