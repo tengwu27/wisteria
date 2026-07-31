@@ -378,9 +378,13 @@ def write_manifest(
 
 
 def prepare_cafe() -> None:
-    source_root = ROOT / "assets/cinematic/art/cafe/interior/active"
-    generated_root = ROOT / "assets/cinematic/art/cafe/parallax/generated"
-    public_root = ROOT / "public/media/art/parallax"
+    source_root = (
+        ROOT / "assets/cinematic/scenes/cafe-gallery/interior/sources"
+    )
+    generated_root = (
+        ROOT / "assets/cinematic/scenes/cafe-gallery/interior/repairs"
+    )
+    public_root = ROOT / "public/media/cafe-gallery/parallax"
     removal_matte = cafe_foreground_matte(generated_root)
     removal_matte.save(
         generated_root / "day-foreground-removal-matte.png"
@@ -507,8 +511,10 @@ def prepare_cafe() -> None:
 
 
 def prepare_travel() -> None:
-    source_root = ROOT / "assets/cinematic/travel/active"
-    public_root = ROOT / "public/media/travel/parallax"
+    source_root = (
+        ROOT / "assets/cinematic/scenes/car-interior/interior/sources"
+    )
+    public_root = ROOT / "public/media/car-interior/parallax"
     charm_position = (700, 228)
     seat_position_y = 12
 
@@ -567,9 +573,11 @@ def prepare_travel() -> None:
 
 
 def prepare_garage_interior() -> None:
-    source_root = ROOT / "assets/cinematic/garage/interior/generated"
+    source_root = (
+        ROOT / "assets/cinematic/scenes/garage-workshop/interior/sources"
+    )
     exterior_root = source_root / "exterior"
-    public_root = ROOT / "public/media/garage/parallax"
+    public_root = ROOT / "public/media/garage-workshop/parallax"
     motorcycle_matte = source_alpha(
         source_root / "day-motorcycles-cutout.png"
     )
@@ -680,10 +688,16 @@ def prepare_garage_interior() -> None:
 
 
 def prepare_garage_transition() -> None:
-    source_root = ROOT / "assets/cinematic/garage/transition/generated"
+    source_root = (
+        ROOT
+        / "assets/cinematic/scenes/garage-workshop/transitions"
+        / "garden-reveal/sources"
+    )
     authored_root = source_root / "authored"
     active_root = (
-        ROOT / "assets/cinematic/garage/transition/active/layers"
+        ROOT
+        / "assets/cinematic/scenes/garage-workshop/transitions"
+        / "garden-reveal/layers"
     )
 
     left_region = polygon_mask(

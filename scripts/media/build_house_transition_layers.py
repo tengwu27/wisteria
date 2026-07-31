@@ -4,9 +4,13 @@ from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[2]
-CAFE_ROOT = ROOT / "assets/cinematic/art/cafe/transition/active/layers"
+CAFE_ROOT = (
+    ROOT
+    / "assets/cinematic/scenes/cafe-gallery/transitions/garden-reveal/layers"
+)
 HOUSE_ROOT = (
-    ROOT / "assets/cinematic/village/interactions/house/active/layers"
+    ROOT
+    / "assets/cinematic/scenes/living-room/transitions/house-door/layers"
 )
 MASTER_SIZE = (1672, 941)
 

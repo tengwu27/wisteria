@@ -16,10 +16,11 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[2]
 CANVAS_SIZE = (1672, 941)
-DAY_SOURCE = ROOT / "assets/cinematic/lifestyle/active/day"
-NIGHT_SOURCE = ROOT / "assets/cinematic/lifestyle/active/night"
-GENERATED = ROOT / "assets/cinematic/lifestyle/parallax/generated"
-OUTPUT_ROOT = ROOT / "public/media/lifestyle/parallax"
+INTERIOR_ROOT = ROOT / "assets/cinematic/scenes/living-room/interior"
+DAY_SOURCE = INTERIOR_ROOT / "sources/day"
+NIGHT_SOURCE = INTERIOR_ROOT / "sources/night"
+GENERATED = INTERIOR_ROOT / "repairs"
+OUTPUT_ROOT = ROOT / "public/media/living-room/parallax"
 
 SKY_SCALE = 0.55
 SKY_POSITION = (550, -140)
@@ -248,9 +249,11 @@ def build_theme(theme: str, verification_dir: Path | None = None) -> None:
             "owner": "room-shell",
             "bbox": [616, 8, 1110, 399],
             "alphaSource": (
-                "active/day/04-foreground-interior.png"
+                "assets/cinematic/scenes/living-room/interior/"
+                "sources/day/04-foreground-interior.png"
                 if theme == "day"
-                else "active/night/05-foreground-interior.png"
+                else "assets/cinematic/scenes/living-room/interior/"
+                "sources/night/05-foreground-interior.png"
             ),
         },
         "registration": {

@@ -7,7 +7,10 @@ from PIL import Image, ImageDraw, ImageFilter
 SIZE = (1672, 941)
 SUPERSAMPLE = 4
 ROOT = Path(__file__).resolve().parents[2]
-OUT_DIR = ROOT / "assets/cinematic/village/interactions/car/masks"
+OUT_DIR = (
+    ROOT
+    / "assets/cinematic/scenes/car-interior/transitions/driver-door/masks"
+)
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # These registered contours describe the complete driver-door leaf and exact

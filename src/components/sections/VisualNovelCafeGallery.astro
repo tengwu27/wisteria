@@ -1,8 +1,8 @@
 ---
 import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOverlay.astro';
 
-const mediaRoot = '/media/art/ambient';
-const parallaxRoot = '/media/art/parallax';
+const mediaRoot = '/media/cafe-gallery/ambient';
+const parallaxRoot = '/media/cafe-gallery/parallax';
 ---
 
 <section
@@ -131,13 +131,14 @@ const parallaxRoot = '/media/art/parallax';
   <CinematicSceneExitOverlay
     label="从咖啡馆画廊返回村庄的过渡动画"
     day={{
-      src: '/media/art/transition/cafe-reveal-day-v1-reverse.mp4',
-      poster: '/media/art/transition/cafe-reveal-day-v1-reverse-poster.jpg'
+      src: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1-reverse.mp4',
+      poster:
+        '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1-reverse-poster.jpg'
     }}
     night={{
-      src: '/media/art/transition/cafe-reveal-night-v1-reverse.mp4',
+      src: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1-reverse.mp4',
       poster:
-        '/media/art/transition/cafe-reveal-night-v1-reverse-poster.jpg'
+        '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1-reverse-poster.jpg'
     }}
   />
   <div class="cafe-gallery__curtain" data-gallery-curtain aria-hidden="true"></div>

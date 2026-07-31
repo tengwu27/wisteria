@@ -7,7 +7,9 @@ from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[2]
-ASSET_ROOT = ROOT / "assets/cinematic/travel/active"
+INTERIOR_ROOT = ROOT / "assets/cinematic/scenes/car-interior/interior"
+SOURCE_ROOT = INTERIOR_ROOT / "sources"
+MASK_ROOT = INTERIOR_ROOT / "masks"
 CHROMA_HELPER = (
     Path.home()
     / ".codex/skills/.system/imagegen/scripts/remove_chroma_key.py"
@@ -99,7 +101,7 @@ def main() -> None:
         temporary_root = Path(temporary)
 
         for theme in ("day", "night"):
-            theme_dir = ASSET_ROOT / theme
+            theme_dir = SOURCE_ROOT / theme
             interior_source = theme_dir / "02-interior-keyed.png"
             seat_source = theme_dir / "04-bench-seat-keyed.png"
             interior = Image.open(interior_source).convert("RGBA")
@@ -118,7 +120,7 @@ def main() -> None:
         # the same alpha to the aligned night repaint prevents one-pixel theme
         # shifts along glass, trim, and upholstery edges.
         aperture = keyed_interiors["day"].getchannel("A")
-        aperture.save(ASSET_ROOT / "masks/aperture-alpha.png")
+        aperture.save(MASK_ROOT / "aperture-alpha.png")
         keyed_interiors["night"].putalpha(aperture)
 
         seat_crop = keyed_seats["day"].getchannel("A").point(
@@ -138,7 +140,7 @@ def main() -> None:
         )
 
         for theme in ("day", "night"):
-            theme_dir = ASSET_ROOT / theme
+            theme_dir = SOURCE_ROOT / theme
             interior = keyed_interiors[theme]
             interior.save(theme_dir / "03-interior-cutout.png")
 
@@ -173,7 +175,7 @@ def main() -> None:
             shared_seat_alpha,
         )
         keyed_seats["day"].getchannel("A").save(
-            ASSET_ROOT / "masks/front-seat-alpha.png"
+            MASK_ROOT / "front-seat-alpha.png"
         )
 
 

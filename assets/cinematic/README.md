@@ -1,18 +1,27 @@
 # Cinematic Asset Sources
 
-This tree contains only editable inputs for the cinematic village. Approved
-encoded output lives in `public/media/village`, which is the single source for
-browser-delivered video.
+This tree contains the editable inputs and registered authoring plates for each
+immersive scene. Browser-delivered assets use the same scene names under
+`public/media`.
 
 ```text
-village/
-  ambient/
-    sources/                  painted day/night source frames
-  interactions/<object>/
-    sources/                  aligned closed/interior endpoint frames
-    masks/                    optional mechanical-motion masks
+scenes/
+  <scene>/
+    interior/
+      sources/                approved masters or registered source plates
+      repairs/                localized reconstruction inputs, when required
+      masks/                  exact alpha or object mattes, when required
+    transitions/
+      <shot>/
+        sources/              approved transition artwork
+        masks/                mechanical or aperture masks, when required
+        layers/               registered render-ready plates
 ```
 
-Only approved delivery copies belong in `public/media/village`. Generated or
-superseded renders are removed from the working tree and remain recoverable
-from Git history instead of being kept in parallel source or archive trees.
+Canonical scene names are `village`, `living-room`, `cafe-gallery`,
+`car-interior`, and `garage-workshop`. Site-route labels such as `art`,
+`lifestyle`, and `travel` do not own cinematic assets.
+
+Only active delivery copies belong in `public/media/<scene>`. Superseded
+renders remain recoverable from Git history instead of being kept in parallel
+source or archive folders.
