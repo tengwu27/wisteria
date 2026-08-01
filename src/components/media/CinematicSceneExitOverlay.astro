@@ -11,7 +11,6 @@ interface Props {
 }
 
 const { day, night, label } = Astro.props;
-const clips = { day, night };
 ---
 
 <div
@@ -20,20 +19,18 @@ const clips = { day, night };
   aria-label={label}
   aria-hidden="true"
 >
-  {
-    Object.entries(clips).map(([environment, clip]) => (
-      <video
-        class="cinematic-scene-exit__video"
-        data-exit-environment={environment}
-        src={clip.src}
-        poster={clip.poster}
-        muted
-        playsinline
-        preload="auto"
-        aria-hidden="true"
-      />
-    ))
-  }
+  <video
+    class="cinematic-scene-exit__video"
+    data-exit-video
+    data-day-src={day.src}
+    data-day-poster={day.poster}
+    data-night-src={night.src}
+    data-night-poster={night.poster}
+    muted
+    playsinline
+    preload="none"
+    aria-hidden="true"
+  ></video>
   <div class="cinematic-scene-exit__vignette" aria-hidden="true"></div>
   <p class="cinematic-scene-exit__skip" aria-hidden="true">
     点击跳过

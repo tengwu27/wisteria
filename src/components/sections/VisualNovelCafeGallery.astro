@@ -23,8 +23,8 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
         <video
           class="cafe-gallery__video is-active"
           data-gallery-video="day"
-          src={`${mediaRoot}/cafe-gallery-day-v1.mp4`}
-          poster={`${mediaRoot}/cafe-gallery-day-v1-poster.jpg`}
+          data-src={`${mediaRoot}/cafe-gallery-day-v1.mp4`}
+          data-poster={`${mediaRoot}/cafe-gallery-day-v1-poster.jpg`}
           muted
           loop
           playsinline
@@ -34,8 +34,8 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
         <video
           class="cafe-gallery__video"
           data-gallery-video="night"
-          src={`${mediaRoot}/cafe-gallery-night-v1.mp4`}
-          poster={`${mediaRoot}/cafe-gallery-night-v1-poster.jpg`}
+          data-src={`${mediaRoot}/cafe-gallery-night-v1.mp4`}
+          data-poster={`${mediaRoot}/cafe-gallery-night-v1-poster.jpg`}
           muted
           loop
           playsinline
@@ -148,13 +148,28 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
   import { navigate } from 'astro:transitions/client';
   import { createAdaptiveCinematicViewport } from '@/utils/adaptiveCinematicViewport';
   import { createCinematicExitSequence } from '@/utils/cinematicExitSequence';
+  import {
+    createLayerBundleLoader,
+    loadDeferredVideo,
+    showDeferredVideoPoster
+  } from '@/utils/cinematicMediaLoader';
   import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
 
   const SESSION_KEY = 'wisteria-hero-environment';
-  const BUNDLE_TIMEOUT = 4000;
 
   type Environment = 'day' | 'night';
   type RoomState = 'arriving' | 'idle' | 'exiting';
+
+  const fallbackMedia: Record<Environment, { src: string; poster: string }> = {
+    day: {
+      src: '/media/cafe-gallery/ambient/cafe-gallery-day-v1.mp4',
+      poster: '/media/cafe-gallery/ambient/cafe-gallery-day-v1-poster.jpg'
+    },
+    night: {
+      src: '/media/cafe-gallery/ambient/cafe-gallery-night-v1.mp4',
+      poster: '/media/cafe-gallery/ambient/cafe-gallery-night-v1-poster.jpg'
+    }
+  };
 
   function getStoredEnvironment(): Environment | null {
     try {
@@ -219,7 +234,11 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
       day: dayStack,
       night: nightStack
     };
-    const bundlePromises = new Map<Environment, Promise<boolean>>();
+    const bundleLoader = createLayerBundleLoader({
+      stacks,
+      imageSelector: '[data-gallery-layer-image]',
+      signal
+    });
     let environment: Environment = getStoredEnvironment() ?? getLocalEnvironment();
     let activeVideo = videos[environment];
     let state: RoomState = 'arriving';
@@ -265,63 +284,7 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
       );
     };
 
-    const waitForImage = (image: HTMLImageElement) =>
-      new Promise<void>((resolve, reject) => {
-        if (image.complete && image.naturalWidth > 0) {
-          if (typeof image.decode === 'function') {
-            image.decode().then(resolve).catch(resolve);
-          } else {
-            resolve();
-          }
-          return;
-        }
-        image.addEventListener('load', () => {
-          if (typeof image.decode === 'function') {
-            image.decode().then(resolve).catch(resolve);
-          } else {
-            resolve();
-          }
-        }, { once: true });
-        image.addEventListener('error', () => {
-          reject(new Error('Café parallax layer failed to load'));
-        }, { once: true });
-      });
-
-    const loadBundle = (theme: Environment) => {
-      const existing = bundlePromises.get(theme);
-      if (existing) return existing;
-      const promise = new Promise<boolean>((resolve) => {
-        const images = Array.from(
-          stacks[theme].querySelectorAll<HTMLImageElement>(
-            '[data-gallery-layer-image]'
-          )
-        );
-        images.forEach((image) => {
-          if (!image.src && image.dataset.src) image.src = image.dataset.src;
-        });
-        let settled = false;
-        const timeout = window.setTimeout(() => {
-          settled = true;
-          bundlePromises.delete(theme);
-          resolve(false);
-        }, BUNDLE_TIMEOUT);
-        Promise.all(images.map(waitForImage))
-          .then(() => {
-            window.clearTimeout(timeout);
-            stacks[theme].dataset.loaded = 'true';
-            if (settled) bundlePromises.delete(theme);
-            resolve(true);
-          })
-          .catch(() => {
-            window.clearTimeout(timeout);
-            stacks[theme].dataset.failed = 'true';
-            bundlePromises.delete(theme);
-            resolve(false);
-          });
-      });
-      bundlePromises.set(theme, promise);
-      return promise;
-    };
+    const loadBundle = bundleLoader.load;
 
     const setRenderer = (next: 'layers' | 'fallback') => {
       renderer = next;
@@ -350,6 +313,11 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
         });
     };
 
+    const activateFallback = (theme: Environment, play = true) => {
+      loadDeferredVideo(videos[theme], fallbackMedia[theme]);
+      if (play) safelyPlay(videos[theme]);
+    };
+
     const updateEnvironment = (
       next: Environment,
       persist = false,
@@ -370,6 +338,8 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
             if (name !== next) video.pause();
           }
         );
+        showDeferredVideoPoster(activeVideo, fallbackMedia[next]);
+        if (activeVideo.hasAttribute('src')) safelyPlay(activeVideo);
       } else if (renderer === 'fallback' && previousVideo !== activeVideo) {
         window.clearTimeout(themeTimer);
         if (
@@ -504,7 +474,6 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
 
     Object.values(videos).forEach((video) => {
       video.muted = true;
-      video.load();
       video.addEventListener('loadeddata', () => {
         if (video === activeVideo) finishArrival();
       }, { signal });
@@ -521,14 +490,10 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
     updateEnvironment(environment, false, false, true);
     void loadBundle(environment).then((ready) => {
       if (signal.aborted || state === 'exiting') return;
+      if (!ready) activateFallback(environment, false);
       setRenderer(ready ? 'layers' : 'fallback');
       updateEnvironment(environment, false, false, true);
       finishArrival();
-      if (ready) {
-        const inactive: Environment =
-          environment === 'day' ? 'night' : 'day';
-        window.setTimeout(() => void loadBundle(inactive), 700);
-      }
     });
 
     if (reduceMotion.matches) {
@@ -549,6 +514,7 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
       depth.setSuspended(true);
       const ready = await loadBundle(next);
       if (signal.aborted || state !== 'idle') return;
+      if (!ready) activateFallback(next, false);
       setRenderer(ready ? 'layers' : 'fallback');
       updateEnvironment(next, true, true);
       window.clearTimeout(themeTimer);

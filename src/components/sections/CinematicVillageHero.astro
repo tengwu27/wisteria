@@ -16,25 +16,23 @@ const mediaRoot = '/media/village';
         <video
           class="cinematic-village__scene is-active"
           data-scene-video="day"
-          src={`${mediaRoot}/ambient/day-v5.mp4`}
-          poster={`${mediaRoot}/ambient/day-v5-poster.jpg`}
+          data-src={`${mediaRoot}/ambient/day-v5.mp4`}
+          data-poster={`${mediaRoot}/ambient/day-v5-poster.jpg`}
           muted
           loop
-          autoplay
           playsinline
-          preload="metadata"
+          preload="none"
           aria-hidden="true"
         ></video>
         <video
           class="cinematic-village__scene"
           data-scene-video="night"
-          src={`${mediaRoot}/ambient/night-v3.mp4`}
-          poster={`${mediaRoot}/ambient/night-v3-poster.jpg`}
+          data-src={`${mediaRoot}/ambient/night-v3.mp4`}
+          data-poster={`${mediaRoot}/ambient/night-v3-poster.jpg`}
           muted
           loop
-          autoplay
           playsinline
-          preload="metadata"
+          preload="none"
           aria-hidden="true"
         ></video>
 
@@ -145,7 +143,7 @@ const mediaRoot = '/media/village';
     <img
       class="cinematic-village__welcome-logo"
       data-welcome-logo
-      src="/media/village/ui/welcome-to-wisteria.png"
+      data-src="/media/village/ui/welcome-to-wisteria.png"
       alt="Welcome to Wisteria"
       decoding="sync"
       fetchpriority="high"
@@ -185,87 +183,7 @@ const mediaRoot = '/media/village';
   >
     <video
       class="cinematic-village__transition-video is-active"
-      data-interaction-video="house"
-      data-environment="day"
-      src="/media/living-room/transitions/house-door/door-day-v4.mp4"
-      poster="/media/living-room/transitions/house-door/door-day-v4-poster.jpg"
-      muted
-      playsinline
-      preload="none"
-      aria-hidden="true"
-    ></video>
-    <video
-      class="cinematic-village__transition-video"
-      data-interaction-video="house"
-      data-environment="night"
-      src="/media/living-room/transitions/house-door/door-night-v4.mp4"
-      poster="/media/living-room/transitions/house-door/door-night-v4-poster.jpg"
-      muted
-      playsinline
-      preload="none"
-      aria-hidden="true"
-    ></video>
-    <video
-      class="cinematic-village__transition-video"
-      data-interaction-video="car"
-      data-environment="day"
-      src="/media/car-interior/transitions/driver-door/driver-door-day-v6.mp4"
-      poster="/media/car-interior/transitions/driver-door/driver-door-day-v6-poster.jpg"
-      muted
-      playsinline
-      preload="none"
-      aria-hidden="true"
-    ></video>
-    <video
-      class="cinematic-village__transition-video"
-      data-interaction-video="garage"
-      data-environment="day"
-      src="/media/garage-workshop/transitions/garden-reveal/garage-reveal-day-v1.mp4"
-      poster="/media/garage-workshop/transitions/garden-reveal/garage-reveal-day-v1-poster.jpg"
-      muted
-      playsinline
-      preload="none"
-      aria-hidden="true"
-    ></video>
-    <video
-      class="cinematic-village__transition-video"
-      data-interaction-video="garage"
-      data-environment="night"
-      src="/media/garage-workshop/transitions/garden-reveal/garage-reveal-night-v1.mp4"
-      poster="/media/garage-workshop/transitions/garden-reveal/garage-reveal-night-v1-poster.jpg"
-      muted
-      playsinline
-      preload="none"
-      aria-hidden="true"
-    ></video>
-    <video
-      class="cinematic-village__transition-video"
-      data-interaction-video="cafe"
-      data-environment="day"
-      src="/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1.mp4"
-      poster="/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1-poster.jpg"
-      muted
-      playsinline
-      preload="none"
-      aria-hidden="true"
-    ></video>
-    <video
-      class="cinematic-village__transition-video"
-      data-interaction-video="cafe"
-      data-environment="night"
-      src="/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1.mp4"
-      poster="/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1-poster.jpg"
-      muted
-      playsinline
-      preload="none"
-      aria-hidden="true"
-    ></video>
-    <video
-      class="cinematic-village__transition-video"
-      data-interaction-video="car"
-      data-environment="night"
-      src="/media/car-interior/transitions/driver-door/driver-door-night-v6.mp4"
-      poster="/media/car-interior/transitions/driver-door/driver-door-night-v6-poster.jpg"
+      data-interaction-video
       muted
       playsinline
       preload="none"
@@ -281,6 +199,10 @@ const mediaRoot = '/media/village';
 
 <script>
   import { navigate } from 'astro:transitions/client';
+  import {
+    loadDeferredVideo,
+    releaseDeferredVideo
+  } from '@/utils/cinematicMediaLoader';
 
   const SESSION_KEY = 'wisteria-hero-environment';
   const RETURN_SESSION_KEY = 'wisteria-village-return';
@@ -294,6 +216,61 @@ const mediaRoot = '/media/village';
     car: '/travel',
     cafe: '/art',
     garage: '/garage'
+  };
+  const sceneMedia: Record<Environment, { src: string; poster: string }> = {
+    day: {
+      src: '/media/village/ambient/day-v5.mp4',
+      poster: '/media/village/ambient/day-v5-poster.jpg'
+    },
+    night: {
+      src: '/media/village/ambient/night-v3.mp4',
+      poster: '/media/village/ambient/night-v3-poster.jpg'
+    }
+  };
+  const interactionMedia: Record<
+    Interaction,
+    Record<Environment, { src: string; poster: string }>
+  > = {
+    house: {
+      day: {
+        src: '/media/living-room/transitions/house-door/door-day-v4.mp4',
+        poster: '/media/living-room/transitions/house-door/door-day-v4-poster.jpg'
+      },
+      night: {
+        src: '/media/living-room/transitions/house-door/door-night-v4.mp4',
+        poster: '/media/living-room/transitions/house-door/door-night-v4-poster.jpg'
+      }
+    },
+    car: {
+      day: {
+        src: '/media/car-interior/transitions/driver-door/driver-door-day-v6.mp4',
+        poster: '/media/car-interior/transitions/driver-door/driver-door-day-v6-poster.jpg'
+      },
+      night: {
+        src: '/media/car-interior/transitions/driver-door/driver-door-night-v6.mp4',
+        poster: '/media/car-interior/transitions/driver-door/driver-door-night-v6-poster.jpg'
+      }
+    },
+    cafe: {
+      day: {
+        src: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1.mp4',
+        poster: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1-poster.jpg'
+      },
+      night: {
+        src: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1.mp4',
+        poster: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1-poster.jpg'
+      }
+    },
+    garage: {
+      day: {
+        src: '/media/garage-workshop/transitions/garden-reveal/garage-reveal-day-v1.mp4',
+        poster: '/media/garage-workshop/transitions/garden-reveal/garage-reveal-day-v1-poster.jpg'
+      },
+      night: {
+        src: '/media/garage-workshop/transitions/garden-reveal/garage-reveal-night-v1.mp4',
+        poster: '/media/garage-workshop/transitions/garden-reveal/garage-reveal-night-v1-poster.jpg'
+      }
+    }
   };
 
   function getStoredEnvironment(): Environment | null {
@@ -340,18 +317,9 @@ const mediaRoot = '/media/village';
     const overlay = root.querySelector<HTMLElement>('[data-entry-overlay]');
     const dayVideo = root.querySelector<HTMLVideoElement>('[data-scene-video="day"]');
     const nightVideo = root.querySelector<HTMLVideoElement>('[data-scene-video="night"]');
-    const getInteractionVideo = (interaction: Interaction, environment: Environment) =>
-      root.querySelector<HTMLVideoElement>(
-        `[data-interaction-video="${interaction}"][data-environment="${environment}"]`
-      );
-    const houseDayVideo = getInteractionVideo('house', 'day');
-    const houseNightVideo = getInteractionVideo('house', 'night');
-    const carDayVideo = getInteractionVideo('car', 'day');
-    const carNightVideo = getInteractionVideo('car', 'night');
-    const cafeDayVideo = getInteractionVideo('cafe', 'day');
-    const cafeNightVideo = getInteractionVideo('cafe', 'night');
-    const garageDayVideo = getInteractionVideo('garage', 'day');
-    const garageNightVideo = getInteractionVideo('garage', 'night');
+    const transitionVideo = root.querySelector<HTMLVideoElement>(
+      '[data-interaction-video]'
+    );
 
     if (
       !viewport ||
@@ -374,14 +342,7 @@ const mediaRoot = '/media/village';
       !overlay ||
       !dayVideo ||
       !nightVideo ||
-      !houseDayVideo ||
-      !houseNightVideo ||
-      !carDayVideo ||
-      !carNightVideo ||
-      !cafeDayVideo ||
-      !cafeNightVideo ||
-      !garageDayVideo ||
-      !garageNightVideo
+      !transitionVideo
     ) return;
 
     const lifecycle = new AbortController();
@@ -394,27 +355,6 @@ const mediaRoot = '/media/village';
       day: dayVideo,
       night: nightVideo
     };
-    const interactionVideos: Record<Interaction, Record<Environment, HTMLVideoElement>> = {
-      house: {
-        day: houseDayVideo,
-        night: houseNightVideo
-      },
-      car: {
-        day: carDayVideo,
-        night: carNightVideo
-      },
-      cafe: {
-        day: cafeDayVideo,
-        night: cafeNightVideo
-      },
-      garage: {
-        day: garageDayVideo,
-        night: garageNightVideo
-      }
-    };
-    const allInteractionVideos = Object.values(interactionVideos).flatMap((videos) =>
-      Object.values(videos)
-    );
     let returningFromScene = document.documentElement.classList.contains(
       'is-returning-to-village'
     );
@@ -429,10 +369,10 @@ const mediaRoot = '/media/village';
     if (returningFromScene) {
       document.documentElement.classList.add('is-returning-to-village');
     }
-    Object.values(sceneVideos).forEach((video) => video.load());
     let environment: Environment = getStoredEnvironment() ?? getLocalEnvironment();
     let activeInteraction: Interaction = 'house';
-    let activeTransitionVideo = interactionVideos[activeInteraction][environment];
+    let activeTransitionVideo = transitionVideo;
+    let activeTransitionMedia = interactionMedia[activeInteraction][environment];
     let activeDestination = destinations[activeInteraction];
     let introActive = document.documentElement.classList.contains(
       'is-village-intro-pending'
@@ -746,6 +686,10 @@ const mediaRoot = '/media/village';
       resetCamera(true);
       welcome.focus({ preventScroll: true });
 
+      if (!welcomeLogo.hasAttribute('src') && welcomeLogo.dataset.src) {
+        welcomeLogo.src = welcomeLogo.dataset.src;
+      }
+
       if (welcomeLogo.complete && welcomeLogo.naturalWidth > 0) {
         revealWelcomeLogo();
       } else {
@@ -768,6 +712,7 @@ const mediaRoot = '/media/village';
 
     const resumeActiveScene = () => {
       if (entering || document.hidden || !root.isConnected) return;
+      loadDeferredVideo(sceneVideos[environment], sceneMedia[environment]);
       safelyPlay(sceneVideos[environment]);
     };
 
@@ -791,17 +736,8 @@ const mediaRoot = '/media/village';
     const selectInteraction = (interaction: Interaction) => {
       activeInteraction = interaction;
       activeDestination = destinations[interaction];
-      activeTransitionVideo = interactionVideos[interaction][environment];
+      activeTransitionMedia = interactionMedia[interaction][environment];
       root.dataset.interaction = interaction;
-
-      allInteractionVideos.forEach((video) => {
-        const active = video === activeTransitionVideo;
-        video.classList.toggle('is-active', active);
-        if (!active) {
-          video.pause();
-          video.currentTime = 0;
-        }
-      });
     };
 
     const updateEnvironment = (next: Environment, persist = false) => {
@@ -812,9 +748,10 @@ const mediaRoot = '/media/village';
         const active = name === next;
         video.classList.toggle('is-active', active);
         if (active && !document.hidden && !entering) {
+          loadDeferredVideo(video, sceneMedia[name]);
           safelyPlay(video);
         } else {
-          video.pause();
+          releaseDeferredVideo(video);
         }
       });
 
@@ -849,6 +786,7 @@ const mediaRoot = '/media/village';
       if (finishing) return;
       finishing = true;
       window.clearTimeout(fallbackTimer);
+      releaseDeferredVideo(activeTransitionVideo, { keepPoster: true });
       overlay.classList.add('is-closing');
       window.setTimeout(navigateToDestination, reduceMotion.matches ? 220 : 320);
     };
@@ -878,7 +816,7 @@ const mediaRoot = '/media/village';
         return;
       }
 
-      activeTransitionVideo.load();
+      loadDeferredVideo(activeTransitionVideo, activeTransitionMedia);
       requestAnimationFrame(() => overlay.classList.add('is-playing'));
 
       const playback = activeTransitionVideo.play();
@@ -1048,14 +986,10 @@ const mediaRoot = '/media/village';
       status.textContent = '已跳过进入场景的过渡动画';
       finishEntry();
     }, { signal });
-    allInteractionVideos.forEach((video) => {
-      video.addEventListener('ended', () => {
-        if (video === activeTransitionVideo) finishEntry();
-      }, { signal });
-      video.addEventListener('error', () => {
-        if (entering && video === activeTransitionVideo) window.setTimeout(finishEntry, 400);
-      }, { signal });
-    });
+    activeTransitionVideo.addEventListener('ended', finishEntry, { signal });
+    activeTransitionVideo.addEventListener('error', () => {
+      if (entering) window.setTimeout(finishEntry, 400);
+    }, { signal });
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
@@ -1079,8 +1013,8 @@ const mediaRoot = '/media/village';
       window.cancelAnimationFrame(cameraFrame);
       window.cancelAnimationFrame(resizeFrame);
       viewportObserver?.disconnect();
-      Object.values(sceneVideos).forEach((video) => video.pause());
-      allInteractionVideos.forEach((video) => video.pause());
+      Object.values(sceneVideos).forEach((video) => releaseDeferredVideo(video));
+      releaseDeferredVideo(activeTransitionVideo);
       document.body.classList.remove('is-entering-cinematic');
       document.documentElement.classList.remove(
         'is-village-intro-pending',

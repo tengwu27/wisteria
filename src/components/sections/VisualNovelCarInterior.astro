@@ -22,29 +22,29 @@ const parallaxRoot = '/media/car-interior/parallax';
       <video
         class="travel-cockpit__video travel-cockpit__arrival is-active"
         data-arrival-video="day"
-        src={`${mediaRoot}/transitions/cockpit-rise/car-interior-rise-day-v1.mp4`}
-        poster={`${mediaRoot}/transitions/cockpit-rise/car-interior-rise-day-v1-poster.jpg`}
+        data-src={`${mediaRoot}/transitions/cockpit-rise/car-interior-rise-day-v1.mp4`}
+        data-poster={`${mediaRoot}/transitions/cockpit-rise/car-interior-rise-day-v1-poster.jpg`}
         muted
         playsinline
-        preload="auto"
+        preload="none"
         aria-hidden="true"
       ></video>
       <video
         class="travel-cockpit__video travel-cockpit__arrival"
         data-arrival-video="night"
-        src={`${mediaRoot}/transitions/cockpit-rise/car-interior-rise-night-v1.mp4`}
-        poster={`${mediaRoot}/transitions/cockpit-rise/car-interior-rise-night-v1-poster.jpg`}
+        data-src={`${mediaRoot}/transitions/cockpit-rise/car-interior-rise-night-v1.mp4`}
+        data-poster={`${mediaRoot}/transitions/cockpit-rise/car-interior-rise-night-v1-poster.jpg`}
         muted
         playsinline
-        preload="auto"
+        preload="none"
         aria-hidden="true"
       ></video>
       <div class="travel-cockpit__camera">
         <video
           class="travel-cockpit__video travel-cockpit__ambient"
           data-ambient-video="day"
-          src={`${mediaRoot}/ambient/car-interior-day-v1.mp4`}
-          poster={`${mediaRoot}/ambient/car-interior-day-v1-poster.jpg`}
+          data-src={`${mediaRoot}/ambient/car-interior-day-v1.mp4`}
+          data-poster={`${mediaRoot}/ambient/car-interior-day-v1-poster.jpg`}
           muted
           loop
           playsinline
@@ -54,8 +54,8 @@ const parallaxRoot = '/media/car-interior/parallax';
         <video
           class="travel-cockpit__video travel-cockpit__ambient"
           data-ambient-video="night"
-          src={`${mediaRoot}/ambient/car-interior-night-v1.mp4`}
-          poster={`${mediaRoot}/ambient/car-interior-night-v1-poster.jpg`}
+          data-src={`${mediaRoot}/ambient/car-interior-night-v1.mp4`}
+          data-poster={`${mediaRoot}/ambient/car-interior-night-v1-poster.jpg`}
           muted
           loop
           playsinline
@@ -186,13 +186,38 @@ const parallaxRoot = '/media/car-interior/parallax';
   import { navigate } from 'astro:transitions/client';
   import { createAdaptiveCinematicViewport } from '@/utils/adaptiveCinematicViewport';
   import { createCinematicExitSequence } from '@/utils/cinematicExitSequence';
+  import {
+    createLayerBundleLoader,
+    loadDeferredVideo,
+    releaseDeferredVideo
+  } from '@/utils/cinematicMediaLoader';
   import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
 
   const SESSION_KEY = 'wisteria-hero-environment';
-  const BUNDLE_TIMEOUT = 4000;
 
   type Environment = 'day' | 'night';
   type CockpitState = 'arriving' | 'idle' | 'exiting';
+
+  const arrivalMedia: Record<Environment, { src: string; poster: string }> = {
+    day: {
+      src: '/media/car-interior/transitions/cockpit-rise/car-interior-rise-day-v1.mp4',
+      poster: '/media/car-interior/transitions/cockpit-rise/car-interior-rise-day-v1-poster.jpg'
+    },
+    night: {
+      src: '/media/car-interior/transitions/cockpit-rise/car-interior-rise-night-v1.mp4',
+      poster: '/media/car-interior/transitions/cockpit-rise/car-interior-rise-night-v1-poster.jpg'
+    }
+  };
+  const ambientMedia: Record<Environment, { src: string; poster: string }> = {
+    day: {
+      src: '/media/car-interior/ambient/car-interior-day-v1.mp4',
+      poster: '/media/car-interior/ambient/car-interior-day-v1-poster.jpg'
+    },
+    night: {
+      src: '/media/car-interior/ambient/car-interior-night-v1.mp4',
+      poster: '/media/car-interior/ambient/car-interior-night-v1-poster.jpg'
+    }
+  };
 
   function getStoredEnvironment(): Environment | null {
     try {
@@ -291,7 +316,11 @@ const parallaxRoot = '/media/car-interior/parallax';
       day: dayStack,
       night: nightStack
     };
-    const bundlePromises = new Map<Environment, Promise<boolean>>();
+    const bundleLoader = createLayerBundleLoader({
+      stacks,
+      imageSelector: '[data-cockpit-layer-image]',
+      signal
+    });
     const allVideos = [
       ...Object.values(arrivals),
       ...Object.values(ambients)
@@ -352,63 +381,7 @@ const parallaxRoot = '/media/car-interior/parallax';
       allVideos.forEach((video) => video.pause());
     };
 
-    const waitForImage = (image: HTMLImageElement) =>
-      new Promise<void>((resolve, reject) => {
-        if (image.complete && image.naturalWidth > 0) {
-          if (typeof image.decode === 'function') {
-            image.decode().then(resolve).catch(resolve);
-          } else {
-            resolve();
-          }
-          return;
-        }
-        image.addEventListener('load', () => {
-          if (typeof image.decode === 'function') {
-            image.decode().then(resolve).catch(resolve);
-          } else {
-            resolve();
-          }
-        }, { once: true });
-        image.addEventListener('error', () => {
-          reject(new Error('Cockpit parallax layer failed to load'));
-        }, { once: true });
-      });
-
-    const loadBundle = (theme: Environment) => {
-      const existing = bundlePromises.get(theme);
-      if (existing) return existing;
-      const promise = new Promise<boolean>((resolve) => {
-        const images = Array.from(
-          stacks[theme].querySelectorAll<HTMLImageElement>(
-            '[data-cockpit-layer-image]'
-          )
-        );
-        images.forEach((image) => {
-          if (!image.src && image.dataset.src) image.src = image.dataset.src;
-        });
-        let settled = false;
-        const timeout = window.setTimeout(() => {
-          settled = true;
-          bundlePromises.delete(theme);
-          resolve(false);
-        }, BUNDLE_TIMEOUT);
-        Promise.all(images.map(waitForImage))
-          .then(() => {
-            window.clearTimeout(timeout);
-            stacks[theme].dataset.loaded = 'true';
-            if (settled) bundlePromises.delete(theme);
-            resolve(true);
-          })
-          .catch(() => {
-            window.clearTimeout(timeout);
-            stacks[theme].dataset.failed = 'true';
-            bundlePromises.delete(theme);
-            resolve(false);
-          });
-      });
-      bundlePromises.set(theme, promise);
-      return promise;
-    };
+    const loadBundle = bundleLoader.load;
 
     const setRenderer = (next: 'layers' | 'fallback') => {
       renderer = next;
@@ -488,6 +461,7 @@ const parallaxRoot = '/media/car-interior/parallax';
       stacks.night.classList.toggle('is-active', environment === 'night');
 
       if (!layeredReady) {
+        loadDeferredVideo(activeAmbient, ambientMedia[environment]);
         activeAmbient.currentTime = 0;
         activeAmbient.classList.add('is-active');
         if (!posterOnly && !reduceMotion.matches && !document.hidden) {
@@ -506,8 +480,8 @@ const parallaxRoot = '/media/car-interior/parallax';
       }
 
       window.setTimeout(() => {
-        activeArrival.pause();
         activeArrival.classList.remove('is-active');
+        releaseDeferredVideo(activeArrival);
         enableInteraction();
       }, reduceMotion.matches ? 1 : 520);
     };
@@ -518,6 +492,7 @@ const parallaxRoot = '/media/car-interior/parallax';
       window.clearTimeout(readyTimer);
       root.classList.add('is-revealed');
 
+      loadDeferredVideo(activeArrival, arrivalMedia[environment]);
       activeArrival.currentTime = 0;
       safelyPlay(activeArrival).catch(() => settleToAmbient(true));
       arrivalTimer = window.setTimeout(
@@ -573,6 +548,7 @@ const parallaxRoot = '/media/car-interior/parallax';
       }
 
       if (!layeredReady) {
+        loadDeferredVideo(activeAmbient, ambientMedia[next]);
         activeAmbient.classList.add('is-active');
         safelyPlay(activeAmbient).catch(() => {
           root.dataset.playback = `${environment}-ambient-poster`;
@@ -694,8 +670,8 @@ const parallaxRoot = '/media/car-interior/parallax';
     allVideos.forEach((video) => {
       video.muted = true;
     });
-    Object.values(arrivals).forEach((video) => video.load());
     setInitialEnvironment();
+    loadDeferredVideo(activeArrival, arrivalMedia[environment]);
 
     activeArrival.addEventListener('loadeddata', beginArrival, {
       signal
@@ -786,7 +762,7 @@ const parallaxRoot = '/media/car-interior/parallax';
       window.clearTimeout(navigationTimer);
       window.clearTimeout(themeTimer);
       exitSequence.pause();
-      pauseAll();
+      allVideos.forEach((video) => releaseDeferredVideo(video));
     }, { once: true, signal });
   }
 

@@ -23,7 +23,7 @@ const mediaRoot = '/media/garage-workshop/parallax';
           <img
             class="garage-room__fallback"
             data-garage-fallback={theme}
-            src={`${mediaRoot}/${theme}/00-composite.png`}
+            data-src={`${mediaRoot}/${theme}/00-composite.png`}
             alt=""
             aria-hidden="true"
           />
@@ -136,10 +136,10 @@ const mediaRoot = '/media/garage-workshop/parallax';
   import { navigate } from 'astro:transitions/client';
   import { createAdaptiveCinematicViewport } from '@/utils/adaptiveCinematicViewport';
   import { createCinematicExitSequence } from '@/utils/cinematicExitSequence';
+  import { createLayerBundleLoader } from '@/utils/cinematicMediaLoader';
   import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
 
   const SESSION_KEY = 'wisteria-hero-environment';
-  const BUNDLE_TIMEOUT = 4000;
 
   type Environment = 'day' | 'night';
   type GarageState = 'arriving' | 'idle' | 'exiting';
@@ -190,11 +190,16 @@ const mediaRoot = '/media/garage-workshop/parallax';
       day: dayFallback,
       night: nightFallback
     };
-    const bundles = new Map<Environment, Promise<boolean>>();
+    const bundleLoader = createLayerBundleLoader({
+      stacks,
+      imageSelector: '[data-garage-layer-image]',
+      signal
+    });
     let environment = getEnvironment();
     let state: GarageState = 'arriving';
     let renderer: 'layers' | 'fallback' = 'fallback';
     let themeLoading = false;
+    let arrivalTimer = 0;
     let navigationTimer = 0;
     let dialogueTimer = 0;
 
@@ -231,42 +236,13 @@ const mediaRoot = '/media/garage-workshop/parallax';
       );
     };
 
-    const loadBundle = (theme: Environment) => {
-      const existing = bundles.get(theme);
-      if (existing) return existing;
-      const promise = new Promise<boolean>((resolve) => {
-        const images = Array.from(
-          stacks[theme].querySelectorAll<HTMLImageElement>(
-            '[data-garage-layer-image]'
-          )
-        );
-        images.forEach((image) => {
-          if (!image.src && image.dataset.src) image.src = image.dataset.src;
-        });
-        const timeout = window.setTimeout(() => resolve(false), BUNDLE_TIMEOUT);
-        Promise.all(images.map((image) => new Promise<void>((done, fail) => {
-          if (image.complete && image.naturalWidth > 0) {
-            if (typeof image.decode === 'function') {
-              image.decode().then(done).catch(done);
-            } else {
-              done();
-            }
-            return;
-          }
-          image.addEventListener('load', () => done(), { once: true });
-          image.addEventListener('error', () => fail(), { once: true });
-        }))).then(() => {
-          window.clearTimeout(timeout);
-          stacks[theme].dataset.loaded = 'true';
-          resolve(true);
-        }).catch(() => {
-          window.clearTimeout(timeout);
-          bundles.delete(theme);
-          resolve(false);
-        });
-      });
-      bundles.set(theme, promise);
-      return promise;
+    const loadBundle = bundleLoader.load;
+
+    const showFallback = (theme: Environment) => {
+      const fallback = fallbacks[theme];
+      if (!fallback.hasAttribute('src') && fallback.dataset.src) {
+        fallback.src = fallback.dataset.src;
+      }
     };
 
     const showTheme = (theme: Environment, nextRenderer: 'layers' | 'fallback') => {
@@ -274,6 +250,7 @@ const mediaRoot = '/media/garage-workshop/parallax';
       renderer = nextRenderer;
       root.dataset.environment = theme;
       root.dataset.renderer = nextRenderer;
+      if (nextRenderer === 'fallback') showFallback(theme);
       stacks.day.classList.toggle('is-active', theme === 'day');
       stacks.night.classList.toggle('is-active', theme === 'night');
       fallbacks.day.classList.toggle('is-active', theme === 'day');
@@ -301,6 +278,8 @@ const mediaRoot = '/media/garage-workshop/parallax';
     });
 
     const finishArrival = () => {
+      if (state !== 'arriving') return;
+      window.clearTimeout(arrivalTimer);
       root.classList.add('is-revealed');
       window.setTimeout(() => {
         if (state !== 'arriving') return;
@@ -313,12 +292,15 @@ const mediaRoot = '/media/garage-workshop/parallax';
       }, reduceMotion.matches ? 1 : 500);
     };
 
+    showFallback(environment);
+    arrivalTimer = window.setTimeout(
+      finishArrival,
+      reduceMotion.matches ? 1 : 1400
+    );
     void loadBundle(environment).then((ready) => {
-      if (signal.aborted) return;
+      if (signal.aborted || state === 'exiting') return;
       showTheme(environment, ready ? 'layers' : 'fallback');
       finishArrival();
-      const inactive: Environment = environment === 'day' ? 'night' : 'day';
-      window.setTimeout(() => void loadBundle(inactive), 800);
     });
 
     toggle.addEventListener('click', async () => {
@@ -391,6 +373,7 @@ const mediaRoot = '/media/garage-workshop/parallax';
 
     document.addEventListener('astro:before-swap', () => {
       lifecycle.abort();
+      window.clearTimeout(arrivalTimer);
       window.clearTimeout(navigationTimer);
       window.clearTimeout(dialogueTimer);
       exitSequence.pause();

@@ -1,3 +1,8 @@
+import {
+  loadDeferredVideo,
+  releaseDeferredVideo
+} from '@/utils/cinematicMediaLoader';
+
 export type CinematicEnvironment = 'day' | 'night';
 
 interface CinematicExitOptions {
@@ -22,16 +27,7 @@ export function createCinematicExitSequence({
   signal,
   onComplete
 }: CinematicExitOptions): CinematicExitController {
-  const videos = Array.from(
-    overlay.querySelectorAll<HTMLVideoElement>(
-      '[data-exit-environment]'
-    )
-  );
-
-  videos.forEach((video) => {
-    video.muted = true;
-    video.load();
-  });
+  const video = overlay.querySelector<HTMLVideoElement>('[data-exit-video]');
 
   let currentVideo: HTMLVideoElement | null = null;
   let running = false;
@@ -44,7 +40,7 @@ export function createCinematicExitSequence({
   };
 
   const pause = () => {
-    videos.forEach((video) => video.pause());
+    if (video) releaseDeferredVideo(video);
   };
 
   const setReturnHandoff = () => {
@@ -59,7 +55,9 @@ export function createCinematicExitSequence({
   const finish = () => {
     if (!running) return;
     clearTimers();
-    currentVideo?.pause();
+    if (currentVideo) {
+      releaseDeferredVideo(currentVideo, { keepPoster: true });
+    }
     overlay.classList.remove('is-playing');
     overlay.classList.add('is-closing');
     setReturnHandoff();
@@ -71,16 +69,8 @@ export function createCinematicExitSequence({
 
   const playCurrent = (video: HTMLVideoElement) => {
     if (!running) return;
-    videos.forEach((candidate) => {
-      const active = candidate === video;
-      candidate.classList.toggle('is-active', active);
-      if (!active) {
-        candidate.pause();
-        candidate.currentTime = 0;
-      }
-    });
-
     video.currentTime = 0;
+    video.classList.add('is-active');
     overlay.classList.add('is-playing');
     const duration = Number.isFinite(video.duration) && video.duration > 0
       ? video.duration * 1000
@@ -92,14 +82,14 @@ export function createCinematicExitSequence({
     });
   };
 
-  videos.forEach((video) => {
+  if (video) {
     video.addEventListener('ended', () => {
       if (video === currentVideo) finish();
     }, { signal });
     video.addEventListener('error', () => {
       if (running && video === currentVideo) finish();
     }, { signal });
-  });
+  }
 
   overlay.addEventListener('pointerdown', (event) => {
     if (!running || overlay.classList.contains('is-closing')) return;
@@ -120,10 +110,7 @@ export function createCinematicExitSequence({
   const start = (environment: CinematicEnvironment) => {
     if (running) return;
     running = true;
-    currentVideo =
-      videos.find(
-        (video) => video.dataset.exitEnvironment === environment
-      ) ?? null;
+    currentVideo = video;
     overlay.setAttribute('aria-hidden', 'false');
     overlay.classList.add('is-active');
 
@@ -131,6 +118,14 @@ export function createCinematicExitSequence({
       requestAnimationFrame(finish);
       return;
     }
+
+    const src = currentVideo.dataset[`${environment}Src`];
+    const poster = currentVideo.dataset[`${environment}Poster`];
+    if (!src) {
+      requestAnimationFrame(finish);
+      return;
+    }
+    loadDeferredVideo(currentVideo, { src, poster });
 
     requestAnimationFrame(() => {
       if (currentVideo) playCurrent(currentVideo);
@@ -141,11 +136,10 @@ export function createCinematicExitSequence({
     clearTimers();
     running = false;
     currentVideo = null;
-    pause();
-    videos.forEach((video) => {
-      video.currentTime = 0;
+    if (video) {
       video.classList.remove('is-active');
-    });
+      releaseDeferredVideo(video);
+    }
     overlay.classList.remove(
       'is-active',
       'is-playing',
