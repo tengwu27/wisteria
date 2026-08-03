@@ -3,6 +3,9 @@ import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOver
 
 const mediaRoot = '/media/car-interior';
 const parallaxRoot = '/media/car-interior/parallax';
+const registeredLayerStyle = ([x, y, width, height]: number[]) =>
+  `--asset-x:${x / 16.72}%;--asset-y:${y / 9.41}%;` +
+  `--asset-width:${width / 16.72}%;--asset-height:${height / 9.41}%`;
 ---
 
 <section
@@ -23,7 +26,7 @@ const parallaxRoot = '/media/car-interior/parallax';
         class="travel-cockpit__video travel-cockpit__arrival is-active"
         data-arrival-video="day"
         data-src={`${mediaRoot}/transitions/cockpit-rise/car-interior-rise-day-v1.mp4`}
-        data-poster={`${mediaRoot}/transitions/cockpit-rise/car-interior-rise-day-v1-poster.jpg`}
+        data-poster={`${mediaRoot}/transitions/cockpit-rise/car-interior-rise-day-v1-poster.webp`}
         muted
         playsinline
         preload="none"
@@ -33,7 +36,7 @@ const parallaxRoot = '/media/car-interior/parallax';
         class="travel-cockpit__video travel-cockpit__arrival"
         data-arrival-video="night"
         data-src={`${mediaRoot}/transitions/cockpit-rise/car-interior-rise-night-v1.mp4`}
-        data-poster={`${mediaRoot}/transitions/cockpit-rise/car-interior-rise-night-v1-poster.jpg`}
+        data-poster={`${mediaRoot}/transitions/cockpit-rise/car-interior-rise-night-v1-poster.webp`}
         muted
         playsinline
         preload="none"
@@ -44,7 +47,7 @@ const parallaxRoot = '/media/car-interior/parallax';
           class="travel-cockpit__video travel-cockpit__ambient"
           data-ambient-video="day"
           data-src={`${mediaRoot}/ambient/car-interior-day-v1.mp4`}
-          data-poster={`${mediaRoot}/ambient/car-interior-day-v1-poster.jpg`}
+          data-poster={`${mediaRoot}/ambient/car-interior-day-v1-poster.webp`}
           muted
           loop
           playsinline
@@ -55,7 +58,7 @@ const parallaxRoot = '/media/car-interior/parallax';
           class="travel-cockpit__video travel-cockpit__ambient"
           data-ambient-video="night"
           data-src={`${mediaRoot}/ambient/car-interior-night-v1.mp4`}
-          data-poster={`${mediaRoot}/ambient/car-interior-night-v1-poster.jpg`}
+          data-poster={`${mediaRoot}/ambient/car-interior-night-v1-poster.webp`}
           muted
           loop
           playsinline
@@ -72,14 +75,14 @@ const parallaxRoot = '/media/car-interior/parallax';
             <div class="travel-cockpit__plane travel-cockpit__plane--exterior">
               <img
                 data-cockpit-layer-image={theme}
-                data-src={`${parallaxRoot}/${theme}/01-exterior.png`}
+                data-src={`${parallaxRoot}/${theme}/01-exterior.webp`}
                 alt=""
               />
             </div>
             <div class="travel-cockpit__plane travel-cockpit__plane--shell">
               <img
                 data-cockpit-layer-image={theme}
-                data-src={`${parallaxRoot}/${theme}/02-cockpit-shell.png`}
+                data-src={`${parallaxRoot}/${theme}/02-cockpit-shell.webp`}
                 alt=""
               />
             </div>
@@ -87,7 +90,9 @@ const parallaxRoot = '/media/car-interior/parallax';
               <div class="travel-cockpit__charm-swing">
                 <img
                   data-cockpit-layer-image={theme}
-                  data-src={`${parallaxRoot}/${theme}/03-buddha-charm.png`}
+                  class="is-registered-sprite"
+                  style={registeredLayerStyle([698, 226, 184, 135])}
+                  data-src={`${parallaxRoot}/${theme}/03-buddha-charm.webp`}
                   alt=""
                 />
               </div>
@@ -95,7 +100,9 @@ const parallaxRoot = '/media/car-interior/parallax';
             <div class="travel-cockpit__plane travel-cockpit__plane--seat">
               <img
                 data-cockpit-layer-image={theme}
-                data-src={`${parallaxRoot}/${theme}/04-front-seat.png`}
+                class="is-registered-sprite"
+                style={registeredLayerStyle([16, 844, 1640, 97])}
+                data-src={`${parallaxRoot}/${theme}/04-front-seat.webp`}
                 alt=""
               />
             </div>
@@ -166,13 +173,13 @@ const parallaxRoot = '/media/car-interior/parallax';
       src:
         '/media/car-interior/transitions/driver-door/driver-door-day-v6-reverse.mp4',
       poster:
-        '/media/car-interior/transitions/driver-door/driver-door-day-v6-reverse-poster.jpg'
+        '/media/car-interior/transitions/driver-door/driver-door-day-v6-reverse-poster.webp'
     }}
     night={{
       src:
         '/media/car-interior/transitions/driver-door/driver-door-night-v6-reverse.mp4',
       poster:
-        '/media/car-interior/transitions/driver-door/driver-door-night-v6-reverse-poster.jpg'
+        '/media/car-interior/transitions/driver-door/driver-door-night-v6-reverse-poster.webp'
     }}
   />
   <div
@@ -189,7 +196,8 @@ const parallaxRoot = '/media/car-interior/parallax';
   import {
     createLayerBundleLoader,
     loadDeferredVideo,
-    releaseDeferredVideo
+    releaseDeferredVideo,
+    scheduleCinematicWarmup
   } from '@/utils/cinematicMediaLoader';
   import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
 
@@ -201,21 +209,21 @@ const parallaxRoot = '/media/car-interior/parallax';
   const arrivalMedia: Record<Environment, { src: string; poster: string }> = {
     day: {
       src: '/media/car-interior/transitions/cockpit-rise/car-interior-rise-day-v1.mp4',
-      poster: '/media/car-interior/transitions/cockpit-rise/car-interior-rise-day-v1-poster.jpg'
+      poster: '/media/car-interior/transitions/cockpit-rise/car-interior-rise-day-v1-poster.webp'
     },
     night: {
       src: '/media/car-interior/transitions/cockpit-rise/car-interior-rise-night-v1.mp4',
-      poster: '/media/car-interior/transitions/cockpit-rise/car-interior-rise-night-v1-poster.jpg'
+      poster: '/media/car-interior/transitions/cockpit-rise/car-interior-rise-night-v1-poster.webp'
     }
   };
   const ambientMedia: Record<Environment, { src: string; poster: string }> = {
     day: {
       src: '/media/car-interior/ambient/car-interior-day-v1.mp4',
-      poster: '/media/car-interior/ambient/car-interior-day-v1-poster.jpg'
+      poster: '/media/car-interior/ambient/car-interior-day-v1-poster.webp'
     },
     night: {
       src: '/media/car-interior/ambient/car-interior-night-v1.mp4',
-      poster: '/media/car-interior/ambient/car-interior-night-v1-poster.jpg'
+      poster: '/media/car-interior/ambient/car-interior-night-v1-poster.webp'
     }
   };
 
@@ -382,6 +390,15 @@ const parallaxRoot = '/media/car-interior/parallax';
     };
 
     const loadBundle = bundleLoader.load;
+    let inactiveWarmupScheduled = false;
+    const scheduleInactiveWarmup = () => {
+      if (inactiveWarmupScheduled) return;
+      inactiveWarmupScheduled = true;
+      scheduleCinematicWarmup(() => {
+        const inactive = environment === 'day' ? 'night' : 'day';
+        return loadBundle(inactive);
+      }, signal);
+    };
 
     const setRenderer = (next: 'layers' | 'fallback') => {
       renderer = next;
@@ -445,6 +462,7 @@ const parallaxRoot = '/media/car-interior/parallax';
       depth.recalculate();
       status.textContent =
         '已坐进汽车。可以查看副驾驶仪表台上的地图。';
+      scheduleInactiveWarmup();
     };
 
     const settleToAmbient = async (posterOnly = false) => {
@@ -900,6 +918,15 @@ const parallaxRoot = '/media/car-interior/parallax';
     object-fit: fill;
     pointer-events: none;
     user-select: none;
+  }
+
+  .travel-cockpit__plane > img.is-registered-sprite,
+  .travel-cockpit__charm-swing > img.is-registered-sprite {
+    inset: auto;
+    left: var(--asset-x);
+    top: var(--asset-y);
+    width: var(--asset-width);
+    height: var(--asset-height);
   }
 
   .travel-cockpit__plane--exterior {

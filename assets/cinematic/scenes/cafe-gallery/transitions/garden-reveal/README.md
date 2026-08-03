@@ -18,11 +18,11 @@ Render the active transitions with:
 ```bash
 python scripts/media/render_cafe_parallax_reveal.py \
   assets/cinematic/scenes/cafe-gallery/transitions/garden-reveal/layers/day \
-  public/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1.mp4 \
-  public/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1-poster.jpg
+  assets/cinematic/delivery-sources/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1.mp4 \
+  assets/cinematic/delivery-sources/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1-poster.jpg
 
 python scripts/media/render_cafe_parallax_reveal.py \
   assets/cinematic/scenes/cafe-gallery/transitions/garden-reveal/layers/night \
-  public/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1.mp4 \
-  public/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1-poster.jpg
+  assets/cinematic/delivery-sources/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1.mp4 \
+  assets/cinematic/delivery-sources/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1-poster.jpg
 ```

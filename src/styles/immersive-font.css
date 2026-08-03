@@ -1,0 +1,17 @@
+@font-face {
+  font-family: 'ZCOOL KuaiLe';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 900;
+  src: url('/fonts/wisteria-immersive-ui.woff2') format('woff2');
+}
+
+/* Immersive copy intentionally shares one compact display face. Editorial
+   routes retain the full LXGW WenKai family through BaseLayout. */
+@font-face {
+  font-family: 'LXGW WenKai';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 900;
+  src: url('/fonts/wisteria-immersive-ui.woff2') format('woff2');
+}

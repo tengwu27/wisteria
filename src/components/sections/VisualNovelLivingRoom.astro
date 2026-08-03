@@ -3,6 +3,9 @@ import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOver
 
 const ambientRoot = '/media/living-room/ambient';
 const parallaxRoot = '/media/living-room/parallax';
+const registeredLayerStyle = ([x, y, width, height]: number[]) =>
+  `--asset-x:${x / 16.72}%;--asset-y:${y / 9.41}%;` +
+  `--asset-width:${width / 16.72}%;--asset-height:${height / 9.41}%`;
 ---
 
 <section
@@ -24,7 +27,7 @@ const parallaxRoot = '/media/living-room/parallax';
           class="living-room__fallback is-active"
           data-room-video="day"
           data-src={`${ambientRoot}/living-room-multilayer-v6.mp4`}
-          data-poster={`${ambientRoot}/living-room-multilayer-v6-poster.jpg`}
+          data-poster={`${ambientRoot}/living-room-multilayer-v6-poster.webp`}
           muted
           loop
           playsinline
@@ -35,7 +38,7 @@ const parallaxRoot = '/media/living-room/parallax';
           class="living-room__fallback"
           data-room-video="night"
           data-src={`${ambientRoot}/living-room-night-v5.mp4`}
-          data-poster={`${ambientRoot}/living-room-night-v5-poster.jpg`}
+          data-poster={`${ambientRoot}/living-room-night-v5-poster.webp`}
           muted
           loop
           playsinline
@@ -51,14 +54,16 @@ const parallaxRoot = '/media/living-room/parallax';
           <div class="living-room__plane living-room__plane--sky">
             <img
               data-room-layer-image="day"
-              data-src={`${parallaxRoot}/day/01-sky.png`}
+              class="is-registered-sprite"
+              style={registeredLayerStyle([548, 0, 924, 380])}
+              data-src={`${parallaxRoot}/day/01-sky.webp`}
               alt=""
             />
           </div>
           <div class="living-room__plane living-room__plane--harbor">
             <img
               data-room-layer-image="day"
-              data-src={`${parallaxRoot}/day/03-harbor.png`}
+              data-src={`${parallaxRoot}/day/03-harbor.webp`}
               alt=""
             />
           </div>
@@ -66,7 +71,9 @@ const parallaxRoot = '/media/living-room/parallax';
             <div class="living-room__boat-rock">
               <img
                 data-room-layer-image="day"
-                data-src={`${parallaxRoot}/day/04-sailboat.png`}
+                class="is-registered-sprite"
+                style={registeredLayerStyle([968, 185, 65, 80])}
+                data-src={`${parallaxRoot}/day/04-sailboat.webp`}
                 alt=""
               />
             </div>
@@ -74,21 +81,25 @@ const parallaxRoot = '/media/living-room/parallax';
           <div class="living-room__plane living-room__plane--room">
             <img
               data-room-layer-image="day"
-              data-src={`${parallaxRoot}/day/05-room-shell.png`}
+              data-src={`${parallaxRoot}/day/05-room-shell.webp`}
               alt=""
             />
           </div>
           <div class="living-room__plane living-room__plane--shadow">
             <img
               data-room-layer-image="day"
-              data-src={`${parallaxRoot}/day/06-table-shadow.png`}
+              class="is-registered-sprite"
+              style={registeredLayerStyle([534, 753, 788, 188])}
+              data-src={`${parallaxRoot}/day/06-table-shadow.webp`}
               alt=""
             />
           </div>
           <div class="living-room__plane living-room__plane--table">
             <img
               data-room-layer-image="day"
-              data-src={`${parallaxRoot}/day/07-coffee-table.png`}
+              class="is-registered-sprite"
+              style={registeredLayerStyle([553, 543, 714, 344])}
+              data-src={`${parallaxRoot}/day/07-coffee-table.webp`}
               alt=""
             />
             <div class="living-room__steam" aria-hidden="true">
@@ -107,21 +118,23 @@ const parallaxRoot = '/media/living-room/parallax';
           <div class="living-room__plane living-room__plane--sky">
             <img
               data-room-layer-image="night"
-              data-src={`${parallaxRoot}/night/01-sky.png`}
+              data-src={`${parallaxRoot}/night/01-sky.webp`}
               alt=""
             />
           </div>
           <div class="living-room__plane living-room__plane--clouds">
             <img
               data-room-layer-image="night"
-              data-src={`${parallaxRoot}/night/02-clouds.png`}
+              class="is-registered-sprite"
+              style={registeredLayerStyle([638, 46, 504, 147])}
+              data-src={`${parallaxRoot}/night/02-clouds.webp`}
               alt=""
             />
           </div>
           <div class="living-room__plane living-room__plane--harbor">
             <img
               data-room-layer-image="night"
-              data-src={`${parallaxRoot}/night/03-harbor.png`}
+              data-src={`${parallaxRoot}/night/03-harbor.webp`}
               alt=""
             />
             <div class="living-room__moon-reflection" aria-hidden="true">
@@ -135,7 +148,9 @@ const parallaxRoot = '/media/living-room/parallax';
             <div class="living-room__boat-rock">
               <img
                 data-room-layer-image="night"
-                data-src={`${parallaxRoot}/night/04-sailboat.png`}
+                class="is-registered-sprite"
+                style={registeredLayerStyle([968, 185, 65, 80])}
+                data-src={`${parallaxRoot}/night/04-sailboat.webp`}
                 alt=""
               />
             </div>
@@ -143,7 +158,7 @@ const parallaxRoot = '/media/living-room/parallax';
           <div class="living-room__plane living-room__plane--room">
             <img
               data-room-layer-image="night"
-              data-src={`${parallaxRoot}/night/05-room-shell.png`}
+              data-src={`${parallaxRoot}/night/05-room-shell.webp`}
               alt=""
             />
             <span class="living-room__lamp-glow is-left" aria-hidden="true"></span>
@@ -152,14 +167,18 @@ const parallaxRoot = '/media/living-room/parallax';
           <div class="living-room__plane living-room__plane--shadow">
             <img
               data-room-layer-image="night"
-              data-src={`${parallaxRoot}/night/06-table-shadow.png`}
+              class="is-registered-sprite"
+              style={registeredLayerStyle([533, 751, 790, 190])}
+              data-src={`${parallaxRoot}/night/06-table-shadow.webp`}
               alt=""
             />
           </div>
           <div class="living-room__plane living-room__plane--table">
             <img
               data-room-layer-image="night"
-              data-src={`${parallaxRoot}/night/07-coffee-table.png`}
+              class="is-registered-sprite"
+              style={registeredLayerStyle([553, 543, 714, 344])}
+              data-src={`${parallaxRoot}/night/07-coffee-table.webp`}
               alt=""
             />
             <span class="living-room__device-glow" aria-hidden="true"></span>
@@ -220,12 +239,12 @@ const parallaxRoot = '/media/living-room/parallax';
     day={{
       src: '/media/living-room/transitions/house-door/door-day-v4-reverse.mp4',
       poster:
-        '/media/living-room/transitions/house-door/door-day-v4-reverse-poster.jpg'
+        '/media/living-room/transitions/house-door/door-day-v4-reverse-poster.webp'
     }}
     night={{
       src: '/media/living-room/transitions/house-door/door-night-v4-reverse.mp4',
       poster:
-        '/media/living-room/transitions/house-door/door-night-v4-reverse-poster.jpg'
+        '/media/living-room/transitions/house-door/door-night-v4-reverse-poster.webp'
     }}
   />
   <div class="living-room__curtain" data-room-curtain aria-hidden="true"></div>
@@ -238,6 +257,7 @@ const parallaxRoot = '/media/living-room/parallax';
   import {
     createLayerBundleLoader,
     loadDeferredVideo,
+    scheduleCinematicWarmup,
     showDeferredVideoPoster
   } from '@/utils/cinematicMediaLoader';
   import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
@@ -251,11 +271,11 @@ const parallaxRoot = '/media/living-room/parallax';
   const fallbackMedia: Record<Environment, { src: string; poster: string }> = {
     day: {
       src: '/media/living-room/ambient/living-room-multilayer-v6.mp4',
-      poster: '/media/living-room/ambient/living-room-multilayer-v6-poster.jpg'
+      poster: '/media/living-room/ambient/living-room-multilayer-v6-poster.webp'
     },
     night: {
       src: '/media/living-room/ambient/living-room-night-v5.mp4',
-      poster: '/media/living-room/ambient/living-room-night-v5-poster.jpg'
+      poster: '/media/living-room/ambient/living-room-night-v5-poster.webp'
     }
   };
 
@@ -402,6 +422,15 @@ const parallaxRoot = '/media/living-room/parallax';
     };
 
     const loadBundle = bundleLoader.load;
+    let inactiveWarmupScheduled = false;
+    const scheduleInactiveWarmup = () => {
+      if (inactiveWarmupScheduled) return;
+      inactiveWarmupScheduled = true;
+      scheduleCinematicWarmup(() => {
+        const inactive = environment === 'day' ? 'night' : 'day';
+        return loadBundle(inactive);
+      }, signal);
+    };
 
     const activateFallback = (theme: Environment, play = true) => {
       loadDeferredVideo(videos[theme], fallbackMedia[theme]);
@@ -419,7 +448,10 @@ const parallaxRoot = '/media/living-room/parallax';
       setRenderer(nextRenderer);
 
       if (nextRenderer === 'layers') {
-        pauseVideos();
+        Object.values(videos).forEach((video) => {
+          video.pause();
+          if (!video.hasAttribute('src')) video.removeAttribute('poster');
+        });
         stacks[next].classList.add('is-active');
         if (initial) {
           stacks[previous === next ? (next === 'day' ? 'night' : 'day') : previous]
@@ -469,6 +501,7 @@ const parallaxRoot = '/media/living-room/parallax';
         photoTrigger.disabled = false;
         themeToggle.disabled = false;
         depth.recalculate();
+        scheduleInactiveWarmup();
 
       }, reduceMotion.matches ? 1 : 500);
     };
@@ -752,6 +785,15 @@ const parallaxRoot = '/media/living-room/parallax';
     object-fit: fill;
     pointer-events: none;
     user-select: none;
+  }
+
+  .living-room__plane > img.is-registered-sprite,
+  .living-room__boat-rock > img.is-registered-sprite {
+    inset: auto;
+    left: var(--asset-x);
+    top: var(--asset-y);
+    width: var(--asset-width);
+    height: var(--asset-height);
   }
 
   .living-room__plane--sky {

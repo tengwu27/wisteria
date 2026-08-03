@@ -1,0 +1,375 @@
+{
+  "format": "H.264 High, yuv420p, fast-start MP4",
+  "policy": {
+    "30fpsStartingCrf": 22,
+    "60fpsStartingCrf": 20,
+    "minimumUsefulReduction": 0.05,
+    "preserveFrameRate": true,
+    "preserveFrameCount": true,
+    "ambientLoops": "retained without another lossy generation"
+  },
+  "sourceBytes": 94473740,
+  "deliveryBytes": 70516575,
+  "assets": [
+    {
+      "file": "cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1-reverse.mp4",
+      "sourceBytes": 6291172,
+      "deliveryBytes": 4905795,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 150,
+      "duration": 5.0,
+      "crf": 22,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 98.904,
+        "minimum": 95.583,
+        "first": 95.964,
+        "last": 95.607
+      }
+    },
+    {
+      "file": "cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1.mp4",
+      "sourceBytes": 5747143,
+      "deliveryBytes": 5091769,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 150,
+      "duration": 5.0,
+      "crf": 22,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 98.952,
+        "minimum": 95.52,
+        "first": 95.746,
+        "last": 96.03
+      }
+    },
+    {
+      "file": "cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1-reverse.mp4",
+      "sourceBytes": 5096215,
+      "deliveryBytes": 4099067,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 150,
+      "duration": 5.0,
+      "crf": 22,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 98.813,
+        "minimum": 95.595,
+        "first": 95.896,
+        "last": 95.636
+      }
+    },
+    {
+      "file": "cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1.mp4",
+      "sourceBytes": 4728336,
+      "deliveryBytes": 4276668,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 150,
+      "duration": 5.0,
+      "crf": 22,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 98.865,
+        "minimum": 95.601,
+        "first": 95.75,
+        "last": 96.028
+      }
+    },
+    {
+      "file": "car-interior/transitions/cockpit-rise/car-interior-rise-day-v1.mp4",
+      "sourceBytes": 3267190,
+      "deliveryBytes": 2510385,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 108,
+      "duration": 3.6,
+      "crf": 22,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 97.965,
+        "minimum": 94.366,
+        "first": 95.258,
+        "last": 94.396
+      }
+    },
+    {
+      "file": "car-interior/transitions/cockpit-rise/car-interior-rise-night-v1.mp4",
+      "sourceBytes": 2400006,
+      "deliveryBytes": 1890917,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 108,
+      "duration": 3.6,
+      "crf": 22,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 97.427,
+        "minimum": 94.23,
+        "first": 94.784,
+        "last": 94.23
+      }
+    },
+    {
+      "file": "car-interior/transitions/driver-door/driver-door-day-v6-reverse.mp4",
+      "sourceBytes": 2526767,
+      "deliveryBytes": 1733079,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 120,
+      "duration": 4.0,
+      "crf": 22,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 96.977,
+        "minimum": 94.108,
+        "first": 95.878,
+        "last": 94.108
+      }
+    },
+    {
+      "file": "car-interior/transitions/driver-door/driver-door-day-v6.mp4",
+      "sourceBytes": 2114423,
+      "deliveryBytes": 1633614,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 120,
+      "duration": 4.0,
+      "crf": 22,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 97.181,
+        "minimum": 93.911,
+        "first": 96.028,
+        "last": 93.924
+      }
+    },
+    {
+      "file": "car-interior/transitions/driver-door/driver-door-night-v6-reverse.mp4",
+      "sourceBytes": 2111266,
+      "deliveryBytes": 2111266,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 120,
+      "duration": 4.0,
+      "crf": null,
+      "preset": null,
+      "vmaf": {
+        "mean": 100.0,
+        "minimum": 100.0,
+        "first": 100.0,
+        "last": 100.0
+      }
+    },
+    {
+      "file": "car-interior/transitions/driver-door/driver-door-night-v6.mp4",
+      "sourceBytes": 1716341,
+      "deliveryBytes": 1716341,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 120,
+      "duration": 4.0,
+      "crf": null,
+      "preset": null,
+      "vmaf": {
+        "mean": 100.0,
+        "minimum": 100.0,
+        "first": 100.0,
+        "last": 100.0
+      }
+    },
+    {
+      "file": "garage-workshop/transitions/garden-reveal/garage-reveal-day-v1-reverse.mp4",
+      "sourceBytes": 8952995,
+      "deliveryBytes": 6772024,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "60/1",
+      "frames": 204,
+      "duration": 3.4,
+      "crf": 20,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 95.533,
+        "minimum": 92.394,
+        "first": 95.376,
+        "last": 92.426
+      }
+    },
+    {
+      "file": "garage-workshop/transitions/garden-reveal/garage-reveal-day-v1.mp4",
+      "sourceBytes": 8839016,
+      "deliveryBytes": 6660670,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "60/1",
+      "frames": 204,
+      "duration": 3.4,
+      "crf": 20,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 95.427,
+        "minimum": 92.284,
+        "first": 95.533,
+        "last": 92.526
+      }
+    },
+    {
+      "file": "garage-workshop/transitions/garden-reveal/garage-reveal-night-v1-reverse.mp4",
+      "sourceBytes": 6524629,
+      "deliveryBytes": 6524629,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "60/1",
+      "frames": 204,
+      "duration": 3.4,
+      "crf": null,
+      "preset": null,
+      "vmaf": {
+        "mean": 100.0,
+        "minimum": 100.0,
+        "first": 100.0,
+        "last": 100.0
+      }
+    },
+    {
+      "file": "garage-workshop/transitions/garden-reveal/garage-reveal-night-v1.mp4",
+      "sourceBytes": 6378695,
+      "deliveryBytes": 5524987,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "60/1",
+      "frames": 204,
+      "duration": 3.4,
+      "crf": 19,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 95.259,
+        "minimum": 92.268,
+        "first": 95.999,
+        "last": 93.25
+      }
+    },
+    {
+      "file": "living-room/transitions/house-door/door-day-v4-reverse.mp4",
+      "sourceBytes": 7936014,
+      "deliveryBytes": 4350913,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 120,
+      "duration": 4.0,
+      "crf": 22,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 98.666,
+        "minimum": 91.504,
+        "first": 95.525,
+        "last": 91.602
+      }
+    },
+    {
+      "file": "living-room/transitions/house-door/door-day-v4.mp4",
+      "sourceBytes": 7863072,
+      "deliveryBytes": 4362253,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 120,
+      "duration": 4.0,
+      "crf": 22,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 98.478,
+        "minimum": 92.201,
+        "first": 95.174,
+        "last": 92.201
+      }
+    },
+    {
+      "file": "living-room/transitions/house-door/door-night-v4-reverse.mp4",
+      "sourceBytes": 6072649,
+      "deliveryBytes": 3187551,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 120,
+      "duration": 4.0,
+      "crf": 22,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 98.149,
+        "minimum": 90.627,
+        "first": 95.276,
+        "last": 90.627
+      }
+    },
+    {
+      "file": "living-room/transitions/house-door/door-night-v4.mp4",
+      "sourceBytes": 5907811,
+      "deliveryBytes": 3164647,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 120,
+      "duration": 4.0,
+      "crf": 22,
+      "preset": "slow",
+      "vmaf": {
+        "mean": 98.193,
+        "minimum": 92.59,
+        "first": 95.184,
+        "last": 92.59
+      }
+    }
+  ]
+}

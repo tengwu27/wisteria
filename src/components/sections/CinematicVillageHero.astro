@@ -17,7 +17,7 @@ const mediaRoot = '/media/village';
           class="cinematic-village__scene is-active"
           data-scene-video="day"
           data-src={`${mediaRoot}/ambient/day-v5.mp4`}
-          data-poster={`${mediaRoot}/ambient/day-v5-poster.jpg`}
+          data-poster={`${mediaRoot}/ambient/day-v5-poster.webp`}
           muted
           loop
           playsinline
@@ -28,7 +28,7 @@ const mediaRoot = '/media/village';
           class="cinematic-village__scene"
           data-scene-video="night"
           data-src={`${mediaRoot}/ambient/night-v3.mp4`}
-          data-poster={`${mediaRoot}/ambient/night-v3-poster.jpg`}
+          data-poster={`${mediaRoot}/ambient/night-v3-poster.webp`}
           muted
           loop
           playsinline
@@ -96,7 +96,7 @@ const mediaRoot = '/media/village';
         aria-hidden="true"
       >
         <img
-          src={`${mediaRoot}/ambient/clouds-day-near-v2.png`}
+          src={`${mediaRoot}/ambient/clouds-day-near-v2.webp`}
           alt=""
           decoding="async"
         />
@@ -143,7 +143,7 @@ const mediaRoot = '/media/village';
     <img
       class="cinematic-village__welcome-logo"
       data-welcome-logo
-      data-src="/media/village/ui/welcome-to-wisteria.png"
+      data-src="/media/village/ui/welcome-to-wisteria.webp"
       alt="Welcome to Wisteria"
       decoding="sync"
       fetchpriority="high"
@@ -220,11 +220,11 @@ const mediaRoot = '/media/village';
   const sceneMedia: Record<Environment, { src: string; poster: string }> = {
     day: {
       src: '/media/village/ambient/day-v5.mp4',
-      poster: '/media/village/ambient/day-v5-poster.jpg'
+      poster: '/media/village/ambient/day-v5-poster.webp'
     },
     night: {
       src: '/media/village/ambient/night-v3.mp4',
-      poster: '/media/village/ambient/night-v3-poster.jpg'
+      poster: '/media/village/ambient/night-v3-poster.webp'
     }
   };
   const interactionMedia: Record<
@@ -234,41 +234,41 @@ const mediaRoot = '/media/village';
     house: {
       day: {
         src: '/media/living-room/transitions/house-door/door-day-v4.mp4',
-        poster: '/media/living-room/transitions/house-door/door-day-v4-poster.jpg'
+        poster: '/media/living-room/transitions/house-door/door-day-v4-poster.webp'
       },
       night: {
         src: '/media/living-room/transitions/house-door/door-night-v4.mp4',
-        poster: '/media/living-room/transitions/house-door/door-night-v4-poster.jpg'
+        poster: '/media/living-room/transitions/house-door/door-night-v4-poster.webp'
       }
     },
     car: {
       day: {
         src: '/media/car-interior/transitions/driver-door/driver-door-day-v6.mp4',
-        poster: '/media/car-interior/transitions/driver-door/driver-door-day-v6-poster.jpg'
+        poster: '/media/car-interior/transitions/driver-door/driver-door-day-v6-poster.webp'
       },
       night: {
         src: '/media/car-interior/transitions/driver-door/driver-door-night-v6.mp4',
-        poster: '/media/car-interior/transitions/driver-door/driver-door-night-v6-poster.jpg'
+        poster: '/media/car-interior/transitions/driver-door/driver-door-night-v6-poster.webp'
       }
     },
     cafe: {
       day: {
         src: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1.mp4',
-        poster: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1-poster.jpg'
+        poster: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1-poster.webp'
       },
       night: {
         src: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1.mp4',
-        poster: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1-poster.jpg'
+        poster: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1-poster.webp'
       }
     },
     garage: {
       day: {
         src: '/media/garage-workshop/transitions/garden-reveal/garage-reveal-day-v1.mp4',
-        poster: '/media/garage-workshop/transitions/garden-reveal/garage-reveal-day-v1-poster.jpg'
+        poster: '/media/garage-workshop/transitions/garden-reveal/garage-reveal-day-v1-poster.webp'
       },
       night: {
         src: '/media/garage-workshop/transitions/garden-reveal/garage-reveal-night-v1.mp4',
-        poster: '/media/garage-workshop/transitions/garden-reveal/garage-reveal-night-v1-poster.jpg'
+        poster: '/media/garage-workshop/transitions/garden-reveal/garage-reveal-night-v1-poster.webp'
       }
     }
   };
@@ -786,7 +786,10 @@ const mediaRoot = '/media/village';
       if (finishing) return;
       finishing = true;
       window.clearTimeout(fallbackTimer);
-      releaseDeferredVideo(activeTransitionVideo, { keepPoster: true });
+      // Keep the decoded frame mounted while the curtain closes. Releasing the
+      // source here makes the video fall back to its poster before the curtain
+      // is opaque, which produces a visible one-frame jump at the handoff.
+      activeTransitionVideo.pause();
       overlay.classList.add('is-closing');
       window.setTimeout(navigateToDestination, reduceMotion.matches ? 220 : 320);
     };
@@ -899,6 +902,34 @@ const mediaRoot = '/media/village';
       updateCloudScrollParallax();
       root.classList.add('has-explored');
     }, { passive: true, signal });
+
+    viewport.addEventListener('keydown', (event) => {
+      if (
+        !worldHasOverflow ||
+        !viewportReady ||
+        introActive ||
+        entering
+      ) return;
+
+      const distance = Math.max(160, viewport.clientWidth * 0.72);
+      let nextLeft: number | null = null;
+      if (event.key === 'ArrowLeft') {
+        nextLeft = viewport.scrollLeft - distance;
+      } else if (event.key === 'ArrowRight') {
+        nextLeft = viewport.scrollLeft + distance;
+      } else if (event.key === 'Home') {
+        nextLeft = 0;
+      } else if (event.key === 'End') {
+        nextLeft = viewport.scrollWidth;
+      }
+
+      if (nextLeft === null) return;
+      event.preventDefault();
+      viewport.scrollTo({
+        left: nextLeft,
+        behavior: reduceMotion.matches ? 'auto' : 'smooth'
+      });
+    }, { signal });
 
     welcome.addEventListener('pointerdown', (event) => {
       if (!introActive) return;

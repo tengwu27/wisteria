@@ -12,11 +12,11 @@ the eight-second loops close without a visible jump.
 python scripts/media/render_cafe_interior_loop.py \
   assets/cinematic/scenes/cafe-gallery/interior/sources/day-master.png \
   public/media/cafe-gallery/ambient/cafe-gallery-day-v1.mp4 \
-  public/media/cafe-gallery/ambient/cafe-gallery-day-v1-poster.jpg
+  assets/cinematic/delivery-sources/cafe-gallery/ambient/cafe-gallery-day-v1-poster.jpg
 
 python scripts/media/render_cafe_interior_loop.py \
   assets/cinematic/scenes/cafe-gallery/interior/sources/night-master.png \
   public/media/cafe-gallery/ambient/cafe-gallery-night-v1.mp4 \
-  public/media/cafe-gallery/ambient/cafe-gallery-night-v1-poster.jpg \
+  assets/cinematic/delivery-sources/cafe-gallery/ambient/cafe-gallery-night-v1-poster.jpg \
   --theme night
 ```

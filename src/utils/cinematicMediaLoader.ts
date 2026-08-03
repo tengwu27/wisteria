@@ -14,6 +14,50 @@ export interface LayerBundleLoader<Theme extends string> {
   isLoaded: (theme: Theme) => boolean;
 }
 
+interface NetworkInformationLike {
+  effectiveType?: string;
+  saveData?: boolean;
+}
+
+/**
+ * Run optional cinematic loading only after the first scene has had time to
+ * settle. Slow connections and data-saving users never receive this traffic.
+ */
+export function scheduleCinematicWarmup(
+  task: () => void | Promise<unknown>,
+  signal: AbortSignal,
+  delay = 4000
+) {
+  const connection = (
+    navigator as Navigator & { connection?: NetworkInformationLike }
+  ).connection;
+  if (
+    signal.aborted ||
+    connection?.saveData ||
+    connection?.effectiveType?.includes('2g')
+  ) return;
+
+  let idleId: number | undefined;
+  const run = () => {
+    if (signal.aborted || document.hidden) return;
+    void task();
+  };
+  const delayId = window.setTimeout(() => {
+    if ('requestIdleCallback' in window) {
+      idleId = window.requestIdleCallback(run, { timeout: 3000 });
+    } else {
+      run();
+    }
+  }, delay);
+
+  signal.addEventListener('abort', () => {
+    window.clearTimeout(delayId);
+    if (idleId !== undefined && 'cancelIdleCallback' in window) {
+      window.cancelIdleCallback(idleId);
+    }
+  }, { once: true });
+}
+
 export function showDeferredVideoPoster(
   video: HTMLVideoElement,
   media: CinematicVideoMedia

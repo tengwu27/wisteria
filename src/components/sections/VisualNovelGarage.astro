@@ -2,6 +2,9 @@
 import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOverlay.astro';
 
 const mediaRoot = '/media/garage-workshop/parallax';
+const registeredLayerStyle = ([x, y, width, height]: number[]) =>
+  `--asset-x:${x / 16.72}%;--asset-y:${y / 9.41}%;` +
+  `--asset-width:${width / 16.72}%;--asset-height:${height / 9.41}%`;
 ---
 
 <section
@@ -23,7 +26,7 @@ const mediaRoot = '/media/garage-workshop/parallax';
           <img
             class="garage-room__fallback"
             data-garage-fallback={theme}
-            data-src={`${mediaRoot}/${theme}/00-composite.png`}
+            data-src={`${mediaRoot}/${theme}/00-composite.webp`}
             alt=""
             aria-hidden="true"
           />
@@ -38,14 +41,14 @@ const mediaRoot = '/media/garage-workshop/parallax';
             <div class="garage-room__plane garage-room__plane--exterior">
               <img
                 data-garage-layer-image={theme}
-                data-src={`${mediaRoot}/${theme}/01-garden-cafe-exterior.png`}
+                data-src={`${mediaRoot}/${theme}/01-garden-cafe-exterior.webp`}
                 alt=""
               />
             </div>
             <div class="garage-room__plane garage-room__plane--shell">
               <img
                 data-garage-layer-image={theme}
-                data-src={`${mediaRoot}/${theme}/02-garage-shell.png`}
+                data-src={`${mediaRoot}/${theme}/02-garage-shell.webp`}
                 alt=""
               />
               {theme === 'night' && (
@@ -59,7 +62,9 @@ const mediaRoot = '/media/garage-workshop/parallax';
             <div class="garage-room__plane garage-room__plane--motorcycles">
               <img
                 data-garage-layer-image={theme}
-                data-src={`${mediaRoot}/${theme}/03-motorcycles.png`}
+                class="is-registered-sprite"
+                style={registeredLayerStyle([598, 468, 695, 369])}
+                data-src={`${mediaRoot}/${theme}/03-motorcycles.webp`}
                 alt=""
               />
               <span class="garage-room__motor-glint" aria-hidden="true"></span>
@@ -121,12 +126,12 @@ const mediaRoot = '/media/garage-workshop/parallax';
     day={{
       src: '/media/garage-workshop/transitions/garden-reveal/garage-reveal-day-v1-reverse.mp4',
       poster:
-        '/media/garage-workshop/transitions/garden-reveal/garage-reveal-day-v1-reverse-poster.jpg'
+        '/media/garage-workshop/transitions/garden-reveal/garage-reveal-day-v1-reverse-poster.webp'
     }}
     night={{
       src: '/media/garage-workshop/transitions/garden-reveal/garage-reveal-night-v1-reverse.mp4',
       poster:
-        '/media/garage-workshop/transitions/garden-reveal/garage-reveal-night-v1-reverse-poster.jpg'
+        '/media/garage-workshop/transitions/garden-reveal/garage-reveal-night-v1-reverse-poster.webp'
     }}
   />
   <div class="garage-room__curtain" aria-hidden="true"></div>
@@ -136,7 +141,10 @@ const mediaRoot = '/media/garage-workshop/parallax';
   import { navigate } from 'astro:transitions/client';
   import { createAdaptiveCinematicViewport } from '@/utils/adaptiveCinematicViewport';
   import { createCinematicExitSequence } from '@/utils/cinematicExitSequence';
-  import { createLayerBundleLoader } from '@/utils/cinematicMediaLoader';
+  import {
+    createLayerBundleLoader,
+    scheduleCinematicWarmup
+  } from '@/utils/cinematicMediaLoader';
   import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
 
   const SESSION_KEY = 'wisteria-hero-environment';
@@ -237,6 +245,15 @@ const mediaRoot = '/media/garage-workshop/parallax';
     };
 
     const loadBundle = bundleLoader.load;
+    let inactiveWarmupScheduled = false;
+    const scheduleInactiveWarmup = () => {
+      if (inactiveWarmupScheduled) return;
+      inactiveWarmupScheduled = true;
+      scheduleCinematicWarmup(() => {
+        const inactive = environment === 'day' ? 'night' : 'day';
+        return loadBundle(inactive);
+      }, signal);
+    };
 
     const showFallback = (theme: Environment) => {
       const fallback = fallbacks[theme];
@@ -250,7 +267,13 @@ const mediaRoot = '/media/garage-workshop/parallax';
       renderer = nextRenderer;
       root.dataset.environment = theme;
       root.dataset.renderer = nextRenderer;
-      if (nextRenderer === 'fallback') showFallback(theme);
+      if (nextRenderer === 'fallback') {
+        showFallback(theme);
+      } else {
+        Object.values(fallbacks).forEach((fallback) => {
+          fallback.removeAttribute('src');
+        });
+      }
       stacks.day.classList.toggle('is-active', theme === 'day');
       stacks.night.classList.toggle('is-active', theme === 'night');
       fallbacks.day.classList.toggle('is-active', theme === 'day');
@@ -289,6 +312,7 @@ const mediaRoot = '/media/garage-workshop/parallax';
         toggle.disabled = false;
         depth.recalculate();
         status.textContent = '已进入摩托车工坊。可以查看中央的两台摩托车。';
+        scheduleInactiveWarmup();
       }, reduceMotion.matches ? 1 : 500);
     };
 
@@ -492,6 +516,14 @@ const mediaRoot = '/media/garage-workshop/parallax';
     object-fit: fill;
     pointer-events: none;
     user-select: none;
+  }
+
+  .garage-room__plane > img.is-registered-sprite {
+    inset: auto;
+    left: var(--asset-x);
+    top: var(--asset-y);
+    width: var(--asset-width);
+    height: var(--asset-height);
   }
 
   .garage-room__plane--exterior {
