@@ -288,10 +288,20 @@ const mediaRoot = '/media/village';
   }
 
   function initialiseCinematicVillage() {
-    const root = document.querySelector<HTMLElement>('[data-cinematic-village]');
-    if (!root || root.dataset.ready === 'true') return;
+    type VillageRoot = HTMLElement & {
+      __wisteriaVillageLifecycle?: AbortController;
+    };
+    const root = document.querySelector<VillageRoot>('[data-cinematic-village]');
+    if (!root) return;
 
-    root.dataset.ready = 'true';
+    const priorLifecycle = root.__wisteriaVillageLifecycle;
+    if (
+      root.dataset.ready === 'true' &&
+      priorLifecycle &&
+      !priorLifecycle.signal.aborted
+    ) return;
+    priorLifecycle?.abort();
+    delete root.dataset.ready;
 
     const viewport = root.querySelector<HTMLElement>('[data-village-viewport]');
     const camera = root.querySelector<HTMLElement>('[data-village-camera]');
@@ -346,6 +356,8 @@ const mediaRoot = '/media/village';
     ) return;
 
     const lifecycle = new AbortController();
+    root.__wisteriaVillageLifecycle = lifecycle;
+    root.dataset.ready = 'true';
     const { signal } = lifecycle;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const finePointer = window.matchMedia(
@@ -388,6 +400,7 @@ const mediaRoot = '/media/village';
     let cameraFrame = 0;
     let resizeFrame = 0;
     let returnRevealed = false;
+    let sceneVisualToken = 0;
     let viewportReady = false;
     let worldHasOverflow = false;
     let hasPositionedOverflow = false;
@@ -710,12 +723,6 @@ const mediaRoot = '/media/village';
       return playback;
     };
 
-    const resumeActiveScene = () => {
-      if (entering || document.hidden || !root.isConnected) return;
-      loadDeferredVideo(sceneVideos[environment], sceneMedia[environment]);
-      safelyPlay(sceneVideos[environment]);
-    };
-
     const revealReturnedVillage = () => {
       if (!returningFromScene || returnRevealed) return;
       returnRevealed = true;
@@ -733,6 +740,37 @@ const mediaRoot = '/media/village';
       });
     };
 
+    const markSceneVisualReady = (target: Environment) => {
+      if (target !== environment || signal.aborted) return;
+      root.classList.add('has-scene-visual');
+      revealReturnedVillage();
+    };
+
+    const prepareScenePoster = (target: Environment) => {
+      const token = ++sceneVisualToken;
+      const poster = new Image();
+      const markReady = () => {
+        if (token !== sceneVisualToken || target !== environment) return;
+        markSceneVisualReady(target);
+      };
+
+      poster.addEventListener('load', () => {
+        if (typeof poster.decode === 'function') {
+          poster.decode().then(markReady).catch(markReady);
+        } else {
+          markReady();
+        }
+      }, { once: true, signal });
+      poster.src = sceneMedia[target].poster;
+      if (poster.complete && poster.naturalWidth > 0) markReady();
+    };
+
+    const resumeActiveScene = () => {
+      if (entering || document.hidden || !root.isConnected) return;
+      loadDeferredVideo(sceneVideos[environment], sceneMedia[environment]);
+      safelyPlay(sceneVideos[environment]);
+    };
+
     const selectInteraction = (interaction: Interaction) => {
       activeInteraction = interaction;
       activeDestination = destinations[interaction];
@@ -743,6 +781,8 @@ const mediaRoot = '/media/village';
     const updateEnvironment = (next: Environment, persist = false) => {
       environment = next;
       root.dataset.environment = next;
+      root.classList.remove('has-scene-visual');
+      prepareScenePoster(next);
 
       (Object.entries(sceneVideos) as [Environment, HTMLVideoElement][]).forEach(([name, video]) => {
         const active = name === next;
@@ -974,18 +1014,24 @@ const mediaRoot = '/media/village';
         sceneVideos[environment].readyState >=
           HTMLMediaElement.HAVE_CURRENT_DATA
       ) {
-        requestAnimationFrame(revealReturnedVillage);
+        requestAnimationFrame(() => markSceneVisualReady(environment));
       }
     });
     if (returningFromScene) {
-      returnRevealTimer = window.setTimeout(revealReturnedVillage, 900);
+      // Keep the return veil opaque while the active video or its decoded
+      // poster becomes usable. The bounded fallback still prevents a failed
+      // media request from trapping navigation indefinitely.
+      returnRevealTimer = window.setTimeout(revealReturnedVillage, 5000);
     }
 
-    Object.values(sceneVideos).forEach((video) => {
+    (Object.entries(sceneVideos) as [Environment, HTMLVideoElement][]).forEach(([
+      target,
+      video
+    ]) => {
       video.addEventListener('canplay', () => {
         if (video === sceneVideos[environment]) {
           resumeActiveScene();
-          revealReturnedVillage();
+          markSceneVisualReady(target);
         }
       }, { signal });
     });
@@ -1030,10 +1076,15 @@ const mediaRoot = '/media/village';
         return;
       }
 
-      if (!entering) safelyPlay(sceneVideos[environment]);
+      if (!entering) resumeActiveScene();
     }, { signal });
 
     document.addEventListener('astro:before-swap', () => {
+      // Astro can restore this DOM from its page cache. Clear the marker before
+      // aborting listeners so the restored village receives a fresh lifecycle
+      // and reloads the released active media source.
+      delete root.dataset.ready;
+      delete root.__wisteriaVillageLifecycle;
       lifecycle.abort();
       window.clearTimeout(fallbackTimer);
       window.clearTimeout(returnRevealTimer);
@@ -1118,19 +1169,10 @@ const mediaRoot = '/media/village';
     z-index: 2;
     inset: 0;
     overflow: hidden;
-    opacity: .36;
+    opacity: 0;
     pointer-events: none;
-    transform:
-      translate3d(
-        var(--cloud-focus-x),
-        var(--cloud-focus-y),
-        0
-      )
-      scale(1);
-    transform-origin: 50% 42%;
     mix-blend-mode: normal;
     transition: opacity 500ms ease;
-    will-change: transform;
   }
 
   .cinematic-village__cloud-layer img {
@@ -1141,11 +1183,24 @@ const mediaRoot = '/media/village';
     height: 140%;
     max-width: none;
     object-fit: fill;
+    transform:
+      translate3d(
+        var(--cloud-focus-x),
+        var(--cloud-focus-y),
+        0
+      );
+    transform-origin: 50% 42%;
+    will-change: transform;
     user-select: none;
     -webkit-user-drag: none;
   }
 
-  .cinematic-village[data-environment='night']
+  .cinematic-village.has-scene-visual
+    .cinematic-village__cloud-layer {
+    opacity: .36;
+  }
+
+  .cinematic-village.has-scene-visual[data-environment='night']
     .cinematic-village__cloud-layer {
     opacity: .22;
     filter: brightness(.86) saturate(.65) contrast(.95);
@@ -1954,7 +2009,7 @@ const mediaRoot = '/media/village';
       --stage-scale: 1;
     }
 
-    .cinematic-village__cloud-layer {
+    .cinematic-village__cloud-layer img {
       transform: none;
     }
 
