@@ -13,6 +13,23 @@ const mediaRoot = '/media/village';
   >
     <div class="cinematic-village__camera" data-village-camera>
       <div class="cinematic-village__stage" data-village-stage>
+        <img
+          class="cinematic-village__scene-poster is-active"
+          data-scene-poster="day"
+          src={`${mediaRoot}/ambient/day-v5-poster.webp`}
+          alt=""
+          decoding="async"
+          fetchpriority="high"
+          aria-hidden="true"
+        />
+        <img
+          class="cinematic-village__scene-poster"
+          data-scene-poster="night"
+          data-src={`${mediaRoot}/ambient/night-v3-poster.webp`}
+          alt=""
+          decoding="async"
+          aria-hidden="true"
+        />
         <video
           class="cinematic-village__scene is-active"
           data-scene-video="day"
@@ -327,6 +344,8 @@ const mediaRoot = '/media/village';
     const overlay = root.querySelector<HTMLElement>('[data-entry-overlay]');
     const dayVideo = root.querySelector<HTMLVideoElement>('[data-scene-video="day"]');
     const nightVideo = root.querySelector<HTMLVideoElement>('[data-scene-video="night"]');
+    const dayPoster = root.querySelector<HTMLImageElement>('[data-scene-poster="day"]');
+    const nightPoster = root.querySelector<HTMLImageElement>('[data-scene-poster="night"]');
     const transitionVideo = root.querySelector<HTMLVideoElement>(
       '[data-interaction-video]'
     );
@@ -352,6 +371,8 @@ const mediaRoot = '/media/village';
       !overlay ||
       !dayVideo ||
       !nightVideo ||
+      !dayPoster ||
+      !nightPoster ||
       !transitionVideo
     ) return;
 
@@ -366,6 +387,10 @@ const mediaRoot = '/media/village';
     const sceneVideos: Record<Environment, HTMLVideoElement> = {
       day: dayVideo,
       night: nightVideo
+    };
+    const scenePosters: Record<Environment, HTMLImageElement> = {
+      day: dayPoster,
+      night: nightPoster
     };
     let returningFromScene = document.documentElement.classList.contains(
       'is-returning-to-village'
@@ -748,7 +773,7 @@ const mediaRoot = '/media/village';
 
     const prepareScenePoster = (target: Environment) => {
       const token = ++sceneVisualToken;
-      const poster = new Image();
+      const poster = scenePosters[target];
       const markReady = () => {
         if (token !== sceneVisualToken || target !== environment) return;
         markSceneVisualReady(target);
@@ -761,7 +786,9 @@ const mediaRoot = '/media/village';
           markReady();
         }
       }, { once: true, signal });
-      poster.src = sceneMedia[target].poster;
+      if (!poster.hasAttribute('src')) {
+        poster.src = poster.dataset.src ?? sceneMedia[target].poster;
+      }
       if (poster.complete && poster.naturalWidth > 0) markReady();
     };
 
@@ -784,16 +811,29 @@ const mediaRoot = '/media/village';
       root.classList.remove('has-scene-visual');
       prepareScenePoster(next);
 
-      (Object.entries(sceneVideos) as [Environment, HTMLVideoElement][]).forEach(([name, video]) => {
-        const active = name === next;
-        video.classList.toggle('is-active', active);
-        if (active && !document.hidden && !entering) {
-          loadDeferredVideo(video, sceneMedia[name]);
-          safelyPlay(video);
-        } else {
-          releaseDeferredVideo(video);
-        }
+      (Object.entries(scenePosters) as [Environment, HTMLImageElement][]).forEach(([
+        name,
+        poster
+      ]) => poster.classList.toggle('is-active', name === next));
+
+      // Decoder ownership is intentionally transferred in two phases. Safari
+      // can evict the newly started day surface when the inactive night video
+      // is released immediately afterward. Releasing every inactive decoder
+      // first makes day and night initialization follow the same safe order.
+      (Object.entries(sceneVideos) as [Environment, HTMLVideoElement][]).forEach(([
+        name,
+        video
+      ]) => {
+        video.classList.remove('is-active');
+        if (name !== next) releaseDeferredVideo(video);
       });
+
+      const activeVideo = sceneVideos[next];
+      activeVideo.classList.add('is-active');
+      if (!document.hidden && !entering) {
+        loadDeferredVideo(activeVideo, sceneMedia[next]);
+        safelyPlay(activeVideo);
+      }
 
       selectInteraction(activeInteraction);
 
@@ -1258,6 +1298,7 @@ const mediaRoot = '/media/village';
     --stage-scale: 1.08;
   }
 
+  .cinematic-village__scene-poster,
   .cinematic-village__scene {
     position: absolute;
     inset: 0;
@@ -1269,10 +1310,17 @@ const mediaRoot = '/media/village';
     transition: none;
   }
 
+  .cinematic-village__scene-poster {
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .cinematic-village.is-ready .cinematic-village__scene-poster,
   .cinematic-village.is-ready .cinematic-village__scene {
     transition: opacity 500ms ease;
   }
 
+  .cinematic-village__scene-poster.is-active,
   .cinematic-village__scene.is-active {
     opacity: 1;
   }
