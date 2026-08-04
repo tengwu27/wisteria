@@ -40,13 +40,13 @@ Render arrival clips:
 ```bash
 python scripts/media/render_travel_interior_arrival.py \
   assets/cinematic/scenes/car-interior/interior/sources/day \
-  public/media/car-interior/transitions/cockpit-rise/car-interior-rise-day-v1.mp4 \
-  public/media/car-interior/transitions/cockpit-rise/car-interior-rise-day-v1-poster.jpg
+  assets/cinematic/delivery-sources/car-interior/transitions/cockpit-rise/car-interior-rise-day-v1.mp4 \
+  assets/cinematic/delivery-sources/car-interior/transitions/cockpit-rise/car-interior-rise-day-v1-poster.jpg
 
 python scripts/media/render_travel_interior_arrival.py \
   assets/cinematic/scenes/car-interior/interior/sources/night \
-  public/media/car-interior/transitions/cockpit-rise/car-interior-rise-night-v1.mp4 \
-  public/media/car-interior/transitions/cockpit-rise/car-interior-rise-night-v1-poster.jpg
+  assets/cinematic/delivery-sources/car-interior/transitions/cockpit-rise/car-interior-rise-night-v1.mp4 \
+  assets/cinematic/delivery-sources/car-interior/transitions/cockpit-rise/car-interior-rise-night-v1-poster.jpg
 ```
 
 Render ambient loops:
@@ -55,12 +55,12 @@ Render ambient loops:
 python scripts/media/render_travel_interior_loop.py \
   assets/cinematic/scenes/car-interior/interior/sources/day \
   public/media/car-interior/ambient/car-interior-day-v1.mp4 \
-  public/media/car-interior/ambient/car-interior-day-v1-poster.jpg \
+  assets/cinematic/delivery-sources/car-interior/ambient/car-interior-day-v1-poster.jpg \
   --theme day
 
 python scripts/media/render_travel_interior_loop.py \
   assets/cinematic/scenes/car-interior/interior/sources/night \
   public/media/car-interior/ambient/car-interior-night-v1.mp4 \
-  public/media/car-interior/ambient/car-interior-night-v1-poster.jpg \
+  assets/cinematic/delivery-sources/car-interior/ambient/car-interior-night-v1-poster.jpg \
   --theme night
 ```

@@ -3,6 +3,13 @@ import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOver
 
 const mediaRoot = '/media/cafe-gallery/ambient';
 const parallaxRoot = '/media/cafe-gallery/parallax';
+const registeredLayerStyle = ([x, y, width, height]: number[]) =>
+  `--asset-x:${x / 16.72}%;--asset-y:${y / 9.41}%;` +
+  `--asset-width:${width / 16.72}%;--asset-height:${height / 9.41}%`;
+const tableRects = {
+  day: [0, 543, 1366, 398],
+  night: [0, 543, 1364, 398]
+};
 ---
 
 <section
@@ -23,8 +30,8 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
         <video
           class="cafe-gallery__video is-active"
           data-gallery-video="day"
-          src={`${mediaRoot}/cafe-gallery-day-v1.mp4`}
-          poster={`${mediaRoot}/cafe-gallery-day-v1-poster.jpg`}
+          data-src={`${mediaRoot}/cafe-gallery-day-v1.mp4`}
+          data-poster={`${mediaRoot}/cafe-gallery-day-v1-poster.webp`}
           muted
           loop
           playsinline
@@ -34,8 +41,8 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
         <video
           class="cafe-gallery__video"
           data-gallery-video="night"
-          src={`${mediaRoot}/cafe-gallery-night-v1.mp4`}
-          poster={`${mediaRoot}/cafe-gallery-night-v1-poster.jpg`}
+          data-src={`${mediaRoot}/cafe-gallery-night-v1.mp4`}
+          data-poster={`${mediaRoot}/cafe-gallery-night-v1-poster.webp`}
           muted
           loop
           playsinline
@@ -52,14 +59,14 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
             <div class="cafe-gallery__plane cafe-gallery__plane--exterior">
               <img
                 data-gallery-layer-image={theme}
-                data-src={`${parallaxRoot}/${theme}/01-garden-bay-exterior.png`}
+                data-src={`${parallaxRoot}/${theme}/01-garden-bay-exterior.webp`}
                 alt=""
               />
             </div>
             <div class="cafe-gallery__plane cafe-gallery__plane--shell">
               <img
                 data-gallery-layer-image={theme}
-                data-src={`${parallaxRoot}/${theme}/02-gallery-shell.png`}
+                data-src={`${parallaxRoot}/${theme}/02-gallery-shell.webp`}
                 alt=""
               />
               {theme === 'night' && (
@@ -72,7 +79,9 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
             <div class="cafe-gallery__plane cafe-gallery__plane--tables">
               <img
                 data-gallery-layer-image={theme}
-                data-src={`${parallaxRoot}/${theme}/03-foreground-tables.png`}
+                class="is-registered-sprite"
+                style={registeredLayerStyle(tableRects[theme])}
+                data-src={`${parallaxRoot}/${theme}/03-foreground-tables.webp`}
                 alt=""
               />
               <div class="cafe-gallery__steam" aria-hidden="true">
@@ -133,12 +142,12 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
     day={{
       src: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1-reverse.mp4',
       poster:
-        '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1-reverse-poster.jpg'
+        '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-day-v1-reverse-poster.webp'
     }}
     night={{
       src: '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1-reverse.mp4',
       poster:
-        '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1-reverse-poster.jpg'
+        '/media/cafe-gallery/transitions/garden-reveal/cafe-reveal-night-v1-reverse-poster.webp'
     }}
   />
   <div class="cafe-gallery__curtain" data-gallery-curtain aria-hidden="true"></div>
@@ -148,13 +157,29 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
   import { navigate } from 'astro:transitions/client';
   import { createAdaptiveCinematicViewport } from '@/utils/adaptiveCinematicViewport';
   import { createCinematicExitSequence } from '@/utils/cinematicExitSequence';
+  import {
+    createLayerBundleLoader,
+    loadDeferredVideo,
+    scheduleCinematicWarmup,
+    showDeferredVideoPoster
+  } from '@/utils/cinematicMediaLoader';
   import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
 
   const SESSION_KEY = 'wisteria-hero-environment';
-  const BUNDLE_TIMEOUT = 4000;
 
   type Environment = 'day' | 'night';
   type RoomState = 'arriving' | 'idle' | 'exiting';
+
+  const fallbackMedia: Record<Environment, { src: string; poster: string }> = {
+    day: {
+      src: '/media/cafe-gallery/ambient/cafe-gallery-day-v1.mp4',
+      poster: '/media/cafe-gallery/ambient/cafe-gallery-day-v1-poster.webp'
+    },
+    night: {
+      src: '/media/cafe-gallery/ambient/cafe-gallery-night-v1.mp4',
+      poster: '/media/cafe-gallery/ambient/cafe-gallery-night-v1-poster.webp'
+    }
+  };
 
   function getStoredEnvironment(): Environment | null {
     try {
@@ -219,7 +244,11 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
       day: dayStack,
       night: nightStack
     };
-    const bundlePromises = new Map<Environment, Promise<boolean>>();
+    const bundleLoader = createLayerBundleLoader({
+      stacks,
+      imageSelector: '[data-gallery-layer-image]',
+      signal
+    });
     let environment: Environment = getStoredEnvironment() ?? getLocalEnvironment();
     let activeVideo = videos[environment];
     let state: RoomState = 'arriving';
@@ -265,69 +294,25 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
       );
     };
 
-    const waitForImage = (image: HTMLImageElement) =>
-      new Promise<void>((resolve, reject) => {
-        if (image.complete && image.naturalWidth > 0) {
-          if (typeof image.decode === 'function') {
-            image.decode().then(resolve).catch(resolve);
-          } else {
-            resolve();
-          }
-          return;
-        }
-        image.addEventListener('load', () => {
-          if (typeof image.decode === 'function') {
-            image.decode().then(resolve).catch(resolve);
-          } else {
-            resolve();
-          }
-        }, { once: true });
-        image.addEventListener('error', () => {
-          reject(new Error('Café parallax layer failed to load'));
-        }, { once: true });
-      });
-
-    const loadBundle = (theme: Environment) => {
-      const existing = bundlePromises.get(theme);
-      if (existing) return existing;
-      const promise = new Promise<boolean>((resolve) => {
-        const images = Array.from(
-          stacks[theme].querySelectorAll<HTMLImageElement>(
-            '[data-gallery-layer-image]'
-          )
-        );
-        images.forEach((image) => {
-          if (!image.src && image.dataset.src) image.src = image.dataset.src;
-        });
-        let settled = false;
-        const timeout = window.setTimeout(() => {
-          settled = true;
-          bundlePromises.delete(theme);
-          resolve(false);
-        }, BUNDLE_TIMEOUT);
-        Promise.all(images.map(waitForImage))
-          .then(() => {
-            window.clearTimeout(timeout);
-            stacks[theme].dataset.loaded = 'true';
-            if (settled) bundlePromises.delete(theme);
-            resolve(true);
-          })
-          .catch(() => {
-            window.clearTimeout(timeout);
-            stacks[theme].dataset.failed = 'true';
-            bundlePromises.delete(theme);
-            resolve(false);
-          });
-      });
-      bundlePromises.set(theme, promise);
-      return promise;
+    const loadBundle = bundleLoader.load;
+    let inactiveWarmupScheduled = false;
+    const scheduleInactiveWarmup = () => {
+      if (inactiveWarmupScheduled) return;
+      inactiveWarmupScheduled = true;
+      scheduleCinematicWarmup(() => {
+        const inactive = environment === 'day' ? 'night' : 'day';
+        return loadBundle(inactive);
+      }, signal);
     };
 
     const setRenderer = (next: 'layers' | 'fallback') => {
       renderer = next;
       root.dataset.renderer = next;
       if (next === 'layers') {
-        Object.values(videos).forEach((video) => video.pause());
+        Object.values(videos).forEach((video) => {
+          video.pause();
+          if (!video.hasAttribute('src')) video.removeAttribute('poster');
+        });
       }
       depth.setSuspended(
         state !== 'idle' || next !== 'layers' || themeLoading,
@@ -350,6 +335,11 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
         });
     };
 
+    const activateFallback = (theme: Environment, play = true) => {
+      loadDeferredVideo(videos[theme], fallbackMedia[theme]);
+      if (play) safelyPlay(videos[theme]);
+    };
+
     const updateEnvironment = (
       next: Environment,
       persist = false,
@@ -370,6 +360,8 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
             if (name !== next) video.pause();
           }
         );
+        showDeferredVideoPoster(activeVideo, fallbackMedia[next]);
+        if (activeVideo.hasAttribute('src')) safelyPlay(activeVideo);
       } else if (renderer === 'fallback' && previousVideo !== activeVideo) {
         window.clearTimeout(themeTimer);
         if (
@@ -432,6 +424,7 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
         themeToggle.disabled = false;
         depth.setSuspended(renderer !== 'layers');
         depth.recalculate();
+        scheduleInactiveWarmup();
       }, reduceMotion.matches ? 1 : 500);
     };
 
@@ -504,7 +497,6 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
 
     Object.values(videos).forEach((video) => {
       video.muted = true;
-      video.load();
       video.addEventListener('loadeddata', () => {
         if (video === activeVideo) finishArrival();
       }, { signal });
@@ -521,14 +513,10 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
     updateEnvironment(environment, false, false, true);
     void loadBundle(environment).then((ready) => {
       if (signal.aborted || state === 'exiting') return;
+      if (!ready) activateFallback(environment, false);
       setRenderer(ready ? 'layers' : 'fallback');
       updateEnvironment(environment, false, false, true);
       finishArrival();
-      if (ready) {
-        const inactive: Environment =
-          environment === 'day' ? 'night' : 'day';
-        window.setTimeout(() => void loadBundle(inactive), 700);
-      }
     });
 
     if (reduceMotion.matches) {
@@ -549,6 +537,7 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
       depth.setSuspended(true);
       const ready = await loadBundle(next);
       if (signal.aborted || state !== 'idle') return;
+      if (!ready) activateFallback(next, false);
       setRenderer(ready ? 'layers' : 'fallback');
       updateEnvironment(next, true, true);
       window.clearTimeout(themeTimer);
@@ -720,6 +709,14 @@ const parallaxRoot = '/media/cafe-gallery/parallax';
     object-fit: fill;
     pointer-events: none;
     user-select: none;
+  }
+
+  .cafe-gallery__plane > img.is-registered-sprite {
+    inset: auto;
+    left: var(--asset-x);
+    top: var(--asset-y);
+    width: var(--asset-width);
+    height: var(--asset-height);
   }
 
   .cafe-gallery__plane--shell {

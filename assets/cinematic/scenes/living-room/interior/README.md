@@ -17,12 +17,12 @@ Render the active bundles with:
 python scripts/media/render_lifestyle_multilayer.py \
   assets/cinematic/scenes/living-room/interior/sources/day \
   public/media/living-room/ambient/living-room-multilayer-v6.mp4 \
-  public/media/living-room/ambient/living-room-multilayer-v6-poster.jpg
+  assets/cinematic/delivery-sources/living-room/ambient/living-room-multilayer-v6-poster.jpg
 
 python scripts/media/render_lifestyle_multilayer.py \
   assets/cinematic/scenes/living-room/interior/sources/day \
   public/media/living-room/ambient/living-room-night-v5.mp4 \
-  public/media/living-room/ambient/living-room-night-v5-poster.jpg \
+  assets/cinematic/delivery-sources/living-room/ambient/living-room-night-v5-poster.jpg \
   --theme night \
   --night-layer-dir assets/cinematic/scenes/living-room/interior/sources/night
 ```

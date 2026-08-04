@@ -22,13 +22,13 @@ python scripts/media/render_multilayer_house_transition.py \
   assets/cinematic/scenes/living-room/transitions/house-door/sources/main-house-closeup-corrected-door.png \
   assets/cinematic/scenes/living-room/transitions/house-door/sources/main-house-closeup-interior-plate.png \
   assets/cinematic/scenes/living-room/transitions/house-door/layers/day \
-  public/media/living-room/transitions/house-door/door-day-v4.mp4 \
-  public/media/living-room/transitions/house-door/door-day-v4-poster.jpg
+  assets/cinematic/delivery-sources/living-room/transitions/house-door/door-day-v4.mp4 \
+  assets/cinematic/delivery-sources/living-room/transitions/house-door/door-day-v4-poster.jpg
 
 python scripts/media/render_multilayer_house_transition.py \
   assets/cinematic/scenes/living-room/transitions/house-door/sources/main-house-closeup-night-closed-v2.png \
   assets/cinematic/scenes/living-room/transitions/house-door/sources/main-house-closeup-night-interior-v2.png \
   assets/cinematic/scenes/living-room/transitions/house-door/layers/night \
-  public/media/living-room/transitions/house-door/door-night-v4.mp4 \
-  public/media/living-room/transitions/house-door/door-night-v4-poster.jpg
+  assets/cinematic/delivery-sources/living-room/transitions/house-door/door-night-v4.mp4 \
+  assets/cinematic/delivery-sources/living-room/transitions/house-door/door-night-v4-poster.jpg
 ```

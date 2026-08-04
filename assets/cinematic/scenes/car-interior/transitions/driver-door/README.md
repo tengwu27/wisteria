@@ -43,8 +43,8 @@ python scripts/media/render_3d_car_door_walk.py \
   assets/cinematic/scenes/car-interior/transitions/driver-door/masks/car-foreground-alpha-mask-v3.png \
   assets/cinematic/scenes/car-interior/transitions/driver-door/masks/car-driver-door-outer-mask-v3.png \
   assets/cinematic/scenes/car-interior/transitions/driver-door/masks/car-driver-door-glazing-mask-v3.png \
-  public/media/car-interior/transitions/driver-door/driver-door-day-v6.mp4 \
-  public/media/car-interior/transitions/driver-door/driver-door-day-v6-poster.jpg
+  assets/cinematic/delivery-sources/car-interior/transitions/driver-door/driver-door-day-v6.mp4 \
+  assets/cinematic/delivery-sources/car-interior/transitions/driver-door/driver-door-day-v6-poster.jpg
 
 python scripts/media/render_3d_car_door_walk.py \
   assets/cinematic/scenes/car-interior/transitions/driver-door/sources/car-closeup-night-closed-v1.png \
@@ -55,7 +55,7 @@ python scripts/media/render_3d_car_door_walk.py \
   assets/cinematic/scenes/car-interior/transitions/driver-door/masks/car-foreground-alpha-mask-v3.png \
   assets/cinematic/scenes/car-interior/transitions/driver-door/masks/car-driver-door-outer-mask-v3.png \
   assets/cinematic/scenes/car-interior/transitions/driver-door/masks/car-driver-door-glazing-mask-v3.png \
-  public/media/car-interior/transitions/driver-door/driver-door-night-v6.mp4 \
-  public/media/car-interior/transitions/driver-door/driver-door-night-v6-poster.jpg \
+  assets/cinematic/delivery-sources/car-interior/transitions/driver-door/driver-door-night-v6.mp4 \
+  assets/cinematic/delivery-sources/car-interior/transitions/driver-door/driver-door-night-v6-poster.jpg \
   --night
 ```

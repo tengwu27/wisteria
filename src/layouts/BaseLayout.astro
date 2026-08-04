@@ -14,15 +14,12 @@ interface Props {
   description?: string;
   image?: string;
   type?: 'website' | 'article';
-  immersive?: boolean;
 }
 
 const title = Astro.props.title ?? site.seo.title;
 const description = Astro.props.description ?? site.seo.description;
 const type = Astro.props.type ?? 'website';
-const immersive = Astro.props.immersive ?? false;
 const canonical = absoluteUrl(Astro.url.pathname);
-const isVillagePage = Astro.url.pathname === '/';
 ---
 
 <!doctype html>
@@ -33,16 +30,6 @@ const isVillagePage = Astro.url.pathname === '/';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonical} />
-    {
-      isVillagePage && (
-        <link
-          rel="preload"
-          as="image"
-          href="/media/village/ui/welcome-to-wisteria.png"
-          fetchpriority="high"
-        />
-      )
-    }
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content={type} />
@@ -51,58 +38,12 @@ const isVillagePage = Astro.url.pathname === '/';
     <meta name="twitter:card" content="summary_large_image" />
     <title>{title}</title>
     <ClientRouter />
-    <script is:inline data-astro-rerun>
-      {
-        const onVillage = window.location.pathname === '/';
-        const returnKey = 'wisteria-village-return';
-        const introKey = 'wisteria-village-intro-seen';
-        let returning = false;
-        let introPending = false;
-
-        if (onVillage) {
-          try {
-            returning = window.sessionStorage.getItem(returnKey) === '1';
-            const introSeen =
-              window.sessionStorage.getItem(introKey) === '1' ||
-              window.__wisteriaVillageIntroSeen === true;
-            introPending = !returning && !introSeen;
-            if (returning) {
-              window.__wisteriaVillageIntroSeen = true;
-              window.sessionStorage.setItem(introKey, '1');
-            }
-          } catch {
-            returning =
-              document.documentElement.classList.contains(
-                'is-returning-to-village'
-              );
-            introPending =
-              !returning && window.__wisteriaVillageIntroSeen !== true;
-            if (returning) {
-              window.__wisteriaVillageIntroSeen = true;
-            }
-          }
-        }
-
-        document.documentElement.classList.toggle(
-          'is-returning-to-village',
-          returning
-        );
-        document.documentElement.classList.toggle(
-          'is-village-intro-pending',
-          introPending
-        );
-        document.documentElement.classList.remove(
-          'is-returning-to-village-ready',
-          'is-village-intro-revealing'
-        );
-      }
-    </script>
   </head>
-  <body class:list={['min-h-screen text-ink antialiased', immersive ? 'bg-[#101d1b]' : 'bg-paper']}>
-    {!immersive && <Header />}
-    <main class:list={{ 'min-h-screen': immersive }}>
+  <body class="min-h-screen bg-paper text-ink antialiased">
+    <Header />
+    <main>
       <slot />
     </main>
-    {!immersive && <SiteFooter />}
+    <SiteFooter />
   </body>
 </html>
