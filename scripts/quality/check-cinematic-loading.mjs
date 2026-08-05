@@ -146,6 +146,36 @@ for (const route of config.routes) {
   const routeCss = [html, ...stylesheets].join('\n');
   const initialCodeBytes = await measureInitialRouteCode(html, route.html);
 
+  const viewportMeta = html.match(
+    /<meta\b[^>]*name=["']viewport["'][^>]*>/i
+  )?.[0];
+  if (!viewportMeta?.includes('viewport-fit=cover')) {
+    report(
+      `${route.label}: immersive viewport must opt into edge-to-edge coverage`,
+      route,
+      false
+    );
+  }
+  if (
+    !routeCss.includes('--immersive-viewport-width') ||
+    !routeCss.includes('--immersive-viewport-height') ||
+    !routeCss.includes('100dvw') ||
+    !routeCss.includes('100dvh')
+  ) {
+    report(
+      `${route.label}: dynamic immersive viewport contract is missing`,
+      route,
+      false
+    );
+  }
+  if (routeCss.includes('100svh')) {
+    report(
+      `${route.label}: small viewport units can leave exposed Safari edges`,
+      route,
+      false
+    );
+  }
+
   if (initialCodeBytes > config.budgets.initialRouteCodeBytes) {
     report(
       `${route.label}: initial HTML, CSS, and JavaScript total ${initialCodeBytes} bytes; budget is ${config.budgets.initialRouteCodeBytes}`,

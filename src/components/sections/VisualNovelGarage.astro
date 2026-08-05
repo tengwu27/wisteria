@@ -1,5 +1,6 @@
 ---
 import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOverlay.astro';
+import SpatialEffectToggle from '@/components/media/SpatialEffectToggle.astro';
 
 const mediaRoot = '/media/garage-workshop/parallax';
 const registeredLayerStyle = ([x, y, width, height]: number[]) =>
@@ -120,6 +121,8 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     <span data-garage-theme-label>白昼</span>
   </button>
 
+  <SpatialEffectToggle className="garage-room__spatial-toggle" />
+
   <p class="sr-only" data-garage-status aria-live="polite">正在进入摩托车工坊</p>
   <CinematicSceneExitOverlay
     label="从摩托车工坊返回村庄的过渡动画"
@@ -146,6 +149,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     scheduleCinematicWarmup
   } from '@/utils/cinematicMediaLoader';
   import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
+  import { createDeviceOrientationSpatialEffect } from '@/utils/deviceOrientationSpatialEffect';
 
   const SESSION_KEY = 'wisteria-hero-environment';
 
@@ -178,12 +182,13 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     const toggle = root.querySelector<HTMLButtonElement>('[data-garage-theme-toggle]');
     const icon = root.querySelector<HTMLElement>('[data-garage-theme-icon]');
     const label = root.querySelector<HTMLElement>('[data-garage-theme-label]');
+    const spatialToggle = root.querySelector<HTMLButtonElement>('[data-spatial-effect-toggle]');
     const status = root.querySelector<HTMLElement>('[data-garage-status]');
     const exitOverlay = root.querySelector<HTMLElement>('[data-cinematic-scene-exit]');
     if (
       !viewport || !stage || !dayStack || !nightStack ||
       !dayFallback || !nightFallback || !motorcycles || !dialogue ||
-      !back || !toggle || !icon || !label || !status || !exitOverlay
+      !back || !toggle || !icon || !label || !spatialToggle || !status || !exitOverlay
     ) return;
     root.dataset.ready = 'true';
 
@@ -211,6 +216,13 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     let navigationTimer = 0;
     let dialogueTimer = 0;
 
+    const isDepthInteractive = () =>
+      state === 'idle' &&
+      renderer === 'layers' &&
+      !themeLoading &&
+      !document.hidden &&
+      !reduceMotion.matches;
+
     const adaptive = createAdaptiveCinematicViewport({
       root,
       viewport,
@@ -225,13 +237,35 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
       world: stage,
       signal,
       neutralCenterRatio: 0.54,
-      isInteractive: () =>
-        state === 'idle' && renderer === 'layers' && !themeLoading,
+      isInteractive: isDepthInteractive,
       planes: [
-        { property: '--depth-exterior-x', maximumPercent: 0.22 },
-        { property: '--depth-shell-x', maximumPercent: 0.55 },
-        { property: '--depth-motorcycles-x', maximumPercent: 1.3 }
+        {
+          property: '--depth-exterior-x',
+          maximumPercent: 0.22,
+          spatialMaximumPercent: -0.38
+        },
+        {
+          property: '--depth-shell-x',
+          maximumPercent: 0.55,
+          spatialMaximumPercent: 0
+        },
+        {
+          property: '--depth-motorcycles-x',
+          maximumPercent: 1.3,
+          spatialMaximumPercent: 1.18
+        }
       ]
+    });
+
+    const spatial = createDeviceOrientationSpatialEffect({
+      button: spatialToggle,
+      signal,
+      axes: 'horizontal',
+      isInteractive: isDepthInteractive,
+      onFocus: ({ x }) => depth.setSpatialFocus(x),
+      onStatus: (message) => {
+        if (message) status.textContent = message;
+      }
     });
 
     const setState = (next: GarageState) => {
@@ -242,6 +276,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
         next !== 'idle' || renderer !== 'layers' || themeLoading,
         next !== 'idle'
       );
+      spatial.setSuspended(!isDepthInteractive(), next !== 'idle');
     };
 
     const loadBundle = bundleLoader.load;
@@ -332,6 +367,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
       themeLoading = true;
       toggle.disabled = true;
       depth.setSuspended(true);
+      spatial.setSuspended(true);
       const next: Environment = environment === 'day' ? 'night' : 'day';
       const ready = await loadBundle(next);
       if (signal.aborted || state !== 'idle') return;
@@ -345,6 +381,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
         themeLoading = false;
         toggle.disabled = false;
         depth.setSuspended(renderer !== 'layers');
+        spatial.setSuspended(!isDepthInteractive());
       }, reduceMotion.matches ? 1 : 540);
     }, { signal });
 
@@ -380,6 +417,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
         document.hidden || state !== 'idle' || renderer !== 'layers',
         document.hidden
       );
+      spatial.setSuspended(!isDepthInteractive(), document.hidden);
     }, { signal });
 
     window.addEventListener('pageshow', (event) => {
@@ -414,8 +452,8 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     --depth-shell-x: 0px;
     --depth-motorcycles-x: 0px;
     position: relative;
-    height: 100vh;
-    height: 100svh;
+    width: var(--immersive-viewport-width);
+    height: var(--immersive-viewport-height);
     overflow: hidden;
     isolation: isolate;
     background: #101d1b;
@@ -440,8 +478,14 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     position: absolute;
     left: 50%;
     top: 50%;
-    width: max(100vw, calc(100vh * 16 / 9));
-    height: max(100vh, calc(100vw * 9 / 16));
+    width: max(
+      var(--immersive-viewport-width),
+      calc(var(--immersive-viewport-height) * 16 / 9)
+    );
+    height: max(
+      var(--immersive-viewport-height),
+      calc(var(--immersive-viewport-width) * 9 / 16)
+    );
     overflow: hidden;
     transform: translate(-50%, -50%);
   }
@@ -471,13 +515,6 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     left: 0;
     top: 50%;
     transform: translateY(-50%);
-  }
-
-  @supports (height: 100svh) {
-    .garage-room__stage {
-      width: max(100vw, calc(100svh * 16 / 9));
-      height: max(100svh, calc(100vw * 9 / 16));
-    }
   }
 
   .garage-room__fallback,
@@ -690,8 +727,25 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     cursor: pointer;
   }
 
+  :global(.garage-room__spatial-toggle) {
+    position: fixed;
+    z-index: 5;
+    top: max(1rem, env(safe-area-inset-top));
+    right: calc(max(1rem, env(safe-area-inset-right)) + 5.4rem);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-.35rem);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+
   .garage-room.is-interactive .garage-room__back,
   .garage-room.is-interactive .garage-room__theme-toggle {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .garage-room.is-interactive :global(.garage-room__spatial-toggle) {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
@@ -718,7 +772,13 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     left: 50%;
     bottom: max(1.2rem, env(safe-area-inset-bottom));
     display: grid;
-    width: min(38rem, calc(100vw - 2rem));
+    width: min(
+      38rem,
+      calc(
+        var(--immersive-viewport-width) -
+        max(2rem, calc(env(safe-area-inset-left) + env(safe-area-inset-right) + 1rem))
+      )
+    );
     gap: .3rem;
     border: 1px solid rgba(255, 248, 231, .55);
     border-radius: 1rem;
@@ -784,7 +844,8 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     .garage-room__curtain,
     .garage-room__dialogue,
     .garage-room__back,
-    .garage-room__theme-toggle {
+    .garage-room__theme-toggle,
+    :global(.garage-room__spatial-toggle) {
       transition-duration: 1ms !important;
     }
     .garage-room__lamp-glow,

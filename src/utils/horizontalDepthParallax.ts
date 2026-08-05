@@ -1,6 +1,7 @@
 interface HorizontalDepthPlane {
   property: string;
   maximumPercent: number;
+  spatialMaximumPercent?: number;
 }
 
 interface HorizontalDepthParallaxOptions {
@@ -16,6 +17,7 @@ interface HorizontalDepthParallaxOptions {
 export interface HorizontalDepthParallaxController {
   recalculate: () => void;
   reset: (immediate?: boolean) => void;
+  setSpatialFocus: (focus: number | null) => void;
   setSuspended: (suspended: boolean, immediate?: boolean) => void;
   destroy: () => void;
 }
@@ -41,8 +43,10 @@ export function createHorizontalDepthParallax({
 
   let frame = 0;
   let resizeFrame = 0;
-  let currentFocus = 0;
-  let targetFocus = 0;
+  let currentBaseFocus = 0;
+  let currentSpatialFocus = 0;
+  let baseFocus = 0;
+  let spatialFocus = 0;
   let previousTime = 0;
   let suspended = true;
   let destroyed = false;
@@ -50,10 +54,14 @@ export function createHorizontalDepthParallax({
   const hasOverflow = () =>
     viewport.scrollWidth - viewport.clientWidth > 1;
 
-  const applyFocus = (focus: number) => {
+  const applyFocus = (base: number, spatial: number) => {
     const width = world.offsetWidth || 1672;
     for (const plane of planes) {
-      const pixels = width * (plane.maximumPercent / 100) * focus;
+      const spatialMaximum =
+        plane.spatialMaximumPercent ?? plane.maximumPercent;
+      const pixels = width * (
+        plane.maximumPercent * base + spatialMaximum * spatial
+      ) / 100;
       root.style.setProperty(plane.property, `${pixels.toFixed(3)}px`);
     }
   };
@@ -71,21 +79,36 @@ export function createHorizontalDepthParallax({
       : 1 / 60;
     previousTime = time;
     const easing = 1 - Math.exp(-elapsed * 8);
-    const nextTarget =
+    const nextBaseTarget =
       suspended ||
       reduceMotion.matches ||
       document.hidden ||
       !isInteractive()
         ? 0
-        : targetFocus;
+        : baseFocus;
+    const nextSpatialTarget =
+      suspended ||
+      reduceMotion.matches ||
+      document.hidden ||
+      !isInteractive()
+        ? 0
+        : spatialFocus;
 
-    currentFocus += (nextTarget - currentFocus) * easing;
-    if (Math.abs(nextTarget - currentFocus) < 0.0005) {
-      currentFocus = nextTarget;
+    currentBaseFocus += (nextBaseTarget - currentBaseFocus) * easing;
+    currentSpatialFocus +=
+      (nextSpatialTarget - currentSpatialFocus) * easing;
+    if (Math.abs(nextBaseTarget - currentBaseFocus) < 0.0005) {
+      currentBaseFocus = nextBaseTarget;
     }
-    applyFocus(currentFocus);
+    if (Math.abs(nextSpatialTarget - currentSpatialFocus) < 0.0005) {
+      currentSpatialFocus = nextSpatialTarget;
+    }
+    applyFocus(currentBaseFocus, currentSpatialFocus);
 
-    if (currentFocus !== nextTarget) {
+    if (
+      currentBaseFocus !== nextBaseTarget ||
+      currentSpatialFocus !== nextSpatialTarget
+    ) {
       schedule();
     } else {
       previousTime = 0;
@@ -125,24 +148,26 @@ export function createHorizontalDepthParallax({
 
   const updateFromLayout = () => {
     if (destroyed || suspended || reduceMotion.matches) {
-      targetFocus = 0;
+      baseFocus = 0;
       schedule();
       return;
     }
     if (hasOverflow()) {
-      targetFocus = focusFromScroll();
+      baseFocus = focusFromScroll();
       schedule();
     }
   };
 
   const reset = (immediate = false) => {
-    targetFocus = 0;
+    baseFocus = 0;
+    spatialFocus = 0;
     if (immediate) {
       window.cancelAnimationFrame(frame);
       frame = 0;
       previousTime = 0;
-      currentFocus = 0;
-      applyFocus(0);
+      currentBaseFocus = 0;
+      currentSpatialFocus = 0;
+      applyFocus(0, 0);
       return;
     }
     schedule();
@@ -155,6 +180,11 @@ export function createHorizontalDepthParallax({
     } else {
       updateFromLayout();
     }
+  };
+
+  const setSpatialFocus = (focus: number | null) => {
+    spatialFocus = clamp(focus ?? 0, -1, 1);
+    schedule();
   };
 
   const recalculate = () => {
@@ -181,17 +211,20 @@ export function createHorizontalDepthParallax({
     );
     // Pointer left reveals more of the artwork's left edge by moving plates
     // right. Every depth plane follows the same signed focus value.
-    targetFocus = clamp((0.5 - normalized) * 2, -1, 1);
+    baseFocus = clamp((0.5 - normalized) * 2, -1, 1);
     schedule();
   }, { signal });
 
   viewport.addEventListener('pointerleave', () => {
-    if (!hasOverflow()) reset();
+    if (!hasOverflow()) {
+      baseFocus = 0;
+      schedule();
+    }
   }, { signal });
 
   viewport.addEventListener('scroll', () => {
     if (!suspended && hasOverflow()) {
-      targetFocus = focusFromScroll();
+      baseFocus = focusFromScroll();
       schedule();
     }
   }, { passive: true, signal });
@@ -201,6 +234,10 @@ export function createHorizontalDepthParallax({
     signal
   });
   window.addEventListener('orientationchange', recalculate, {
+    passive: true,
+    signal
+  });
+  window.visualViewport?.addEventListener('resize', recalculate, {
     passive: true,
     signal
   });
@@ -233,11 +270,11 @@ export function createHorizontalDepthParallax({
     window.cancelAnimationFrame(frame);
     window.cancelAnimationFrame(resizeFrame);
     observer?.disconnect();
-    applyFocus(0);
+    applyFocus(0, 0);
   };
 
   signal.addEventListener('abort', destroy, { once: true });
-  applyFocus(0);
+  applyFocus(0, 0);
 
-  return { recalculate, reset, setSuspended, destroy };
+  return { recalculate, reset, setSpatialFocus, setSuspended, destroy };
 }

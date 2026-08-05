@@ -1,5 +1,6 @@
 ---
 import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOverlay.astro';
+import SpatialEffectToggle from '@/components/media/SpatialEffectToggle.astro';
 
 const mediaRoot = '/media/car-interior';
 const parallaxRoot = '/media/car-interior/parallax';
@@ -164,6 +165,8 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     <span data-cockpit-theme-label>白昼</span>
   </button>
 
+  <SpatialEffectToggle className="travel-cockpit__spatial-toggle" />
+
   <p class="sr-only" data-cockpit-status aria-live="polite">
     正在坐进汽车
   </p>
@@ -200,6 +203,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     scheduleCinematicWarmup
   } from '@/utils/cinematicMediaLoader';
   import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
+  import { createDeviceOrientationSpatialEffect } from '@/utils/deviceOrientationSpatialEffect';
 
   const SESSION_KEY = 'wisteria-hero-environment';
 
@@ -280,6 +284,9 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     const themeLabel = root.querySelector<HTMLElement>(
       '[data-cockpit-theme-label]'
     );
+    const spatialToggle = root.querySelector<HTMLButtonElement>(
+      '[data-spatial-effect-toggle]'
+    );
     const status = root.querySelector<HTMLElement>(
       '[data-cockpit-status]'
     );
@@ -301,6 +308,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
       !themeToggle ||
       !themeIcon ||
       !themeLabel ||
+      !spatialToggle ||
       !status ||
       !exitOverlay
     ) return;
@@ -348,6 +356,13 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     let navigationTimer = 0;
     let themeTimer = 0;
 
+    const isDepthInteractive = () =>
+      state === 'idle' &&
+      renderer === 'layers' &&
+      !themeLoading &&
+      !document.hidden &&
+      !reduceMotion.matches;
+
     const adaptiveViewport = createAdaptiveCinematicViewport({
       root,
       viewport,
@@ -363,16 +378,40 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
       world: stage,
       signal,
       neutralCenterRatio: 0.62,
-      isInteractive: () =>
-        state === 'idle' &&
-        renderer === 'layers' &&
-        !themeLoading,
+      isInteractive: isDepthInteractive,
       planes: [
-        { property: '--depth-exterior-x', maximumPercent: 0.3 },
-        { property: '--depth-shell-x', maximumPercent: 0.75 },
-        { property: '--depth-charm-x', maximumPercent: 1.05 },
-        { property: '--depth-seat-x', maximumPercent: 1.5 }
+        {
+          property: '--depth-exterior-x',
+          maximumPercent: 0.3,
+          spatialMaximumPercent: -0.42
+        },
+        {
+          property: '--depth-shell-x',
+          maximumPercent: 0.75,
+          spatialMaximumPercent: 0
+        },
+        {
+          property: '--depth-charm-x',
+          maximumPercent: 1.05,
+          spatialMaximumPercent: 0.68
+        },
+        {
+          property: '--depth-seat-x',
+          maximumPercent: 1.5,
+          spatialMaximumPercent: 1.35
+        }
       ]
+    });
+
+    const spatial = createDeviceOrientationSpatialEffect({
+      button: spatialToggle,
+      signal,
+      axes: 'horizontal',
+      isInteractive: isDepthInteractive,
+      onFocus: ({ x }) => depth.setSpatialFocus(x),
+      onStatus: (message) => {
+        if (message) status.textContent = message;
+      }
     });
 
     const setState = (next: CockpitState) => {
@@ -383,6 +422,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
         next !== 'idle' || renderer !== 'layers' || themeLoading,
         next !== 'idle'
       );
+      spatial.setSuspended(!isDepthInteractive(), next !== 'idle');
     };
 
     const pauseAll = () => {
@@ -410,6 +450,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
         state !== 'idle' || next !== 'layers' || themeLoading,
         true
       );
+      spatial.setSuspended(!isDepthInteractive(), true);
     };
 
     const safelyPlay = (video: HTMLVideoElement) => {
@@ -459,6 +500,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
       themeToggle.disabled = false;
       backLink.removeAttribute('aria-disabled');
       depth.setSuspended(renderer !== 'layers');
+      spatial.setSuspended(!isDepthInteractive());
       depth.recalculate();
       status.textContent =
         '已坐进汽车。可以查看副驾驶仪表台上的地图。';
@@ -547,6 +589,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
       themeLoading = true;
       themeToggle.disabled = true;
       depth.setSuspended(true);
+      spatial.setSuspended(true);
       const layeredReady = await loadBundle(next);
       if (signal.aborted || state !== 'idle') return;
       environment = next;
@@ -586,6 +629,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
         themeLoading = false;
         themeToggle.disabled = false;
         depth.setSuspended(renderer !== 'layers');
+        spatial.setSuspended(!isDepthInteractive());
       }, reduceMotion.matches ? 1 : 560);
     };
 
@@ -759,11 +803,13 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
       if (document.hidden) {
         pauseAll();
         depth.setSuspended(true, true);
+        spatial.setSuspended(true, true);
       } else if (state === 'idle') {
         if (renderer === 'fallback') {
           safelyPlay(activeAmbient).catch(() => undefined);
         }
         depth.setSuspended(renderer !== 'layers');
+        spatial.setSuspended(!isDepthInteractive());
       } else if (state === 'arriving' && arrivalStarted) {
         safelyPlay(activeArrival).catch(() => settleToAmbient(true));
       }
@@ -798,8 +844,8 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     --depth-charm-x: 0px;
     --depth-seat-x: 0px;
     position: relative;
-    height: 100vh;
-    height: 100svh;
+    width: var(--immersive-viewport-width);
+    height: var(--immersive-viewport-height);
     overflow: hidden;
     isolation: isolate;
     background: #101d1b;
@@ -810,8 +856,14 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     position: absolute;
     left: 50%;
     top: 50%;
-    width: max(100vw, calc(100vh * 16 / 9));
-    height: max(100vh, calc(100vw * 9 / 16));
+    width: max(
+      var(--immersive-viewport-width),
+      calc(var(--immersive-viewport-height) * 16 / 9)
+    );
+    height: max(
+      var(--immersive-viewport-height),
+      calc(var(--immersive-viewport-width) * 9 / 16)
+    );
     overflow: hidden;
     transform: translate(-50%, -50%);
   }
@@ -857,13 +909,6 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     left: 0;
     top: 50%;
     transform: translateY(-50%);
-  }
-
-  @supports (height: 100svh) {
-    .travel-cockpit__stage {
-      width: max(100vw, calc(100svh * 16 / 9));
-      height: max(100svh, calc(100vw * 9 / 16));
-    }
   }
 
   .travel-cockpit__video,
@@ -1098,8 +1143,25 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     cursor: pointer;
   }
 
+  :global(.travel-cockpit__spatial-toggle) {
+    position: fixed;
+    z-index: 6;
+    top: max(1rem, env(safe-area-inset-top));
+    right: calc(max(1rem, env(safe-area-inset-right)) + 5.4rem);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-.35rem);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+
   .travel-cockpit.is-interactive .travel-cockpit__back,
   .travel-cockpit.is-interactive .travel-cockpit__theme-toggle {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .travel-cockpit.is-interactive :global(.travel-cockpit__spatial-toggle) {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
@@ -1217,6 +1279,11 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
       top: max(.7rem, env(safe-area-inset-top));
     }
 
+    :global(.travel-cockpit__spatial-toggle) {
+      top: max(.7rem, env(safe-area-inset-top));
+      right: calc(max(.7rem, env(safe-area-inset-right)) + 5rem);
+    }
+
     .travel-cockpit__map-label {
       bottom: -2.65rem;
     }
@@ -1228,6 +1295,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     .travel-cockpit__map-label,
     .travel-cockpit__back,
     .travel-cockpit__theme-toggle,
+    :global(.travel-cockpit__spatial-toggle),
     .travel-cockpit__arrival-skip,
     .travel-cockpit__explore-cue,
     .travel-cockpit__curtain {

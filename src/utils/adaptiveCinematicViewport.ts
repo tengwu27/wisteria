@@ -236,6 +236,14 @@ export function createAdaptiveCinematicViewport({
     recalculate(true);
   }, { passive: true, signal });
 
+  window.addEventListener('orientationchange', () => {
+    recalculate(true);
+  }, { passive: true, signal });
+
+  window.visualViewport?.addEventListener('resize', () => {
+    recalculate(true);
+  }, { passive: true, signal });
+
   finePointer.addEventListener('change', () => {
     recalculate(true);
   }, { signal });

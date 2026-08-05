@@ -1,5 +1,6 @@
 ---
 import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOverlay.astro';
+import SpatialEffectToggle from '@/components/media/SpatialEffectToggle.astro';
 
 const ambientRoot = '/media/living-room/ambient';
 const parallaxRoot = '/media/living-room/parallax';
@@ -233,6 +234,8 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     <span data-room-theme-label>白昼</span>
   </button>
 
+  <SpatialEffectToggle className="living-room__spatial-toggle" />
+
   <p class="sr-only" data-room-status aria-live="polite">正在进入客厅</p>
   <CinematicSceneExitOverlay
     label="从主屋返回村庄的过渡动画"
@@ -261,6 +264,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     showDeferredVideoPoster
   } from '@/utils/cinematicMediaLoader';
   import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
+  import { createDeviceOrientationSpatialEffect } from '@/utils/deviceOrientationSpatialEffect';
 
   const SESSION_KEY = 'wisteria-hero-environment';
 
@@ -304,6 +308,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     const themeToggle = root.querySelector<HTMLButtonElement>('[data-room-theme-toggle]');
     const themeIcon = root.querySelector<HTMLElement>('[data-room-theme-icon]');
     const themeLabel = root.querySelector<HTMLElement>('[data-room-theme-label]');
+    const spatialToggle = root.querySelector<HTMLButtonElement>('[data-spatial-effect-toggle]');
     const status = root.querySelector<HTMLElement>('[data-room-status]');
     const exitOverlay = root.querySelector<HTMLElement>(
       '[data-cinematic-scene-exit]'
@@ -321,6 +326,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
       !themeToggle ||
       !themeIcon ||
       !themeLabel ||
+      !spatialToggle ||
       !status ||
       !exitOverlay ||
       !dayVideo ||
@@ -380,14 +386,53 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
       neutralCenterRatio: 0.43,
       isInteractive: isDepthInteractive,
       planes: [
-        { property: '--depth-sky-x', maximumPercent: 0.15 },
-        { property: '--depth-clouds-x', maximumPercent: 0.25 },
-        { property: '--depth-harbor-x', maximumPercent: 0.35 },
-        { property: '--depth-boat-x', maximumPercent: 0.45 },
-        { property: '--depth-room-x', maximumPercent: 0.75 },
-        { property: '--depth-shadow-x', maximumPercent: 1.05 },
-        { property: '--depth-table-x', maximumPercent: 1.5 }
+        {
+          property: '--depth-sky-x',
+          maximumPercent: 0.15,
+          spatialMaximumPercent: -0.45
+        },
+        {
+          property: '--depth-clouds-x',
+          maximumPercent: 0.25,
+          spatialMaximumPercent: -0.38
+        },
+        {
+          property: '--depth-harbor-x',
+          maximumPercent: 0.35,
+          spatialMaximumPercent: -0.3
+        },
+        {
+          property: '--depth-boat-x',
+          maximumPercent: 0.45,
+          spatialMaximumPercent: -0.16
+        },
+        {
+          property: '--depth-room-x',
+          maximumPercent: 0.75,
+          spatialMaximumPercent: 0
+        },
+        {
+          property: '--depth-shadow-x',
+          maximumPercent: 1.05,
+          spatialMaximumPercent: 0.82
+        },
+        {
+          property: '--depth-table-x',
+          maximumPercent: 1.5,
+          spatialMaximumPercent: 1.35
+        }
       ]
+    });
+
+    const spatial = createDeviceOrientationSpatialEffect({
+      button: spatialToggle,
+      signal,
+      axes: 'horizontal',
+      isInteractive: isDepthInteractive,
+      onFocus: ({ x }) => depth.setSpatialFocus(x),
+      onStatus: (message) => {
+        if (message) status.textContent = message;
+      }
     });
 
     const setState = (next: RoomState) => {
@@ -395,12 +440,14 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
       root.dataset.state = next;
       root.classList.toggle('is-ambient-paused', next !== 'idle');
       depth.setSuspended(!isDepthInteractive(), next !== 'idle');
+      spatial.setSuspended(!isDepthInteractive(), next !== 'idle');
     };
 
     const setRenderer = (next: Renderer) => {
       renderer = next;
       root.dataset.renderer = next;
       depth.setSuspended(!isDepthInteractive(), true);
+      spatial.setSuspended(!isDepthInteractive(), true);
     };
 
     const safelyPlay = (video: HTMLVideoElement) => {
@@ -527,6 +574,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
       root.classList.add('is-theme-loading');
       themeToggle.disabled = true;
       depth.setSuspended(true);
+      spatial.setSuspended(true);
       status.textContent = next === 'night' ? '正在准备夜晚客厅' : '正在准备白昼客厅';
 
       const layeredReady = await loadBundle(next);
@@ -542,6 +590,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
         root.classList.remove('is-theme-loading');
         themeToggle.disabled = false;
         depth.setSuspended(!isDepthInteractive());
+        spatial.setSuspended(!isDepthInteractive());
       }, reduceMotion.matches ? 1 : 540);
     };
 
@@ -637,14 +686,17 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
       if (document.hidden) {
         pauseVideos();
         depth.setSuspended(true, true);
+        spatial.setSuspended(true, true);
       } else if (state === 'idle') {
         if (renderer === 'fallback') safelyPlay(videos[environment]);
         depth.setSuspended(!isDepthInteractive());
+        spatial.setSuspended(!isDepthInteractive());
       }
     }, { signal });
 
     reduceMotion.addEventListener('change', () => {
       depth.setSuspended(!isDepthInteractive(), true);
+      spatial.setSuspended(!isDepthInteractive(), true);
       if (reduceMotion.matches) pauseVideos();
       else if (renderer === 'fallback') safelyPlay(videos[environment]);
     }, { signal });
@@ -676,8 +728,8 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     --depth-shadow-x: 0px;
     --depth-table-x: 0px;
     position: relative;
-    height: 100vh;
-    height: 100svh;
+    width: var(--immersive-viewport-width);
+    height: var(--immersive-viewport-height);
     overflow: hidden;
     isolation: isolate;
     background: #101d1b;
@@ -702,8 +754,14 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     position: absolute;
     left: 50%;
     top: 50%;
-    width: max(100vw, calc(100vh * 16 / 9));
-    height: max(100vh, calc(100vw * 9 / 16));
+    width: max(
+      var(--immersive-viewport-width),
+      calc(var(--immersive-viewport-height) * 16 / 9)
+    );
+    height: max(
+      var(--immersive-viewport-height),
+      calc(var(--immersive-viewport-width) * 9 / 16)
+    );
     overflow: hidden;
     transform: translate(-50%, -50%);
   }
@@ -734,13 +792,6 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     left: 0;
     top: 50%;
     transform: translateY(-50%);
-  }
-
-  @supports (height: 100svh) {
-    .living-room__stage {
-      width: max(100vw, calc(100svh * 16 / 9));
-      height: max(100svh, calc(100vw * 9 / 16));
-    }
   }
 
   .living-room__fallback,
@@ -1187,9 +1238,27 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     cursor: pointer;
   }
 
+  :global(.living-room__spatial-toggle) {
+    position: fixed;
+    z-index: 5;
+    top: max(1rem, env(safe-area-inset-top));
+    right: calc(max(1rem, env(safe-area-inset-right)) + 5.4rem);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-.35rem);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+
   .living-room.is-interactive .living-room__back,
   .living-room.is-interactive:not(.is-theme-loading)
   .living-room__theme-toggle {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .living-room.is-interactive:not(.is-theme-loading)
+  :global(.living-room__spatial-toggle) {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
@@ -1296,6 +1365,12 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
       top: max(.7rem, env(safe-area-inset-top));
     }
 
+
+    :global(.living-room__spatial-toggle) {
+      top: max(.7rem, env(safe-area-inset-top));
+      right: calc(max(.7rem, env(safe-area-inset-right)) + 5rem);
+    }
+
     .living-room__photo-label {
       bottom: -2.65rem;
     }
@@ -1315,6 +1390,7 @@ const registeredLayerStyle = ([x, y, width, height]: number[]) =>
     .living-room__photo-label,
     .living-room__back,
     .living-room__theme-toggle,
+    :global(.living-room__spatial-toggle),
     .living-room__fallback,
     .living-room__stack,
     .living-room__explore-cue,

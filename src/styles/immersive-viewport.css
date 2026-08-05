@@ -1,0 +1,87 @@
+:root {
+  --immersive-viewport-width: 100vw;
+  --immersive-viewport-height: 100vh;
+}
+
+@supports (width: 100dvw) and (height: 100dvh) {
+  :root {
+    --immersive-viewport-width: 100dvw;
+    --immersive-viewport-height: 100dvh;
+  }
+}
+
+html.immersive-document,
+html.immersive-document body,
+html.immersive-document body > main {
+  width: var(--immersive-viewport-width);
+  height: var(--immersive-viewport-height);
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: #101d1b;
+}
+
+html.immersive-document body > main {
+  position: relative;
+  isolation: isolate;
+}
+
+.spatial-effect-toggle {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.48rem 0.78rem;
+  border: 1px solid rgba(255, 247, 218, 0.52);
+  border-radius: 999px;
+  color: #fff8de;
+  background: rgba(18, 31, 29, 0.78);
+  box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.26);
+  font: 700 0.72rem/1 system-ui, sans-serif;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(0.5rem);
+  -webkit-backdrop-filter: blur(0.5rem);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.spatial-effect-toggle[hidden] {
+  display: none !important;
+}
+
+.spatial-effect-toggle:disabled {
+  cursor: default;
+  opacity: 0.52;
+}
+
+.spatial-effect-toggle:not(:disabled):hover,
+.spatial-effect-toggle:not(:disabled):focus-visible,
+.spatial-effect-toggle[aria-pressed='true'] {
+  border-color: rgba(158, 229, 239, 0.92);
+  background: rgba(23, 68, 70, 0.9);
+  box-shadow:
+    0 0 0 2px rgba(158, 229, 239, 0.22),
+    0 0.35rem 1.15rem rgba(0, 0, 0, 0.3);
+  outline: none;
+}
+
+.spatial-effect-toggle__icon {
+  display: grid;
+  width: 1.4rem;
+  height: 1.4rem;
+  place-items: center;
+  border-radius: 50%;
+  color: #102b2c;
+  background: #a9e4e5;
+  font-size: 1rem;
+}
+
+@media (max-width: 767px) {
+  .spatial-effect-toggle {
+    min-height: 2.6rem;
+    padding: 0.42rem 0.65rem;
+    font-size: 0.68rem;
+  }
+}

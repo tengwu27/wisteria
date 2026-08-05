@@ -1,5 +1,6 @@
 ---
 import { navigation } from '@/data/navigation';
+import SpatialEffectToggle from '@/components/media/SpatialEffectToggle.astro';
 
 const mediaRoot = '/media/village';
 ---
@@ -187,6 +188,7 @@ const mediaRoot = '/media/village';
       <span class="cinematic-village__toggle-icon" data-toggle-icon aria-hidden="true">☀</span>
       <span data-toggle-label>白昼</span>
     </button>
+    <SpatialEffectToggle className="cinematic-village__spatial-toggle" />
     <p class="cinematic-village__hint" aria-hidden="true">探索主屋、咖啡馆、摩托车工坊，或开车去旅行</p>
   </div>
 
@@ -220,6 +222,7 @@ const mediaRoot = '/media/village';
     loadDeferredVideo,
     releaseDeferredVideo
   } from '@/utils/cinematicMediaLoader';
+  import { createDeviceOrientationSpatialEffect } from '@/utils/deviceOrientationSpatialEffect';
 
   const SESSION_KEY = 'wisteria-hero-environment';
   const RETURN_SESSION_KEY = 'wisteria-village-return';
@@ -338,6 +341,7 @@ const mediaRoot = '/media/village';
     const cafeTrigger = root.querySelector<HTMLButtonElement>('[data-cafe-trigger]');
     const garageTrigger = root.querySelector<HTMLButtonElement>('[data-garage-trigger]');
     const environmentToggle = root.querySelector<HTMLButtonElement>('[data-environment-toggle]');
+    const spatialToggle = root.querySelector<HTMLButtonElement>('[data-spatial-effect-toggle]');
     const toggleIcon = root.querySelector<HTMLElement>('[data-toggle-icon]');
     const toggleLabel = root.querySelector<HTMLElement>('[data-toggle-label]');
     const status = root.querySelector<HTMLElement>('[data-village-status]');
@@ -365,6 +369,7 @@ const mediaRoot = '/media/village';
       !cafeTrigger ||
       !garageTrigger ||
       !environmentToggle ||
+      !spatialToggle ||
       !toggleIcon ||
       !toggleLabel ||
       !status ||
@@ -422,6 +427,7 @@ const mediaRoot = '/media/village';
     let introAssetTimer = 0;
     let introHoldTimer = 0;
     let introCleanupTimer = 0;
+    let spatialThemeTimer = 0;
     let cameraFrame = 0;
     let resizeFrame = 0;
     let returnRevealed = false;
@@ -435,9 +441,16 @@ const mediaRoot = '/media/village';
     let cloudScrollX = 0;
     let targetCameraX = 0;
     let targetCameraY = 0;
+    let spatialCameraX = 0;
+    let spatialCameraY = 0;
+    let targetSpatialCameraX = 0;
+    let targetSpatialCameraY = 0;
     let panVelocity = 0;
     let targetPanVelocity = 0;
     let previousCameraTime = 0;
+    let spatialController: ReturnType<
+      typeof createDeviceOrientationSpatialEffect
+    > | null = null;
 
     const setSceneInteractive = (interactive: boolean) => {
       viewport.toggleAttribute('inert', !interactive);
@@ -447,13 +460,26 @@ const mediaRoot = '/media/village';
       cafeTrigger.disabled = !interactive;
       garageTrigger.disabled = !interactive;
       environmentToggle.disabled = !interactive;
+      spatialController?.setSuspended(!interactive, !interactive);
     };
 
     const writeCameraPosition = () => {
-      camera.style.setProperty('--camera-x', `${cameraX.toFixed(2)}px`);
-      camera.style.setProperty('--camera-y', `${cameraY.toFixed(2)}px`);
-      const cloudFocusX = cameraX * 0.55 + cloudScrollX;
-      const cloudFocusY = cameraY * 0.35;
+      const composedCameraX = cameraX + spatialCameraX;
+      const composedCameraY = cameraY + spatialCameraY;
+      camera.style.setProperty(
+        '--camera-x',
+        `${composedCameraX.toFixed(2)}px`
+      );
+      camera.style.setProperty(
+        '--camera-y',
+        `${composedCameraY.toFixed(2)}px`
+      );
+      const cloudFocusX =
+        cameraX * 0.55 +
+        spatialCameraX * -3.1538 +
+        cloudScrollX;
+      const cloudFocusY =
+        cameraY * 0.35 + spatialCameraY * -3.1538;
       cloudLayer.style.setProperty(
         '--cloud-focus-x',
         `${cloudFocusX.toFixed(2)}px`
@@ -479,6 +505,10 @@ const mediaRoot = '/media/village';
       const easing = 1 - Math.exp(-elapsedSeconds * 8);
       cameraX += (targetCameraX - cameraX) * easing;
       cameraY += (targetCameraY - cameraY) * easing;
+      spatialCameraX +=
+        (targetSpatialCameraX - spatialCameraX) * easing;
+      spatialCameraY +=
+        (targetSpatialCameraY - spatialCameraY) * easing;
       panVelocity += (targetPanVelocity - panVelocity) * easing;
 
       if (
@@ -510,7 +540,9 @@ const mediaRoot = '/media/village';
 
       const cameraSettled =
         Math.abs(targetCameraX - cameraX) < 0.05 &&
-        Math.abs(targetCameraY - cameraY) < 0.05;
+        Math.abs(targetCameraY - cameraY) < 0.05 &&
+        Math.abs(targetSpatialCameraX - spatialCameraX) < 0.05 &&
+        Math.abs(targetSpatialCameraY - spatialCameraY) < 0.05;
       const panSettled =
         Math.abs(targetPanVelocity - panVelocity) < 0.1 &&
         Math.abs(panVelocity) < 0.1;
@@ -518,6 +550,8 @@ const mediaRoot = '/media/village';
       if (cameraSettled && panSettled) {
         cameraX = targetCameraX;
         cameraY = targetCameraY;
+        spatialCameraX = targetSpatialCameraX;
+        spatialCameraY = targetSpatialCameraY;
         panVelocity = targetPanVelocity;
         previousCameraTime = 0;
         writeCameraPosition();
@@ -553,6 +587,24 @@ const mediaRoot = '/media/village';
 
     const canTrackCamera = () =>
       canAnimateCamera() && finePointer.matches;
+
+    spatialController = createDeviceOrientationSpatialEffect({
+      button: spatialToggle,
+      signal,
+      axes: 'both',
+      isInteractive: canAnimateCamera,
+      onFocus: ({ x, y }) => {
+        // Spatial tilt pivots around the village plane: the village shifts
+        // slightly against the tilt while the nearer cloud plate crosses the
+        // focal plane and moves with it.
+        targetSpatialCameraX = -x * viewport.clientWidth * 0.0065;
+        targetSpatialCameraY = -y * viewport.clientHeight * 0.00325;
+        scheduleCamera();
+      },
+      onStatus: (message) => {
+        if (message) status.textContent = message;
+      }
+    });
 
     const updateViewCenterRatio = () => {
       if (!worldHasOverflow || viewport.scrollWidth <= 0) return;
@@ -1042,6 +1094,7 @@ const mediaRoot = '/media/village';
 
     reduceMotion.addEventListener('change', () => {
       resetCamera(true);
+      spatialController?.setSuspended(!canAnimateCamera(), true);
       scheduleViewportPosition(true);
     }, { signal });
 
@@ -1077,7 +1130,12 @@ const mediaRoot = '/media/village';
     });
 
     environmentToggle.addEventListener('click', () => {
+      spatialController?.setSuspended(true, true);
       updateEnvironment(environment === 'day' ? 'night' : 'day', true);
+      window.clearTimeout(spatialThemeTimer);
+      spatialThemeTimer = window.setTimeout(() => {
+        spatialController?.setSuspended(!canAnimateCamera());
+      }, reduceMotion.matches ? 1 : 520);
     }, { signal });
 
     const bindInteractionTrigger = (
@@ -1113,10 +1171,14 @@ const mediaRoot = '/media/village';
         dayVideo.pause();
         nightVideo.pause();
         resetCamera();
+        spatialController?.setSuspended(true, true);
         return;
       }
 
-      if (!entering) resumeActiveScene();
+      if (!entering) {
+        resumeActiveScene();
+        spatialController?.setSuspended(!canAnimateCamera());
+      }
     }, { signal });
 
     document.addEventListener('astro:before-swap', () => {
@@ -1132,6 +1194,7 @@ const mediaRoot = '/media/village';
       window.clearTimeout(introAssetTimer);
       window.clearTimeout(introHoldTimer);
       window.clearTimeout(introCleanupTimer);
+      window.clearTimeout(spatialThemeTimer);
       window.cancelAnimationFrame(cameraFrame);
       window.cancelAnimationFrame(resizeFrame);
       viewportObserver?.disconnect();
@@ -1153,8 +1216,8 @@ const mediaRoot = '/media/village';
   .cinematic-village {
     --transition-focal-x: 50%;
     position: relative;
-    height: 100vh;
-    height: 100svh;
+    width: var(--immersive-viewport-width);
+    height: var(--immersive-viewport-height);
     overflow: hidden;
     isolation: isolate;
     background: #173d3a;
@@ -1181,8 +1244,14 @@ const mediaRoot = '/media/village';
     position: absolute;
     left: 50%;
     top: 50%;
-    width: max(100vw, calc(100vh * 16 / 9));
-    height: max(100vh, calc(100vw * 9 / 16));
+    width: max(
+      var(--immersive-viewport-width),
+      calc(var(--immersive-viewport-height) * 16 / 9)
+    );
+    height: max(
+      var(--immersive-viewport-height),
+      calc(var(--immersive-viewport-width) * 9 / 16)
+    );
     transform:
       translate(
         calc(-50% + var(--camera-x)),
@@ -1258,14 +1327,6 @@ const mediaRoot = '/media/village';
     --transition-focal-x: 76%;
   }
 
-  @supports (height: 100svh) {
-    .cinematic-village__camera {
-      width: max(100vw, calc(100svh * 16 / 9));
-      height: max(100svh, calc(100vw * 9 / 16));
-    }
-
-  }
-
   .cinematic-village.has-world-overflow
     .cinematic-village__viewport {
     overflow-x: auto;
@@ -1285,7 +1346,13 @@ const mediaRoot = '/media/village';
     position: relative;
     left: 0;
     top: 50%;
-    transform: translateY(calc(-50% + var(--camera-y)));
+    transform:
+      translate3d(
+        var(--camera-x),
+        calc(-50% + var(--camera-y)),
+        0
+      )
+      scale(1.035);
     transform-origin: 50% 50%;
     will-change: transform;
   }
@@ -1977,8 +2044,8 @@ const mediaRoot = '/media/village';
 
   @media (max-width: 900px), (hover: none), (pointer: coarse) {
     .cinematic-village__controls {
-      left: .75rem;
-      right: .75rem;
+      left: max(.75rem, env(safe-area-inset-left));
+      right: max(.75rem, env(safe-area-inset-right));
       bottom: max(1rem, env(safe-area-inset-bottom));
       justify-content: center;
     }
@@ -2023,7 +2090,7 @@ const mediaRoot = '/media/village';
 
     .cinematic-village__welcome-logo {
       width: min(90vw, 34rem);
-      max-height: 68svh;
+      max-height: calc(var(--immersive-viewport-height) * .68);
     }
   }
 
@@ -2067,7 +2134,7 @@ const mediaRoot = '/media/village';
 
     .cinematic-village.has-world-overflow
       .cinematic-village__camera {
-      transform: translateY(-50%);
+      transform: translate3d(0, -50%, 0) scale(1);
     }
   }
 

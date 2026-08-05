@@ -4,6 +4,7 @@ import { absoluteUrl } from '@/utils/seo';
 import { ClientRouter } from 'astro:transitions';
 import '@/styles/global.css';
 import '@/styles/immersive-font.css';
+import '@/styles/immersive-viewport.css';
 
 interface Props {
   title?: string;
@@ -19,11 +20,14 @@ const canonical = absoluteUrl(Astro.url.pathname);
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="immersive-document">
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonical} />
     <meta property="og:title" content={title} />
@@ -34,6 +38,52 @@ const canonical = absoluteUrl(Astro.url.pathname);
     <meta name="twitter:card" content="summary_large_image" />
     <title>{title}</title>
     <ClientRouter />
+    <script is:inline data-astro-rerun>
+      {
+        const viewportStateKey = '__wisteriaImmersiveViewport';
+        const existingViewportState = window[viewportStateKey];
+
+        if (existingViewportState) {
+          existingViewportState.sync();
+        } else {
+          let viewportFrame = 0;
+          const syncViewport = () => {
+            viewportFrame = 0;
+            const viewport = window.visualViewport;
+            if (viewport && Math.abs(viewport.scale - 1) > 0.001) return;
+
+            const width = viewport?.width ?? window.innerWidth;
+            const height = viewport?.height ?? window.innerHeight;
+            document.documentElement.style.setProperty(
+              '--immersive-viewport-width',
+              `${width}px`
+            );
+            document.documentElement.style.setProperty(
+              '--immersive-viewport-height',
+              `${height}px`
+            );
+          };
+          const scheduleViewportSync = () => {
+            window.cancelAnimationFrame(viewportFrame);
+            viewportFrame = window.requestAnimationFrame(syncViewport);
+          };
+
+          window[viewportStateKey] = { sync: scheduleViewportSync };
+          window.addEventListener('resize', scheduleViewportSync, {
+            passive: true
+          });
+          window.addEventListener('orientationchange', scheduleViewportSync, {
+            passive: true
+          });
+          window.visualViewport?.addEventListener(
+            'resize',
+            scheduleViewportSync,
+            { passive: true }
+          );
+          syncViewport();
+        }
+      }
+    </script>
     <script is:inline data-astro-rerun>
       {
         const onVillage = window.location.pathname === '/';
@@ -81,8 +131,8 @@ const canonical = absoluteUrl(Astro.url.pathname);
       }
     </script>
   </head>
-  <body class="min-h-screen bg-[#101d1b] text-ink antialiased">
-    <main class="min-h-screen">
+  <body class="bg-[#101d1b] text-ink antialiased">
+    <main>
       <slot />
     </main>
   </body>
