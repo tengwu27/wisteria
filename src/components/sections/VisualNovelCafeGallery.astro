@@ -1,5 +1,6 @@
 ---
 import CinematicSceneExitOverlay from '@/components/media/CinematicSceneExitOverlay.astro';
+import SpatialEffectToggle from '@/components/media/SpatialEffectToggle.astro';
 
 const mediaRoot = '/media/cafe-gallery/ambient';
 const parallaxRoot = '/media/cafe-gallery/parallax';
@@ -136,6 +137,8 @@ const tableRects = {
     <span data-gallery-theme-label>白昼</span>
   </button>
 
+  <SpatialEffectToggle className="cafe-gallery__spatial-toggle" />
+
   <p class="sr-only" data-gallery-status aria-live="polite">正在进入咖啡馆画廊</p>
   <CinematicSceneExitOverlay
     label="从咖啡馆画廊返回村庄的过渡动画"
@@ -164,6 +167,7 @@ const tableRects = {
     showDeferredVideoPoster
   } from '@/utils/cinematicMediaLoader';
   import { createHorizontalDepthParallax } from '@/utils/horizontalDepthParallax';
+  import { createDeviceOrientationSpatialEffect } from '@/utils/deviceOrientationSpatialEffect';
 
   const SESSION_KEY = 'wisteria-hero-environment';
 
@@ -210,6 +214,7 @@ const tableRects = {
     const themeToggle = root.querySelector<HTMLButtonElement>('[data-gallery-theme-toggle]');
     const themeIcon = root.querySelector<HTMLElement>('[data-gallery-theme-icon]');
     const themeLabel = root.querySelector<HTMLElement>('[data-gallery-theme-label]');
+    const spatialToggle = root.querySelector<HTMLButtonElement>('[data-spatial-effect-toggle]');
     const status = root.querySelector<HTMLElement>('[data-gallery-status]');
     const exitOverlay = root.querySelector<HTMLElement>(
       '[data-cinematic-scene-exit]'
@@ -227,6 +232,7 @@ const tableRects = {
       !themeToggle ||
       !themeIcon ||
       !themeLabel ||
+      !spatialToggle ||
       !status ||
       !exitOverlay
     ) return;
@@ -258,6 +264,13 @@ const tableRects = {
     let navigationTimer = 0;
     let themeTimer = 0;
 
+    const isDepthInteractive = () =>
+      state === 'idle' &&
+      renderer === 'layers' &&
+      !themeLoading &&
+      !document.hidden &&
+      !reduceMotion.matches;
+
     const adaptiveViewport = createAdaptiveCinematicViewport({
       root,
       viewport,
@@ -273,15 +286,35 @@ const tableRects = {
       world: stage,
       signal,
       neutralCenterRatio: 0.5,
-      isInteractive: () =>
-        state === 'idle' &&
-        renderer === 'layers' &&
-        !themeLoading,
+      isInteractive: isDepthInteractive,
       planes: [
-        { property: '--depth-exterior-x', maximumPercent: 0.22 },
-        { property: '--depth-shell-x', maximumPercent: 0.55 },
-        { property: '--depth-tables-x', maximumPercent: 1.35 }
+        {
+          property: '--depth-exterior-x',
+          maximumPercent: 0.22,
+          spatialMaximumPercent: -0.38
+        },
+        {
+          property: '--depth-shell-x',
+          maximumPercent: 0.55,
+          spatialMaximumPercent: 0
+        },
+        {
+          property: '--depth-tables-x',
+          maximumPercent: 1.35,
+          spatialMaximumPercent: 1.25
+        }
       ]
+    });
+
+    const spatial = createDeviceOrientationSpatialEffect({
+      button: spatialToggle,
+      signal,
+      axes: 'horizontal',
+      isInteractive: isDepthInteractive,
+      onFocus: ({ x }) => depth.setSpatialFocus(x),
+      onStatus: (message) => {
+        if (message) status.textContent = message;
+      }
     });
 
     const setState = (next: RoomState) => {
@@ -292,6 +325,7 @@ const tableRects = {
         next !== 'idle' || renderer !== 'layers' || themeLoading,
         next !== 'idle'
       );
+      spatial.setSuspended(!isDepthInteractive(), next !== 'idle');
     };
 
     const loadBundle = bundleLoader.load;
@@ -318,6 +352,7 @@ const tableRects = {
         state !== 'idle' || next !== 'layers' || themeLoading,
         true
       );
+      spatial.setSuspended(!isDepthInteractive(), true);
     };
 
     const safelyPlay = (video = activeVideo) => {
@@ -423,6 +458,7 @@ const tableRects = {
         artworkTrigger.disabled = false;
         themeToggle.disabled = false;
         depth.setSuspended(renderer !== 'layers');
+        spatial.setSuspended(!isDepthInteractive());
         depth.recalculate();
         scheduleInactiveWarmup();
       }, reduceMotion.matches ? 1 : 500);
@@ -535,6 +571,7 @@ const tableRects = {
       themeLoading = true;
       themeToggle.disabled = true;
       depth.setSuspended(true);
+      spatial.setSuspended(true);
       const ready = await loadBundle(next);
       if (signal.aborted || state !== 'idle') return;
       if (!ready) activateFallback(next, false);
@@ -545,6 +582,7 @@ const tableRects = {
         themeLoading = false;
         themeToggle.disabled = false;
         depth.setSuspended(renderer !== 'layers');
+        spatial.setSuspended(!isDepthInteractive());
       }, reduceMotion.matches ? 1 : 540);
     }, { signal });
 
@@ -573,9 +611,11 @@ const tableRects = {
       if (document.hidden) {
         Object.values(videos).forEach((video) => video.pause());
         depth.setSuspended(true, true);
+        spatial.setSuspended(true, true);
       } else if (state === 'idle') {
         safelyPlay(activeVideo);
         depth.setSuspended(renderer !== 'layers');
+        spatial.setSuspended(!isDepthInteractive());
       }
     }, { signal });
 
@@ -603,8 +643,8 @@ const tableRects = {
     --depth-shell-x: 0px;
     --depth-tables-x: 0px;
     position: relative;
-    height: 100vh;
-    height: 100svh;
+    width: var(--immersive-viewport-width);
+    height: var(--immersive-viewport-height);
     overflow: hidden;
     isolation: isolate;
     background: #101d1b;
@@ -615,8 +655,14 @@ const tableRects = {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: max(100vw, calc(100vh * 16 / 9));
-    height: max(100vh, calc(100vw * 9 / 16));
+    width: max(
+      var(--immersive-viewport-width),
+      calc(var(--immersive-viewport-height) * 16 / 9)
+    );
+    height: max(
+      var(--immersive-viewport-height),
+      calc(var(--immersive-viewport-width) * 9 / 16)
+    );
     overflow: hidden;
     transform: translate(-50%, -50%);
   }
@@ -661,13 +707,6 @@ const tableRects = {
     left: 0;
     top: 50%;
     transform: translateY(-50%);
-  }
-
-  @supports (height: 100svh) {
-    .cafe-gallery__stage {
-      width: max(100vw, calc(100svh * 16 / 9));
-      height: max(100svh, calc(100vw * 9 / 16));
-    }
   }
 
   .cafe-gallery__video,
@@ -992,6 +1031,23 @@ const tableRects = {
     transform: translateY(0);
   }
 
+  :global(.cafe-gallery__spatial-toggle) {
+    position: fixed;
+    z-index: 5;
+    top: max(1rem, env(safe-area-inset-top));
+    right: calc(max(1rem, env(safe-area-inset-right)) + 5.4rem);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-.35rem);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+
+  .cafe-gallery.is-interactive :global(.cafe-gallery__spatial-toggle) {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
   .cafe-gallery__theme-toggle:hover,
   .cafe-gallery__theme-toggle:focus-visible {
     background: rgba(13, 34, 32, .94);
@@ -1087,6 +1143,11 @@ const tableRects = {
       top: max(.7rem, env(safe-area-inset-top));
     }
 
+    :global(.cafe-gallery__spatial-toggle) {
+      top: max(.7rem, env(safe-area-inset-top));
+      right: calc(max(.7rem, env(safe-area-inset-right)) + 5rem);
+    }
+
     .cafe-gallery__artwork-label {
       bottom: -2.65rem;
     }
@@ -1097,6 +1158,7 @@ const tableRects = {
     .cafe-gallery__artwork-label,
     .cafe-gallery__back,
     .cafe-gallery__theme-toggle,
+    :global(.cafe-gallery__spatial-toggle),
     .cafe-gallery__video,
     .cafe-gallery__explore-cue,
     .cafe-gallery__curtain {

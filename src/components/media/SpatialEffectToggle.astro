@@ -1,0 +1,19 @@
+---
+interface Props {
+  className?: string;
+}
+
+const { className } = Astro.props;
+---
+
+<button
+  class:list={['spatial-effect-toggle', className]}
+  type="button"
+  data-spatial-effect-toggle
+  aria-label="开启手机空间感"
+  aria-pressed="false"
+  hidden
+>
+  <span class="spatial-effect-toggle__icon" aria-hidden="true">◎</span>
+  <span data-spatial-effect-label>空间感</span>
+</button>
