@@ -43,8 +43,6 @@ video {
   color: #fffdf8;
 }
 
-/* Interactive world styles live in src/components/world/WorldScene.astro */
-
 .arrival-badge {
   display: inline-flex;
   align-items: center;

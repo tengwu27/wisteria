@@ -146,6 +146,57 @@ for (const route of config.routes) {
   const routeCss = [html, ...stylesheets].join('\n');
   const initialCodeBytes = await measureInitialRouteCode(html, route.html);
 
+  if (route.id === 'village') {
+    const registeredPlanes = html.match(/data-plane="[^"]+"/g) ?? [];
+    const expectedPlanes = ['village', 'clouds'];
+    const missingPlanes = expectedPlanes.filter((plane) =>
+      !registeredPlanes.includes(`data-plane="${plane}"`)
+    );
+    if (registeredPlanes.length !== expectedPlanes.length || missingPlanes.length > 0) {
+      report(
+        `${route.label}: expected ${expectedPlanes.length} semantic registered planes (${expectedPlanes.join(', ')}), found ${registeredPlanes.length}${missingPlanes.length ? `; missing ${missingPlanes.join(', ')}` : ''}`,
+        route,
+        false
+      );
+    }
+    if (!html.includes('data-layer-stack') || !html.includes('data-fallback')) {
+      report(`${route.label}: registered stack and flattened fallback are required`, route, false);
+    }
+    if (!html.includes('class="factory-steam"')) {
+      report(`${route.label}: factory steam must remain a layer-owned browser effect`, route, false);
+    }
+  }
+
+  const viewportMeta = html.match(
+    /<meta\b[^>]*name=["']viewport["'][^>]*>/i
+  )?.[0];
+  if (!viewportMeta?.includes('viewport-fit=cover')) {
+    report(
+      `${route.label}: immersive viewport must opt into edge-to-edge coverage`,
+      route,
+      false
+    );
+  }
+  if (
+    !routeCss.includes('--immersive-viewport-width') ||
+    !routeCss.includes('--immersive-viewport-height') ||
+    !routeCss.includes('100dvw') ||
+    !routeCss.includes('100dvh')
+  ) {
+    report(
+      `${route.label}: dynamic immersive viewport contract is missing`,
+      route,
+      false
+    );
+  }
+  if (routeCss.includes('100svh')) {
+    report(
+      `${route.label}: small viewport units can leave exposed Safari edges`,
+      route,
+      false
+    );
+  }
+
   if (initialCodeBytes > config.budgets.initialRouteCodeBytes) {
     report(
       `${route.label}: initial HTML, CSS, and JavaScript total ${initialCodeBytes} bytes; budget is ${config.budgets.initialRouteCodeBytes}`,
@@ -182,7 +233,7 @@ for (const route of config.routes) {
     }
   }
 
-  if (route.id !== 'village') {
+  if (route.deliveryStatus === 'production' && route.id !== 'village') {
     const exits = videos.filter((video) => video.includes('data-exit-video'));
     if (exits.length !== 1) {
       report(

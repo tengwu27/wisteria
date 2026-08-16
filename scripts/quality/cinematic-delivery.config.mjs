@@ -16,41 +16,11 @@ export const cinematicDeliveryConfig = {
   routes: [
     {
       id: 'village',
-      label: 'village',
+      label: 'isometric coastal village',
       html: 'dist/index.html',
-      mediaRoots: ['public/media/village'],
-      deliveryStatus: 'production',
-      performanceBypass: null
-    },
-    {
-      id: 'living-room',
-      label: 'living room',
-      html: 'dist/lifestyle/index.html',
-      mediaRoots: ['public/media/living-room'],
-      deliveryStatus: 'production',
-      performanceBypass: null
-    },
-    {
-      id: 'cafe-gallery',
-      label: 'cafe gallery',
-      html: 'dist/art/index.html',
-      mediaRoots: ['public/media/cafe-gallery'],
-      deliveryStatus: 'production',
-      performanceBypass: null
-    },
-    {
-      id: 'car-interior',
-      label: 'car interior',
-      html: 'dist/travel/index.html',
-      mediaRoots: ['public/media/car-interior'],
-      deliveryStatus: 'production',
-      performanceBypass: null
-    },
-    {
-      id: 'garage',
-      label: 'garage',
-      html: 'dist/garage/index.html',
-      mediaRoots: ['public/media/garage-workshop'],
+      mediaRoots: [
+        'assets/cinematic/scenes/gamified-coastal-village/isometric-parallax/registered'
+      ],
       deliveryStatus: 'production',
       performanceBypass: null
     }

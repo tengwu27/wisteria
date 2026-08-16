@@ -1,27 +1,25 @@
 # Cinematic Asset Sources
 
-This tree contains the editable inputs and registered authoring plates for each
-immersive scene. Browser-delivered assets use the same scene names under
-`public/media`.
+This tree contains the approved editable inputs and registered production
+plates for the immersive village.
 
 ```text
-scenes/
-  <scene>/
-    interior/
-      sources/                approved masters or registered source plates
-      repairs/                localized reconstruction inputs, when required
-      masks/                  exact alpha or object mattes, when required
-    transitions/
-      <shot>/
-        sources/              approved transition artwork
-        masks/                mechanical or aperture masks, when required
-        layers/               registered render-ready plates
+scenes/gamified-coastal-village/isometric-parallax/
+  source/
+    core-village-master.png   locked pre-expansion village authority
+    village-master.png        approved 2412×941 expanded geometry authority
+    clouds-master.webp        approved transparent aerial-cloud source
+    tiles/                    six accepted overlapping detail tiles
+  scripts/                    deterministic expansion and delivery builders
+  registered/                 optimized Astro-imported production plates
+  proofs/                     accepted neutral registered composite
 ```
 
-Canonical scene names are `village`, `living-room`, `cafe-gallery`,
-`car-interior`, and `garage-workshop`. Site-route labels such as `art`,
-`lifestyle`, and `travel` do not own cinematic assets.
+The registered bundle is self-contained; it does not depend on a parallel
+`public/media` copy. Superseded renders and experimental generations remain
+recoverable from Git history instead of being kept in archive folders.
 
-Only active delivery copies belong in `public/media/<scene>`. Superseded
-renders remain recoverable from Git history instead of being kept in parallel
-source or archive folders.
+The west expansion uses the original port water as its single deep-water
+authority. Its shoreline is rebuilt as a land core, illustrated contact apron,
+and shared deep-water zone so cliffs retain submerged rocks, shallows, foam,
+and contact shading instead of appearing as hard cutouts.

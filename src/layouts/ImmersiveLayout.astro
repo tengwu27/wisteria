@@ -4,12 +4,14 @@ import { absoluteUrl } from '@/utils/seo';
 import { ClientRouter } from 'astro:transitions';
 import '@/styles/global.css';
 import '@/styles/immersive-font.css';
+import '@/styles/immersive-viewport.css';
 
 interface Props {
   title?: string;
   description?: string;
   image?: string;
   type?: 'website' | 'article';
+  noindex?: boolean;
 }
 
 const title = Astro.props.title ?? site.seo.title;
@@ -19,11 +21,14 @@ const canonical = absoluteUrl(Astro.url.pathname);
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="immersive-document">
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonical} />
     <meta property="og:title" content={title} />
@@ -32,57 +37,58 @@ const canonical = absoluteUrl(Astro.url.pathname);
     <meta property="og:url" content={canonical} />
     {Astro.props.image && <meta property="og:image" content={Astro.props.image} />}
     <meta name="twitter:card" content="summary_large_image" />
+    {Astro.props.noindex && <meta name="robots" content="noindex, nofollow" />}
     <title>{title}</title>
     <ClientRouter />
     <script is:inline data-astro-rerun>
       {
-        const onVillage = window.location.pathname === '/';
-        const returnKey = 'wisteria-village-return';
-        const introKey = 'wisteria-village-intro-seen';
-        let returning = false;
-        let introPending = false;
+        const viewportStateKey = '__wisteriaImmersiveViewport';
+        const existingViewportState = window[viewportStateKey];
 
-        if (onVillage) {
-          try {
-            returning = window.sessionStorage.getItem(returnKey) === '1';
-            const introSeen =
-              window.sessionStorage.getItem(introKey) === '1' ||
-              window.__wisteriaVillageIntroSeen === true;
-            introPending = !returning && !introSeen;
-            if (returning) {
-              window.__wisteriaVillageIntroSeen = true;
-              window.sessionStorage.setItem(introKey, '1');
-            }
-          } catch {
-            returning =
-              document.documentElement.classList.contains(
-                'is-returning-to-village'
-              );
-            introPending =
-              !returning && window.__wisteriaVillageIntroSeen !== true;
-            if (returning) {
-              window.__wisteriaVillageIntroSeen = true;
-            }
-          }
+        if (existingViewportState) {
+          existingViewportState.sync();
+        } else {
+          let viewportFrame = 0;
+          const syncViewport = () => {
+            viewportFrame = 0;
+            const viewport = window.visualViewport;
+            if (viewport && Math.abs(viewport.scale - 1) > 0.001) return;
+
+            const width = viewport?.width ?? window.innerWidth;
+            const height = viewport?.height ?? window.innerHeight;
+            document.documentElement.style.setProperty(
+              '--immersive-viewport-width',
+              `${width}px`
+            );
+            document.documentElement.style.setProperty(
+              '--immersive-viewport-height',
+              `${height}px`
+            );
+          };
+          const scheduleViewportSync = () => {
+            window.cancelAnimationFrame(viewportFrame);
+            viewportFrame = window.requestAnimationFrame(syncViewport);
+          };
+
+          window[viewportStateKey] = { sync: scheduleViewportSync };
+          window.addEventListener('resize', scheduleViewportSync, {
+            passive: true
+          });
+          window.addEventListener('orientationchange', scheduleViewportSync, {
+            passive: true
+          });
+          window.visualViewport?.addEventListener(
+            'resize',
+            scheduleViewportSync,
+            { passive: true }
+          );
+          syncViewport();
         }
-
-        document.documentElement.classList.toggle(
-          'is-returning-to-village',
-          returning
-        );
-        document.documentElement.classList.toggle(
-          'is-village-intro-pending',
-          introPending
-        );
-        document.documentElement.classList.remove(
-          'is-returning-to-village-ready',
-          'is-village-intro-revealing'
-        );
       }
     </script>
   </head>
-  <body class="min-h-screen bg-[#101d1b] text-ink antialiased">
-    <main class="min-h-screen">
+  <body class="bg-[#101d1b] text-ink antialiased">
+    <main>
       <slot />
     </main>
   </body>

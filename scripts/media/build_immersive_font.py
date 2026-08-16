@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the compact font used by the five production immersive routes.
+"""Build the compact font used by the production immersive village.
 
 Requires fonttools with WOFF2 support:
   python3 -m pip install 'fonttools[woff]>=4.59,<5'
@@ -19,18 +19,9 @@ SOURCE = (
 OUTPUT = ROOT / "public/fonts/wisteria-immersive-ui.woff2"
 TEXT_SOURCES = [
     ROOT / "src/layouts/ImmersiveLayout.astro",
-    ROOT / "src/components/media/CinematicSceneExitOverlay.astro",
-    ROOT / "src/components/sections/CinematicVillageHero.astro",
-    ROOT / "src/components/sections/VisualNovelLivingRoom.astro",
-    ROOT / "src/components/sections/VisualNovelCafeGallery.astro",
-    ROOT / "src/components/sections/VisualNovelCarInterior.astro",
-    ROOT / "src/components/sections/VisualNovelGarage.astro",
+    ROOT / "src/components/sections/GamifiedCoastalVillage.astro",
     ROOT / "src/data/navigation.ts",
     ROOT / "src/pages/index.astro",
-    ROOT / "src/pages/lifestyle/index.astro",
-    ROOT / "src/pages/art/index.astro",
-    ROOT / "src/pages/travel/index.astro",
-    ROOT / "src/pages/garage/index.astro",
 ]
 
 

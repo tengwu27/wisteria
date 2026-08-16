@@ -9,5 +9,7 @@ export default defineConfig({
   output: 'static',
   integrations: [tailwind({
     applyBaseStyles: false
-  }), sitemap(), react()]
+  }), sitemap({
+    filter: (page) => !page.includes('/prototype/')
+  }), react()]
 });

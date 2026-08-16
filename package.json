@@ -7,6 +7,7 @@
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
     "lint": "ASTRO_TELEMETRY_DISABLED=1 astro check",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build && node scripts/quality/check-cinematic-loading.mjs --profile=production",
+    "build:prototype": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build && node scripts/quality/check-cinematic-loading.mjs --profile=prototype",
     "audit:cinematic-loading": "node scripts/quality/check-cinematic-loading.mjs --profile=production",
     "audit:cinematic-loading:prototype": "node scripts/quality/check-cinematic-loading.mjs --profile=prototype",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
