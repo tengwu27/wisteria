@@ -1,0 +1,14 @@
+---
+import LibraryExperience from '@/components/sections/LibraryExperience.astro';
+import ImmersiveLayout from '@/layouts/ImmersiveLayout.astro';
+import { getLibraryBooks } from '@/lib/artifacts';
+
+const books = await getLibraryBooks();
+---
+
+<ImmersiveLayout
+  title="Wisteria · 大教堂图书馆"
+  description="走进 Wisteria 山崖上的大教堂图书馆，在玫瑰窗、多层书架与中央阅读长廊之间俯瞰海岸。"
+>
+  <LibraryExperience books={books} />
+</ImmersiveLayout>

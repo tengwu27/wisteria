@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 2,
+  "geometryMaster": {
+    "path": "source/library-grand-hall-full-tile-v3.png",
+    "width": 4096,
+    "height": 1536,
+    "version": 3,
+    "previousVersion": "source/library-grand-hall-refined-v2.png",
+    "authoringManifest": "source/exterior-refinement-v2/experiments/full-tile-overlay/authoring-manifest.json"
+  },
+  "focusPlates": [
+    {
+      "id": "shelf",
+      "registration": {
+        "kind": "independent-viewpoint",
+        "sourceZone": { "x": 0.135, "y": 0.34, "width": 0.235, "height": 0.39 },
+        "cameraDescription": "Standing directly before the lower west arched bookcase at eye level, looking nearly straight on at its reachable central shelf.",
+        "continuityAnchors": [
+          "pointed teal-black arched shelf with aged brass trim",
+          "warm brass reading lamp mounted at the left side",
+          "rolling library ladder beside the alcove",
+          "dense rows of dark leather volumes surrounding the featured books"
+        ]
+      },
+      "source": "source/library-shelf-close-v1.png",
+      "arrangementReference": "source/library-shelf-focus-refined.png",
+      "delivery": [
+        { "path": "delivery/library-shelf-close-1254.webp", "width": 1254, "height": 706 },
+        { "path": "delivery/library-shelf-close-1672.webp", "width": 1672, "height": 941 }
+      ]
+    },
+    {
+      "id": "table",
+      "registration": {
+        "kind": "independent-viewpoint",
+        "sourceZone": { "x": 0.285, "y": 0.56, "width": 0.2, "height": 0.37 },
+        "cameraDescription": "Standing in the central hallway immediately behind the aisle-side chair, looking down about 55 degrees across its upper edge to the reading table.",
+        "continuityAnchors": [
+          "oxblood book on a darker supporting volume",
+          "brass and dark writing vessels beside the book",
+          "burgundy leather chair between the aisle and table",
+          "parquet floor and central red carpet beyond the table"
+        ]
+      },
+      "source": "source/library-table-over-chair-v1.png",
+      "arrangementReference": "source/library-table-focus-refined.png",
+      "delivery": [
+        { "path": "delivery/library-table-over-chair-1254.webp", "width": 1254, "height": 706 },
+        { "path": "delivery/library-table-over-chair-1672.webp", "width": 1672, "height": 941 }
+      ]
+    }
+  ]
+}

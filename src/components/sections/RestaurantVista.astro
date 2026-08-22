@@ -1,0 +1,438 @@
+---
+import restaurantVista1672 from '../../../assets/cinematic/scenes/restaurant-vista-interior/delivery/restaurant-vista-patio-1672.webp';
+import restaurantVista2508 from '../../../assets/cinematic/scenes/restaurant-vista-interior/delivery/restaurant-vista-patio-2508.webp';
+import restaurantVista3072 from '../../../assets/cinematic/scenes/restaurant-vista-interior/delivery/restaurant-vista-patio-3072.webp';
+import cafeVista from '../../../assets/cinematic/scenes/windmill-cafe-interior/delivery/windmill-cafe-approved.webp';
+import harborVista from '../../../assets/cinematic/scenes/harbor-interior/delivery/harbor-view-approved.webp';
+import workshopVista1672 from '../../../assets/cinematic/scenes/workshop-interior/delivery/workshop-1672.webp';
+import workshopVista2508 from '../../../assets/cinematic/scenes/workshop-interior/delivery/workshop-2508.webp';
+import workshopVista3072 from '../../../assets/cinematic/scenes/workshop-interior/delivery/workshop-3072.webp';
+import factoryVista from '../../../assets/cinematic/scenes/coffee-factory-interior/delivery/coffee-factory-approved.webp';
+import libraryVista2048 from '../../../assets/cinematic/scenes/library-grand-hall/delivery/library-grand-hall-2048.webp';
+import libraryVista3072 from '../../../assets/cinematic/scenes/library-grand-hall/delivery/library-grand-hall-3072.webp';
+import libraryVista4096 from '../../../assets/cinematic/scenes/library-grand-hall/delivery/library-grand-hall-4096.webp';
+
+interface Props {
+  scene?: 'restaurant' | 'cafe' | 'harbor' | 'workshop' | 'library' | 'factory';
+}
+
+const { scene = 'restaurant' } = Astro.props;
+const sceneConfigs = {
+  harbor: {
+      artwork: harborVista,
+      responsiveArtwork: null,
+      responsiveSizes: null,
+      rootLabel: 'Wisteria 港湾穹顶观景厅',
+      viewportLabel: '可水平探索的港湾观景厅',
+      artworkAlt: '从青绿色穹顶港湾观景厅内穿过石拱门望向木码头、三角帆船与远处地中海山岸',
+      loadingZh: '正在准备港湾观景厅…',
+      loadingEn: 'PREPARING THE HARBOR VISTA',
+      errorZh: '港湾景观暂时无法载入。',
+      errorEn: 'THE HARBOR VISTA COULD NOT BE LOADED.'
+  },
+  cafe: {
+      artwork: cafeVista,
+      responsiveArtwork: null,
+      responsiveSizes: null,
+      rootLabel: 'Wisteria 风车咖啡馆景观室',
+      viewportLabel: '可水平探索的风车咖啡馆景观',
+      artworkAlt: '荷兰风格的风车咖啡馆，右侧吧台连接风车传动轴，环绕窗外可见露台、海湾港口、弧形石桥与溪谷',
+      loadingZh: '正在准备风车咖啡馆…',
+      loadingEn: 'PREPARING THE WINDMILL CAFÉ',
+      errorZh: '咖啡馆景观暂时无法载入。',
+      errorEn: 'THE WINDMILL CAFÉ COULD NOT BE LOADED.'
+  },
+  restaurant: {
+      artwork: restaurantVista1672,
+      responsiveArtwork: [restaurantVista1672, restaurantVista2508, restaurantVista3072],
+      responsiveSizes: '(min-aspect-ratio: 1672/941) 100vw, 178vh',
+      rootLabel: 'Wisteria 海湾餐厅二楼用餐室',
+      viewportLabel: '可水平探索的餐厅海湾景观',
+      artworkAlt: '温暖的圆弧石砌餐厅二楼，窗外露台设有餐桌，远处可见海湾、桥梁与帆船',
+      loadingZh: '正在准备临海餐厅…',
+      loadingEn: 'PREPARING THE RESTAURANT VISTA',
+      errorZh: '餐厅景观暂时无法载入。',
+      errorEn: 'THE RESTAURANT VISTA COULD NOT BE LOADED.'
+  },
+  workshop: {
+      artwork: workshopVista1672,
+      responsiveArtwork: [workshopVista1672, workshopVista2508, workshopVista3072],
+      responsiveSizes: '(min-aspect-ratio: 1672/941) 100vw, 178vh',
+      rootLabel: 'Wisteria 海湾工坊一楼',
+      viewportLabel: '可水平探索的海湾工坊景观',
+      artworkAlt: '复古海湾工坊一楼，室内停有凯旋摩托车与古董电动车，右侧工作台和大型同步水力发电机面向环绕海湾景观窗',
+      loadingZh: '正在准备海湾工坊…',
+      loadingEn: 'PREPARING THE BAY WORKSHOP',
+      errorZh: '工坊景观暂时无法载入。',
+      errorEn: 'THE BAY WORKSHOP COULD NOT BE LOADED.'
+  },
+  factory: {
+      artwork: factoryVista,
+      responsiveArtwork: null,
+      responsiveSizes: null,
+      rootLabel: 'Wisteria 咖啡工厂一楼店铺',
+      viewportLabel: '可水平探索的咖啡工厂店铺',
+      artworkAlt: '复古咖啡工厂一楼店铺，左侧是临街服务窗，中央柜台面向河谷，右侧大型铜制自动咖啡浇注机连接天花板管路',
+      loadingZh: '正在准备咖啡工厂…',
+      loadingEn: 'PREPARING THE COFFEE FACTORY',
+      errorZh: '咖啡工厂暂时无法载入。',
+      errorEn: 'THE COFFEE FACTORY COULD NOT BE LOADED.'
+  },
+  library: {
+      artwork: libraryVista2048,
+      responsiveArtwork: [libraryVista2048, libraryVista3072, libraryVista4096],
+      responsiveSizes: '(min-aspect-ratio: 8/3) 100vw, 267vh',
+      rootLabel: 'Wisteria 大教堂图书馆大厅',
+      viewportLabel: '可水平探索的大教堂图书馆',
+      artworkAlt: '宽阔的大教堂风格图书馆大厅，中央长毯通向山崖高处的主门，两侧是玫瑰窗、多层书架、阅读桌与暖色灯光',
+      loadingZh: '正在准备大教堂图书馆…',
+      loadingEn: 'PREPARING THE CATHEDRAL LIBRARY',
+      errorZh: '图书馆大厅暂时无法载入。',
+      errorEn: 'THE CATHEDRAL LIBRARY COULD NOT BE LOADED.'
+  }
+} satisfies Record<NonNullable<Props['scene']>, {
+  artwork: ImageMetadata;
+  responsiveArtwork: ImageMetadata[] | null;
+  responsiveSizes: string | null;
+  rootLabel: string;
+  viewportLabel: string;
+  artworkAlt: string;
+  loadingZh: string;
+  loadingEn: string;
+  errorZh: string;
+  errorEn: string;
+}>;
+const sceneConfig = sceneConfigs[scene];
+const artworkSrcset = sceneConfig.responsiveArtwork
+  ?.map((artwork) => `${artwork.src} ${artwork.width}w`)
+  .join(', ');
+---
+
+<section
+  class="restaurant-vista"
+  data-restaurant-vista
+  aria-label={sceneConfig.rootLabel}
+  style={`--scene-width:${sceneConfig.artwork.width};--scene-height:${sceneConfig.artwork.height}`}
+>
+  <div
+    class="scene-viewport"
+    data-scene-viewport
+    tabindex="0"
+    aria-label={sceneConfig.viewportLabel}
+  >
+    <div class="scene-world" data-scene-world>
+      <img
+        class="scene-art"
+        src={sceneConfig.artwork.src}
+        srcset={artworkSrcset}
+        sizes={artworkSrcset ? sceneConfig.responsiveSizes ?? undefined : undefined}
+        width={sceneConfig.artwork.width}
+        height={sceneConfig.artwork.height}
+        alt={sceneConfig.artworkAlt}
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        draggable="false"
+        data-scene-art
+      />
+    </div>
+  </div>
+
+  <a
+    class="back-control"
+    href="/"
+    aria-label="返回 Wisteria 村庄"
+    data-back-control
+    data-immersive-route
+  >
+    <span aria-hidden="true">←</span>
+    <span>返回村庄<small>BACK TO VILLAGE</small></span>
+  </a>
+
+  <p class="swipe-cue" aria-hidden="true">← 滑动探索 · SWIPE TO EXPLORE →</p>
+
+  <div class="loading-veil" data-loading-veil data-immersive-loading aria-hidden="false">
+    <p>{sceneConfig.loadingZh}<small>{sceneConfig.loadingEn}</small></p>
+  </div>
+
+  <div class="load-error" data-load-error role="status" hidden>
+    <p>{sceneConfig.errorZh}<small>{sceneConfig.errorEn}</small></p>
+  </div>
+</section>
+
+<script>
+  import {
+    afterCinematicPaint,
+    waitForCinematicImage
+  } from '@/utils/cinematicMediaLoader';
+  import { settleImmersiveArrival } from '@/utils/immersiveNavigation';
+
+  function initRestaurantVista() {
+    const root = document.querySelector<HTMLElement>('[data-restaurant-vista]');
+    if (!root || root.dataset.initialized === 'true') return;
+    root.dataset.initialized = 'true';
+
+    const abort = new AbortController();
+    const { signal } = abort;
+    const viewport = root.querySelector<HTMLElement>('[data-scene-viewport]')!;
+    const world = root.querySelector<HTMLElement>('[data-scene-world]')!;
+    const image = root.querySelector<HTMLImageElement>('[data-scene-art]')!;
+    const loading = root.querySelector<HTMLElement>('[data-loading-veil]')!;
+    const loadError = root.querySelector<HTMLElement>('[data-load-error]')!;
+    let focalRatio = 0.5;
+    let resizeFrame = 0;
+
+    const overflow = () => Math.max(0, world.scrollWidth - viewport.clientWidth);
+    const restoreFocalPoint = () => {
+      window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = window.requestAnimationFrame(() => {
+        viewport.scrollLeft = overflow() * focalRatio;
+      });
+    };
+    const rememberFocalPoint = () => {
+      const available = overflow();
+      if (available > 0) focalRatio = viewport.scrollLeft / available;
+    };
+
+    viewport.addEventListener('scroll', rememberFocalPoint, { passive: true, signal });
+    viewport.addEventListener('keydown', (event) => {
+      const distance = Math.max(64, viewport.clientWidth * 0.12);
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        viewport.scrollBy({
+          left: event.key === 'ArrowLeft' ? -distance : distance,
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            ? 'auto'
+            : 'smooth'
+        });
+      } else if (event.key === 'Home' || event.key === 'End') {
+        event.preventDefault();
+        viewport.scrollTo({
+          left: event.key === 'Home' ? 0 : overflow(),
+          behavior: 'auto'
+        });
+      }
+    }, { signal });
+
+    const resizeObserver = new ResizeObserver(restoreFocalPoint);
+    resizeObserver.observe(viewport);
+    resizeObserver.observe(world);
+    window.visualViewport?.addEventListener('resize', restoreFocalPoint, { passive: true, signal });
+    window.addEventListener('orientationchange', restoreFocalPoint, { passive: true, signal });
+
+    const reveal = () => {
+      if (signal.aborted) return;
+      root.dataset.ready = 'true';
+      delete root.dataset.failed;
+      loadError.hidden = true;
+      restoreFocalPoint();
+      afterCinematicPaint(() => {
+        loading.setAttribute('aria-hidden', 'true');
+        settleImmersiveArrival();
+      }, signal);
+    };
+    const fail = () => {
+      if (signal.aborted) return;
+      root.dataset.failed = 'true';
+      loadError.hidden = false;
+      afterCinematicPaint(() => {
+        loading.setAttribute('aria-hidden', 'true');
+        settleImmersiveArrival();
+      }, signal);
+    };
+
+    void waitForCinematicImage(image, {
+      signal,
+      onLateReady: reveal
+    }).then((state) => {
+      if (state === 'loaded') reveal();
+      else if (state !== 'aborted') fail();
+    });
+
+    document.addEventListener('astro:before-swap', () => {
+      abort.abort();
+      resizeObserver.disconnect();
+      window.cancelAnimationFrame(resizeFrame);
+    }, { once: true });
+  }
+
+  initRestaurantVista();
+  document.addEventListener('astro:page-load', initRestaurantVista);
+</script>
+
+<style>
+  :global(html), :global(body), :global(main) {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--immersive-transition-background, #183d38);
+  }
+
+  .restaurant-vista {
+    position: fixed;
+    inset: 0;
+    width: var(--immersive-viewport-width, 100dvw);
+    height: var(--immersive-viewport-height, 100dvh);
+    overflow: hidden;
+    color: #fff4d2;
+    background: var(--immersive-transition-background, #183d38);
+    font-family: 'Wisteria Immersive UI', system-ui, sans-serif;
+  }
+
+  .scene-viewport {
+    position: absolute;
+    inset: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    outline: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scene-viewport::-webkit-scrollbar { display: none; }
+
+  .scene-viewport:focus-visible {
+    box-shadow: inset 0 0 0 3px rgba(255, 239, 184, 0.8);
+  }
+
+  .scene-world {
+    position: relative;
+    top: 50%;
+    width: max(100%, calc(var(--immersive-viewport-height, 100dvh) * var(--scene-width) / var(--scene-height)));
+    min-width: 100%;
+    aspect-ratio: var(--scene-width) / var(--scene-height);
+    overflow: hidden;
+    translate: 0 -50%;
+  }
+
+  .scene-art {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    opacity: 0;
+    user-select: none;
+  }
+
+  [data-ready='true'] .scene-art { opacity: 1; }
+
+  .back-control {
+    position: fixed;
+    z-index: 10;
+    top: max(0.65rem, env(safe-area-inset-top));
+    left: max(0.65rem, env(safe-area-inset-left));
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid rgba(255, 241, 197, 0.65);
+    border-radius: 999px;
+    color: #fff4d2;
+    background: rgba(25, 44, 41, 0.78);
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.28);
+    text-decoration: none;
+    backdrop-filter: blur(0.55rem);
+    -webkit-backdrop-filter: blur(0.55rem);
+  }
+
+  .back-control > span:first-child { font-size: 1.25rem; }
+  .back-control small {
+    display: block;
+    margin-top: 0.1rem;
+    font-size: 0.52rem;
+    letter-spacing: 0.1em;
+    opacity: 0.72;
+  }
+
+  .back-control:hover,
+  .back-control:focus-visible {
+    border-color: #fff2b2;
+    background: rgba(34, 70, 65, 0.94);
+    outline: 2px solid rgba(255, 242, 178, 0.6);
+    outline-offset: 2px;
+  }
+
+  .loading-veil {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    background: #183d38;
+    opacity: 1;
+    transition: opacity 240ms ease, visibility 0s linear 240ms;
+  }
+
+  .loading-veil[aria-hidden='true'] {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .loading-veil p,
+  .load-error p { margin: 0; }
+  .loading-veil small,
+  .load-error small {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.64rem;
+    letter-spacing: 0.12em;
+    opacity: 0.72;
+  }
+
+  .load-error {
+    position: fixed;
+    z-index: 5;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    text-align: center;
+    background: #172421;
+  }
+
+  .load-error[hidden] { display: none; }
+
+  .swipe-cue { display: none; }
+
+  @media (max-width: 800px), (pointer: coarse) {
+    .back-control {
+      top: max(0.4rem, env(safe-area-inset-top));
+      left: max(0.4rem, env(safe-area-inset-left));
+      min-height: 2.55rem;
+      padding: 0.36rem 0.62rem;
+      font-size: 0.75rem;
+    }
+
+    .swipe-cue {
+      position: fixed;
+      z-index: 8;
+      left: 50%;
+      bottom: max(0.7rem, env(safe-area-inset-bottom));
+      display: block;
+      margin: 0;
+      translate: -50% 0;
+      color: #fff8dc;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-shadow: 0 2px 5px rgba(14, 35, 32, 0.95);
+      animation: swipe-cue 3.2s ease both 0.8s;
+      pointer-events: none;
+    }
+  }
+
+  @keyframes swipe-cue {
+    0%, 18%, 100% { opacity: 0; }
+    38%, 72% { opacity: 0.92; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loading-veil { transition-duration: 1ms; }
+    .swipe-cue { animation: none; opacity: 0.85; }
+  }
+</style>

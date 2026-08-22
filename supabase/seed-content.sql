@@ -2,9 +2,17 @@
 -- Source: src/content/**/*.md
 
 insert into public.content_entries (collection, slug, published, data, body_markdown)
-values ('art', 'quiet-window-study', true, '{"title":"静窗习作","date":"2026-01-12T00:00:00.000Z","year":2026,"creator":"替换为创作者姓名","medium":"纸上综合媒介","category":"experiments","dimensions":"替换为作品尺寸","coverImage":"artPaperStudy","coverAlt":"由层叠纸形构成的抽象作品占位图","excerpt":"一篇关于光、纸与记忆的安静习作占位条目。","caption":"替换为关于完成作品的说明。","gallery":[{"imageKey":"artPaperStudy","alt":"主要作品习作占位图","caption":"主习作占位说明。"},{"imageKey":"artWindowLight","alt":"第二张抽象作品占位图","caption":"过程图片或相关图片占位说明。"}],"featured":true,"published":true,"tags":["占位","纸","光"],"order":1}'::jsonb, '这是一段用于作品详情页的故事占位文字。请替换为塑造这件完成作品的记忆、过程、材料和那些细小决定。
+values ('art', 'collected-glimmers', true, '{"title":"微光集","date":"2026-05-08T00:00:00.000Z","year":2026,"creator":"Wisteria Archive","medium":"纸上光影与数字拼贴","category":"illustration","dimensions":"两页小型样册","coverImage":"artRetroStudio","coverAlt":"复古工作室中的画架、纸张和暖色灯光","excerpt":"收集工作室里短暂光影的两页示例册。","caption":"沉浸式书册版式夹具。","gallery":[],"featured":true,"published":true,"tags":["沉浸式夹具","光"],"order":3,"book":{"artifactId":"collected-glimmers","kind":"book","fixture":true,"noindex":true,"cover":{"titleZh":"微光集","titleEn":"COLLECTED GLIMMERS","emblem":"sun","color":"#6b3940","foil":"#d9b66c"},"pages":[{"layout":"prose-image","imageKey":"artRetroStudio","imageAlt":"暖色灯光下摆放画架与纸张的复古工作室","imageCaption":"示例图版 · 光停在纸面上的几分钟"},{"layout":"prose"}]}}'::jsonb, '# 微光集
 
-详情页会把故事视为作品的一部分，而不是把它藏在元数据下面。')
+有些作品从完整的构图开始，有些只从桌角的一块亮色开始。这册样本收集后者：玻璃上的反光、纸张翘起的边缘，以及颜料尚未干透时的微小光泽。
+
+<!-- page -->
+
+## 第二页：保留未完成
+
+记录并不要求事物已经完成。日期、材料和一张过程图片足以让某个瞬间在未来重新变得清晰。
+
+*This sample volume can later become a sketchbook, portfolio note, or miniature exhibition catalogue.*')
 on conflict (collection, slug) do update set
   published = excluded.published,
   data = excluded.data,
@@ -12,7 +20,35 @@ on conflict (collection, slug) do update set
   body_html = null;
 
 insert into public.content_entries (collection, slug, published, data, body_markdown)
-values ('art', 'soft-geometry', true, '{"title":"柔软几何","date":"2025-11-02T00:00:00.000Z","year":2025,"creator":"替换为创作者姓名","medium":"数字习作","category":"digital art","coverImage":"artWindowLight","coverAlt":"带有窗形元素的抽象作品占位图","excerpt":"第二件示例作品，用来展示不同画幅比例如何共处于画廊中。","gallery":[{"imageKey":"artWindowLight","alt":"窗边光影数字占位图","caption":"替换为一段过程说明。"}],"featured":false,"published":true,"tags":["占位","数字"],"order":2}'::jsonb, '把这一段替换为作品的背景：它为什么被创作、它在研究什么，以及它在你们共同档案中的位置。')
+values ('lifestyle', 'wisteria-field-notes', true, '{"title":"紫藤镇手记","date":"2026-08-20T00:00:00.000Z","contentType":"original","author":"Wisteria Archive","coverImage":"lifestyleRetroMorning","coverAlt":"暖色晨光中的桌面与手记","excerpt":"放在图书馆阅览桌上的四页观察手记示例。","personalNote":"这是一册可替换的沉浸式阅读夹具。","featured":true,"published":true,"tags":["沉浸式夹具","手记"],"order":1,"book":{"artifactId":"wisteria-field-notes","kind":"book","fixture":true,"noindex":true,"cover":{"titleZh":"紫藤镇手记","titleEn":"WISTERIA FIELD NOTES","emblem":"wisteria","color":"#6f2f3c","foil":"#d3ad62"},"pages":[{"layout":"title"},{"layout":"prose-image","imageKey":"lifestyleRetroMorning","imageAlt":"晨光照在桌面、杯子和手记上","imageCaption":"清晨九点，阅览室的灯仍然亮着。"},{"layout":"prose"},{"layout":"prose"}]}}'::jsonb, '# 第一则观察
+
+海风穿过高窗时，书页会先于窗帘轻轻移动。我们把这个微小的先后顺序记下来，像记住一条只有清晨才出现的路。
+
+*Field note 01 · The pages notice the sea breeze first.*
+
+<!-- page -->
+
+## 阅览桌
+
+黄铜灯把桌面照成一座小岛。杯沿、铅笔和旧纸张各自留下短短的影子；它们不急着说明什么，只邀请人多停留一会儿。
+
+<!-- page -->
+
+## 今日收藏
+
+- 一枚从书脊间落下的干花瓣
+- 门廊外三次远远的钟声
+- 地毯上被晨光照亮的一小段红色
+
+这些内容只是版式夹具，之后可以替换为真实札记、照片或共同记忆。
+
+<!-- page -->
+
+## 离开之前
+
+合上手记时，不必为这一天写下结论。留下日期、天气，以及仍然想再看一次的事物，就已经足够。
+
+*End of sample volume · Replace with your own field notes.*')
 on conflict (collection, slug) do update set
   published = excluded.published,
   data = excluded.data,
@@ -20,35 +56,31 @@ on conflict (collection, slug) do update set
   body_html = null;
 
 insert into public.content_entries (collection, slug, published, data, body_markdown)
-values ('lifestyle', 'a-found-essay', true, '{"title":"一篇关于注意力的文章","date":"2026-03-18T00:00:00.000Z","contentType":"external","author":"替换为策展人姓名","sourceName":"外部来源占位","externalUrl":"https://example.com","coverImage":"lifestyleShelf","coverAlt":"书架与笔记的抽象占位图","excerpt":"一张外部发现示例卡片，包含私人备注和安全的外部链接。","personalNote":"我们保存这篇文章，是为了提醒自己留意普通日子。请替换为你真正想分享它的原因。","featured":true,"published":true,"tags":["我们发现的事物","文章"],"order":2}'::jsonb, '这则条目展示如何收纳一个外部发现。可以在这里保留一段简短的私人备注，然后通过安全的外部链接把访客带到原始来源。')
-on conflict (collection, slug) do update set
-  published = excluded.published,
-  data = excluded.data,
-  body_markdown = excluded.body_markdown,
-  body_html = null;
+values ('travel', 'atlas-of-tides', true, '{"title":"潮汐图谱","destination":"Wisteria Coast","country":"Imagined Archive","startDate":"2026-06-12T00:00:00.000Z","endDate":"2026-06-15T00:00:00.000Z","year":2026,"coverImage":"travelRetroCoast","coverAlt":"复古海岸列车与蓝色海湾","excerpt":"一册由海岸线、航标与潮汐札记组成的四页示例图谱。","tripCategory":"航海图谱","gallery":[],"highlights":["潮线与旧码头的方向标记","傍晚返航时的金色水面"],"featured":true,"published":true,"tags":["沉浸式夹具","海岸"],"order":2,"book":{"artifactId":"atlas-of-tides","kind":"book","fixture":true,"noindex":true,"cover":{"titleZh":"潮汐图谱","titleEn":"ATLAS OF TIDES","emblem":"wave","color":"#244f58","foil":"#d1ad62"},"pages":[{"layout":"title"},{"layout":"image","imageKey":"travelRetroCoast","imageAlt":"沿着海湾行驶的复古列车与远处帆船","imageCaption":"示例图版 · 北岸慢车与午后潮线"},{"layout":"prose"},{"layout":"prose"}]}}'::jsonb, '# 潮汐图谱
 
-insert into public.content_entries (collection, slug, published, data, body_markdown)
-values ('lifestyle', 'morning-table-notes', true, '{"title":"晨间餐桌札记","date":"2026-02-04T00:00:00.000Z","contentType":"original","author":"替换为作者姓名","coverImage":"lifestyleTable","coverAlt":"安静餐桌场景的抽象占位图","excerpt":"一篇关于日常观察、餐食、书本与居家仪式的原创故事占位内容。","personalNote":"替换为你对这个时刻的私人备注。","featured":true,"published":true,"tags":["家","食物","日常"],"order":1}'::jsonb, '这篇原创生活故事是占位内容。你可以把它替换成一段反思、一道食谱、一次房间更新、一则读书笔记、一个小小里程碑，或任何属于生活档案的内容。
+这不是一张用于抵达的地图，而是一份关于等待的记录：潮水何时盖住礁石，帆影何时越过钟楼，以及哪一种蓝色只在黄昏出现。
 
-这个版式支持长文、图片，以及需要时嵌入的媒体内容。')
-on conflict (collection, slug) do update set
-  published = excluded.published,
-  data = excluded.data,
-  body_markdown = excluded.body_markdown,
-  body_html = null;
+*Atlas plate I · A map for noticing, not arriving.*
 
-insert into public.content_entries (collection, slug, published, data, body_markdown)
-values ('travel', 'garden-walk', true, '{"title":"花园散步","destination":"替换为目的地","country":"替换为国家或地区","startDate":"2025-09-10T00:00:00.000Z","year":2025,"coverImage":"travelGarden","coverAlt":"花园小径的抽象占位图","excerpt":"第二篇旅行条目，用来展示桌面端时间线的交错排布。","tripCategory":"午后札记","gallery":[{"imageKey":"travelGarden","alt":"花园小径占位图","caption":"替换为真实旅行图片。"}],"highlights":["替换为一个你想记住的细节。"],"featured":false,"published":true,"tags":["占位","花园"],"order":2}'::jsonb, '把这段故事替换为旅途中真实的记忆、照片和图片说明。')
-on conflict (collection, slug) do update set
-  published = excluded.published,
-  data = excluded.data,
-  body_markdown = excluded.body_markdown,
-  body_html = null;
+<!-- page -->
 
-insert into public.content_entries (collection, slug, published, data, body_markdown)
-values ('travel', 'winter-coastline', true, '{"title":"冬日海岸线","destination":"替换为目的地","country":"替换为国家或地区","startDate":"2026-01-20T00:00:00.000Z","endDate":"2026-01-24T00:00:00.000Z","year":2026,"coordinates":{"lat":0,"lng":0},"coverImage":"travelCoast","coverAlt":"柔和海岸线的抽象占位图","excerpt":"一篇用于时间线展示的旅行示例，未包含真实的私人位置细节。","tripCategory":"安静旅程","gallery":[{"imageKey":"travelCoast","alt":"海岸线占位图","caption":"替换为真实照片和说明。"},{"imageKey":"travelGarden","alt":"花园小径旅行占位图","caption":"可选的第二张旅行图片占位说明。"}],"highlights":["替换为一个值得记住的瞬间。","替换为一顿喜欢的饭、一次散步或一处风景。"],"featured":true,"published":true,"tags":["占位","海岸"],"order":1}'::jsonb, '这篇旅行故事是完整旅程页面的占位内容。请替换为真实记忆、横向大图、图片网格、说明文字、可选行程笔记和记忆亮点。
+## 北岸图版
 
-公开条目中请避免加入实时精确位置或私人旅行计划。')
+图中的海岸、列车与帆船是可替换的示例图片。未来每一页都可以收纳真实旅程中的横幅照片、手绘路线或旧票据。
+
+<!-- page -->
+
+## 航标记录
+
+从图书馆高窗望去，海岸向南弯曲。三座塔、一道桥和港口外的白帆构成了返航时最容易辨认的顺序。
+
+当雾落下来，先寻找灯，再寻找水面的倒影。
+
+<!-- page -->
+
+## 潮水退去以后
+
+沙滩会暂时保留绳索、贝壳和脚步的轮廓。图谱的最后一页留白，是为了让下一次散步决定它应当收藏什么。')
 on conflict (collection, slug) do update set
   published = excluded.published,
   data = excluded.data,

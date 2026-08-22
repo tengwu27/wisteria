@@ -4,12 +4,47 @@ const imageKey = z.enum([
   'heroStillness',
   'artPaperStudy',
   'artWindowLight',
+  'artRetroStudio',
   'lifestyleTable',
   'lifestyleShelf',
+  'lifestyleRetroMorning',
   'travelCoast',
   'travelGarden',
+  'travelRetroCoast',
   'portraitPlaceholder'
 ]);
+
+const bookPage = z
+  .object({
+    layout: z.enum(['title', 'prose', 'image', 'prose-image']),
+    imageKey: imageKey.optional(),
+    imageAlt: z.string().min(1).optional(),
+    imageCaption: z.string().optional()
+  })
+  .superRefine((page, context) => {
+    const needsImage = page.layout === 'image' || page.layout === 'prose-image';
+    if (needsImage && (!page.imageKey || !page.imageAlt)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `${page.layout} pages require imageKey and imageAlt`
+      });
+    }
+  });
+
+const bookPresentation = z.object({
+  artifactId: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  kind: z.literal('book'),
+  fixture: z.boolean().default(false),
+  noindex: z.boolean().default(false),
+  cover: z.object({
+    titleZh: z.string().min(1),
+    titleEn: z.string().min(1),
+    emblem: z.enum(['wisteria', 'sun', 'wave']),
+    color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+    foil: z.string().regex(/^#[0-9a-fA-F]{6}$/)
+  }),
+  pages: z.array(bookPage).min(2).max(4)
+});
 
 const galleryImage = z.object({
   imageKey,
@@ -35,7 +70,8 @@ const art = defineCollection({
     featured: z.boolean().default(false),
     published: z.boolean().default(true),
     tags: z.array(z.string()).default([]),
-    order: z.number().default(0)
+    order: z.number().default(0),
+    book: bookPresentation.optional()
   })
 });
 
@@ -56,7 +92,8 @@ const lifestyle = defineCollection({
     featured: z.boolean().default(false),
     published: z.boolean().default(true),
     tags: z.array(z.string()).default([]),
-    order: z.number().default(0)
+    order: z.number().default(0),
+    book: bookPresentation.optional()
   })
 });
 
@@ -84,7 +121,8 @@ const travel = defineCollection({
     featured: z.boolean().default(false),
     published: z.boolean().default(true),
     tags: z.array(z.string()).default([]),
-    order: z.number().default(0)
+    order: z.number().default(0),
+    book: bookPresentation.optional()
   })
 });
 

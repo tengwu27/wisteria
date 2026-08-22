@@ -6,18 +6,96 @@ import villagePlate from '../../../assets/cinematic/scenes/gamified-coastal-vill
 const planningMode = false;
 const compositionReview = true;
 type PlaneDefinition = { id: string; src: string; owner: string; z: number; pointerX: number; pointerY: number; spatialX: number; spatialY: number; minX?: number; maxX?: number };
-type LandmarkDefinition = { id: string; zh: string; en: string; x: number; y: number; w: number; h: number; plane: string };
+type LandmarkDefinition = { id: string; zh: string; en: string; x: number; y: number; w: number; h: number; plane: string; route?: string };
 const planes: PlaneDefinition[] = [
   { id: 'village', src: villagePlate.src, owner: 'registered isometric village, roads, farms, harbor, structures, vehicles, and factory', z: 2, pointerX: .28, pointerY: .09, spatialX: -.10, spatialY: -.04 },
-  { id: 'clouds', src: cloudPlate.src, owner: 'near aerial cloud field', z: 5, pointerX: 1.18, pointerY: .42, spatialX: .86, spatialY: .34 },
+  { id: 'clouds', src: cloudPlate.src, owner: 'near aerial cloud field', z: 5, pointerX: 2.124, pointerY: .756, spatialX: 1.548, spatialY: .612 },
 ];
-const landmarks: LandmarkDefinition[] = [];
+const landmarks: LandmarkDefinition[] = [
+  {
+    id: 'castle',
+    zh: '城堡',
+    en: 'CASTLE',
+    x: 39.5,
+    y: 1,
+    w: 23,
+    h: 42.5,
+    plane: 'village',
+    route: '/castle'
+  },
+  {
+    id: 'harbor',
+    zh: '港湾观景厅',
+    en: 'HARBOR VISTA',
+    x: 30.6,
+    y: 38.5,
+    w: 12.3,
+    h: 33,
+    plane: 'village',
+    route: '/harbor'
+  },
+  {
+    id: 'restaurant',
+    zh: '海湾餐厅',
+    en: 'BAY RESTAURANT',
+    x: 65.3,
+    y: 38.26,
+    w: 14.72,
+    h: 31.88,
+    plane: 'village',
+    route: '/restaurant'
+  },
+  {
+    id: 'cafe',
+    zh: '风车咖啡馆',
+    en: 'WINDMILL CAFÉ',
+    x: 67.1,
+    y: 17.6,
+    w: 10.8,
+    h: 28.4,
+    plane: 'village',
+    route: '/cafe'
+  },
+  {
+    id: 'workshop',
+    zh: '海湾工坊',
+    en: 'BAY WORKSHOP',
+    x: 50.8,
+    y: 43.9,
+    w: 13.4,
+    h: 34.2,
+    plane: 'village',
+    route: '/workshop'
+  },
+  {
+    id: 'library',
+    zh: '大教堂图书馆',
+    en: 'CATHEDRAL LIBRARY',
+    x: 78.8,
+    y: 3.4,
+    w: 13.4,
+    h: 34.6,
+    plane: 'village',
+    route: '/library'
+  },
+  {
+    id: 'factory',
+    zh: '咖啡工厂',
+    en: 'COFFEE FACTORY',
+    x: 81.2,
+    y: 69.8,
+    w: 10.8,
+    h: 25.4,
+    plane: 'village',
+    route: '/factory'
+  }
+];
 ---
 
 <section class="game" data-game-root data-review-mode={planningMode ? 'true' : undefined} data-composition-review={compositionReview ? 'true' : undefined} aria-label="Wisteria 海岸村庄多层视差原型">
   <div class="scene-viewport" data-scene-viewport tabindex="0" aria-label="可水平探索的海岸村庄">
     <div class="scene-world" data-scene-world>
-      <img class="fallback" src={holisticCandidate.src} alt="Wisteria 等距海岸村庄、城堡、港口、咖啡工厂、风车咖啡馆与山城图书馆" data-fallback data-geography-master />
+      <img class="fallback" src={holisticCandidate.src} alt="Wisteria 等距海岸村庄、城堡、港口、海湾工坊、咖啡工厂、风车咖啡馆与山城图书馆" data-fallback data-geography-master />
       <div class="layer-stack" data-layer-stack aria-hidden="true">
         {planes.map((plane) => (
           <div
@@ -42,20 +120,39 @@ const landmarks: LandmarkDefinition[] = [];
               )}
             </div>
             {landmarks.filter((landmark) => landmark.plane === plane.id).map((landmark) => (
-              <button
-                class="landmark"
-                type="button"
-                data-landmark={landmark.id}
-                data-name-zh={landmark.zh}
-                data-name-en={landmark.en}
-                style={`left:${landmark.x}%;top:${landmark.y}%;width:${landmark.w}%;height:${landmark.h}%`}
-                aria-label={`${landmark.zh} ${landmark.en}`}
-              ><span>{landmark.zh}<small>{landmark.en}</small></span></button>
+              landmark.route ? (
+                <a
+                  class:list={['landmark', `landmark-${landmark.id}`]}
+                  href={landmark.route}
+                  data-immersive-route
+                  data-landmark={landmark.id}
+                  data-name-zh={landmark.zh}
+                  data-name-en={landmark.en}
+                  data-route={landmark.route}
+                  style={`left:${landmark.x}%;top:${landmark.y}%;width:${landmark.w}%;height:${landmark.h}%`}
+                  aria-label={`进入${landmark.zh} · ENTER ${landmark.en}`}
+                ></a>
+              ) : (
+                <button
+                  class:list={['landmark', `landmark-${landmark.id}`]}
+                  type="button"
+                  data-landmark={landmark.id}
+                  data-name-zh={landmark.zh}
+                  data-name-en={landmark.en}
+                  style={`left:${landmark.x}%;top:${landmark.y}%;width:${landmark.w}%;height:${landmark.h}%`}
+                  aria-label={`${landmark.zh} · ${landmark.en}`}
+                ></button>
+              )
             ))}
           </div>
         ))}
       </div>
     </div>
+  </div>
+
+  <div class="landmark-label" data-landmark-label data-visible="false" aria-hidden="true">
+    <span data-landmark-label-zh></span>
+    <small data-landmark-label-en></small>
   </div>
 
   <header class="title-plaque" aria-label="Wisteria"><i></i><b>WISTERIA</b><i></i></header>
@@ -111,12 +208,20 @@ const landmarks: LandmarkDefinition[] = [];
   <div class="dialogue hud-panel" data-dialogue role="status" aria-live="polite">
     <p>选择一种互动方式，然后探索村庄。</p><small>Choose an action, then discover the village.</small>
   </div>
-  <div class="loading" data-loading><span>正在准备海岸村庄…</span><small>PREPARING LAYERED VILLAGE</small></div>
+  <div class="loading" data-loading data-immersive-loading aria-hidden="false"><span>正在准备海岸村庄…</span><small>PREPARING LAYERED VILLAGE</small></div>
 </section>
 
 <script>
   import { createPrototypeLayeredSceneController, type LayeredScenePlane } from '@/utils/prototypeLayeredScene';
   import { createDeviceOrientationSpatialEffect } from '@/utils/deviceOrientationSpatialEffect';
+  import {
+    afterCinematicPaint,
+    waitForCinematicImage
+  } from '@/utils/cinematicMediaLoader';
+  import {
+    NAVIGATION_START_EVENT,
+    settleImmersiveArrival
+  } from '@/utils/immersiveNavigation';
 
   const SESSION_KEY = 'wisteria-gamified-coastal-prototype';
   type ActionMode = 'explore' | 'talk' | 'inspect';
@@ -132,13 +237,21 @@ const landmarks: LandmarkDefinition[] = [];
     const viewport = root.querySelector<HTMLElement>('[data-scene-viewport]')!;
     const world = root.querySelector<HTMLElement>('[data-scene-world]')!;
     const stack = root.querySelector<HTMLElement>('[data-layer-stack]')!;
-    const fallback = root.querySelector<HTMLElement>('[data-fallback]')!;
+    const fallback = root.querySelector<HTMLImageElement>('[data-fallback]')!;
     const loading = root.querySelector<HTMLElement>('[data-loading]')!;
+    const landmarkLabel = root.querySelector<HTMLElement>('[data-landmark-label]')!;
+    const landmarkLabelZh = landmarkLabel.querySelector<HTMLElement>('[data-landmark-label-zh]')!;
+    const landmarkLabelEn = landmarkLabel.querySelector<HTMLElement>('[data-landmark-label-en]')!;
     if (root.dataset.reviewMode === 'true') {
       const terrain = root.querySelector<HTMLImageElement>('[data-geography-master]')!;
-      const reveal = () => { root.dataset.terrainReady = 'true'; loading.hidden = true; };
-      if (terrain.complete && terrain.naturalWidth > 0) reveal();
-      else terrain.decode().then(reveal).catch(reveal);
+      const reveal = () => {
+        root.dataset.terrainReady = 'true';
+        afterCinematicPaint(() => {
+          loading.setAttribute('aria-hidden', 'true');
+          settleImmersiveArrival();
+        }, signal);
+      };
+      void waitForCinematicImage(terrain, { signal }).then(reveal);
       document.addEventListener('astro:before-swap', () => abort.abort(), { once: true });
       return;
     }
@@ -198,7 +311,32 @@ const landmarks: LandmarkDefinition[] = [];
       announce(state.speed === 0 ? '村庄的时间暂停了。' : state.speed > 1 ? '海风和时钟加快了。' : '时间恢复到平静的步调。', 'TIME CONTROL UPDATED');
     }, { signal }));
 
-    root.querySelectorAll<HTMLButtonElement>('[data-landmark]').forEach((button) => {
+    let labelledLandmark: HTMLElement | null = null;
+    let labelFrame = 0;
+    const positionLandmarkLabel = () => {
+      if (!labelledLandmark) return;
+      const rect = labelledLandmark.getBoundingClientRect();
+      landmarkLabel.style.setProperty('--landmark-label-x', `${rect.left + rect.width / 2}px`);
+      landmarkLabel.style.setProperty('--landmark-label-y', `${rect.bottom}px`);
+      labelFrame = requestAnimationFrame(positionLandmarkLabel);
+    };
+    const showLandmarkLabel = (button: HTMLElement) => {
+      labelledLandmark = button;
+      landmarkLabelZh.textContent = button.dataset.nameZh ?? '';
+      landmarkLabelEn.textContent = button.dataset.nameEn ?? '';
+      landmarkLabel.dataset.landmark = button.dataset.landmark ?? '';
+      landmarkLabel.dataset.visible = 'true';
+      cancelAnimationFrame(labelFrame);
+      positionLandmarkLabel();
+    };
+    const hideLandmarkLabel = (button: HTMLElement) => {
+      if (labelledLandmark !== button) return;
+      labelledLandmark = null;
+      landmarkLabel.dataset.visible = 'false';
+      cancelAnimationFrame(labelFrame);
+    };
+
+    root.querySelectorAll<HTMLElement>('[data-landmark]').forEach((button) => {
       const activateLandmark = () => {
       const id = button.dataset.landmark!;
       const name = button.dataset.nameZh!;
@@ -218,12 +356,13 @@ const landmarks: LandmarkDefinition[] = [];
       }
       persist(); updateState();
       };
-      button.addEventListener('click', activateLandmark, { signal });
-      button.addEventListener('keydown', (event) => {
-        if (event.key !== 'Enter' && event.key !== ' ') return;
-        event.preventDefault();
-        activateLandmark();
-      }, { signal });
+      button.addEventListener('pointerenter', () => showLandmarkLabel(button), { signal });
+      button.addEventListener('pointerleave', () => hideLandmarkLabel(button), { signal });
+      button.addEventListener('focus', () => showLandmarkLabel(button), { signal });
+      button.addEventListener('blur', () => hideLandmarkLabel(button), { signal });
+      if (button instanceof HTMLButtonElement) {
+        button.addEventListener('click', activateLandmark, { signal });
+      }
     });
 
     root.querySelectorAll<HTMLButtonElement>('[data-drawer-toggle]').forEach((button) => button.addEventListener('click', () => {
@@ -234,51 +373,108 @@ const landmarks: LandmarkDefinition[] = [];
     }, { signal }));
     document.addEventListener('keydown', (event) => { if (event.key === 'Escape') root.dataset.openDrawer = ''; }, { signal });
 
-    let last = performance.now();
-    const tick = (now: number) => {
-      if (!document.hidden && state.speed > 0 && now - last > 1000) {
-        state.minutes = (state.minutes + state.speed * 2) % 1440; last = now; updateState(); persist();
-      }
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
+    const clockTimer = window.setInterval(() => {
+      if (document.hidden || state.speed <= 0) return;
+      state.minutes = (state.minutes + state.speed * 2) % 1440;
+      updateState();
+      persist();
+    }, 1000);
 
     const images = [...stack.querySelectorAll<HTMLImageElement>('img[data-src]')];
-    const decode = Promise.all(images.map(async (image) => {
+    const loadedLayers = new Set<HTMLImageElement>();
+    let layersPromoted = false;
+    let primarySettled = false;
+    const deferFallbackArrival =
+      document.documentElement.dataset.immersiveNavigating === 'true';
+    const hideLoadingAfterPaint = () => {
+      if (primarySettled) return;
+      primarySettled = true;
+      afterCinematicPaint(() => {
+        loading.setAttribute('aria-hidden', 'true');
+        settleImmersiveArrival();
+      }, signal);
+    };
+    const promoteLayers = () => {
+      if (layersPromoted || loadedLayers.size !== images.length || signal.aborted) return;
+      layersPromoted = true;
+      root.dataset.layersReady = 'true';
+      delete root.dataset.fallback;
+      stack.setAttribute('aria-hidden', 'false');
+      fallback.setAttribute('aria-hidden', 'true');
+      parallax.setSuspended(false);
+      spatial.setSuspended(false);
+      hideLoadingAfterPaint();
+    };
+    const markLayerReady = (image: HTMLImageElement) => {
+      loadedLayers.add(image);
+      promoteLayers();
+    };
+    const layerStates = Promise.all(images.map(async (image) => {
       image.src = image.dataset.src!;
-      await image.decode();
+      const result = await waitForCinematicImage(image, {
+        signal,
+        onLateReady: () => markLayerReady(image)
+      });
+      if (result === 'loaded') markLayerReady(image);
+      return result;
     }));
-    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('decode timeout')), 4000));
-    Promise.race([decode, timeout]).then(() => {
-      root.dataset.layersReady = 'true'; stack.setAttribute('aria-hidden', 'false'); fallback.setAttribute('aria-hidden', 'true');
-      parallax.setSuspended(false); spatial.setSuspended(false); loading.hidden = true;
-    }).catch(() => {
-      root.dataset.fallback = 'true'; loading.hidden = true; parallax.setSuspended(true, true); spatial.setSuspended(true, true);
-      announce('已切换到静态海岸画面。', 'STATIC FALLBACK ACTIVE');
+    void layerStates.then((states) => {
+      if (signal.aborted || states.every((state) => state === 'loaded')) return;
+      root.dataset.fallback = 'true';
+      parallax.setSuspended(true, true);
+      spatial.setSuspended(true, true);
+    });
+    const fallbackState = waitForCinematicImage(fallback, {
+      signal,
+      onLateReady: deferFallbackArrival ? undefined : hideLoadingAfterPaint
+    }).then((result) => {
+      if (result === 'aborted' || layersPromoted) return result;
+      root.dataset.fallback = 'true';
+      parallax.setSuspended(true, true);
+      spatial.setSuspended(true, true);
+      if (!deferFallbackArrival) hideLoadingAfterPaint();
+      if (result !== 'loaded') {
+        announce('海岸画面仍在载入，你可以稍后重试。', 'VILLAGE ARTWORK IS STILL LOADING');
+      }
+      return result;
+    });
+    void Promise.all([layerStates, fallbackState]).then(() => {
+      if (signal.aborted || layersPromoted || !deferFallbackArrival) return;
+      hideLoadingAfterPaint();
     });
 
     const visibility = () => { const hidden = document.hidden; parallax.setSuspended(hidden, true); spatial.setSuspended(hidden, true); };
     document.addEventListener('visibilitychange', visibility, { signal });
+    document.addEventListener(NAVIGATION_START_EVENT, () => {
+      parallax.setSuspended(true, true);
+      spatial.setSuspended(true, true);
+    }, { signal });
     window.addEventListener('orientationchange', () => { spatial.recalibrate(); requestAnimationFrame(parallax.recalculate); }, { signal });
-    document.addEventListener('astro:before-swap', () => { abort.abort(); parallax.destroy(); spatial.destroy(); }, { once: true });
+    document.addEventListener('astro:before-swap', () => {
+      window.clearInterval(clockTimer);
+      cancelAnimationFrame(labelFrame);
+      abort.abort();
+      parallax.destroy();
+      spatial.destroy();
+    }, { once: true });
   }
   initGame();
   document.addEventListener('astro:page-load', initGame);
 </script>
 
 <style>
-  :global(html), :global(body), :global(main) { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #0d4d52; }
-  .game { --cream:#f5dfaa; --teal:#0b6568; --deep:#073f44; --coral:#d86d49; --gold:#d5a63c; --line:#183d38; --ambient-speed:1; position:fixed; inset:0; width:var(--immersive-viewport-width,100dvw); height:var(--immersive-viewport-height,100dvh); overflow:hidden; color:#183d38; font-family:'Wisteria Immersive UI',system-ui,sans-serif; background:#0d4d52; }
+  :global(html), :global(body), :global(main) { margin: 0; width: 100%; height: 100%; overflow: hidden; background: var(--immersive-transition-background, #183d38); }
+  .game { --cream:#f5dfaa; --teal:#0b6568; --deep:#073f44; --coral:#d86d49; --gold:#d5a63c; --line:#183d38; --ambient-speed:1; position:fixed; inset:0; width:var(--immersive-viewport-width,100dvw); height:var(--immersive-viewport-height,100dvh); overflow:hidden; color:#183d38; font-family:'Wisteria Immersive UI',system-ui,sans-serif; background:var(--immersive-transition-background, #183d38); }
   .scene-viewport { position:absolute; inset:0; overflow-x:auto; overflow-y:hidden; overscroll-behavior-x:contain; scrollbar-width:none; outline:none; -webkit-overflow-scrolling:touch; }
   .scene-viewport::-webkit-scrollbar { display:none; }
   .scene-world { position:relative; top:50%; translate:0 -50%; width:max(100%,calc(var(--immersive-viewport-height,100dvh) * 2412 / 941)); min-width:100%; min-height:100%; aspect-ratio:2412/941; overflow:hidden; }
   .fallback,.layer-stack,.plane,.plane-ambient,.plane img { position:absolute; inset:0; width:100%; height:100%; object-fit:fill; }
-  .fallback { z-index:0; transition:opacity .4s; }
+  .fallback { z-index:0; }
   [data-review-mode=true] > :not(.scene-viewport):not(.loading) { display:none!important; }
   [data-review-mode=true] .layer-stack { display:none; }
-  [data-review-mode=true] .fallback { opacity:1; object-fit:contain; background:#0d4d52; }
+  [data-review-mode=true] .fallback { opacity:1; object-fit:contain; background:var(--immersive-transition-background, #183d38); }
   [data-layers-ready=true] .fallback { opacity:0; }
-  .layer-stack { opacity:0; transition:opacity .5s; pointer-events:none; }
+  .layer-stack { opacity:0; pointer-events:none; }
   [data-layers-ready=true] .layer-stack { opacity:1; }
   .plane { transform:translate3d(var(--plane-x,0),var(--plane-y,0),0); transform-origin:center; will-change:transform; pointer-events:none; }
   .plane > .plane-ambient { inset:-3.1% -3.15%; width:auto; height:auto; }
@@ -295,13 +491,54 @@ const landmarks: LandmarkDefinition[] = [];
   .factory-steam i:nth-child(6) { --steam-sway:-30%; --steam-mid:-12%; --steam-counter:9%; --steam-turn:-14deg; --steam-mid-turn:5deg; --steam-counter-turn:-5deg; animation-delay:-4.10s; width:58%; }
   .factory-steam i:nth-child(7) { --steam-sway:16%; --steam-mid:7%; --steam-counter:-5%; --steam-turn:7deg; animation-delay:-4.92s; width:46%; }
   [data-paused] .factory-steam i { animation-play-state:paused; }
-  [data-composition-review=true] > :not(.scene-viewport):not(.loading):not(.mobile-tools):not(.swipe-cue) { display:none!important; }
+  [data-composition-review=true] > :not(.scene-viewport):not(.loading):not(.mobile-tools):not(.swipe-cue):not(.landmark-label) { display:none!important; }
   [data-composition-review=true] .mobile-tools button:not(.spatial) { display:none!important; }
-  .landmark { position:absolute; border:0; background:transparent; pointer-events:auto; cursor:pointer; border-radius:40%; color:white; }
-  .landmark span { position:absolute; left:50%; bottom:3%; translate:-50% 0; min-width:max-content; opacity:0; padding:.38rem .65rem; border:2px solid var(--cream); border-radius:999px; background:rgba(7,63,68,.91); box-shadow:0 2px 0 var(--line); font-size:.76rem; transition:.2s; }
-  .landmark small { display:block; font-size:.54rem; letter-spacing:.09em; opacity:.75; }
-  .landmark:hover span,.landmark:focus-visible span { opacity:1; transform:translateY(-4px); }
+  .landmark { position:absolute; border:0; padding:0; background:transparent; pointer-events:auto; cursor:pointer; border-radius:40%; color:white; }
   .landmark:focus-visible { outline:3px solid #fff2a9; outline-offset:3px; background:rgba(255,235,130,.13); }
+  .landmark-castle {
+    clip-path: polygon(4% 35%,16% 31%,20% 16%,31% 15%,36% 4%,44% 11%,50% 0,57% 13%,67% 11%,73% 25%,88% 27%,99% 43%,100% 70%,91% 85%,72% 94%,51% 100%,26% 96%,9% 84%,0 65%);
+    border-radius:0;
+  }
+  .landmark-castle:focus-visible { outline:none; background:transparent; }
+  .landmark-harbor {
+    clip-path: polygon(5% 8%,37% 3%,47% 20%,64% 27%,99% 35%,100% 90%,80% 100%,16% 97%,0 75%,0 30%);
+    border-radius:0;
+  }
+  .landmark-harbor:focus-visible { outline:none; background:transparent; }
+  .landmark-restaurant {
+    clip-path: polygon(2% 30%,14% 16%,30% 16%,38% 23%,61% 24%,72% 18%,88% 25%,98% 42%,98% 73%,88% 87%,68% 97%,35% 96%,12% 86%,2% 65%);
+    border-radius: 0;
+  }
+  .landmark-restaurant:focus-visible { outline:none; background:transparent; }
+  .landmark-cafe {
+    clip-path: polygon(18% 0,52% 0,66% 16%,86% 25%,98% 48%,90% 82%,68% 100%,24% 98%,4% 76%,0 35%);
+    border-radius:0;
+  }
+  .landmark-cafe:focus-visible { outline:none; background:transparent; }
+  .landmark-workshop {
+    clip-path: polygon(6% 18%,18% 7%,65% 0,91% 12%,100% 40%,96% 88%,72% 100%,23% 96%,0 76%,0 34%);
+    border-radius:0;
+  }
+  .landmark-workshop:focus-visible { outline:none; background:transparent; }
+  .landmark-library {
+    clip-path: polygon(7% 29%,18% 29%,22% 13%,32% 13%,37% 2%,44% 13%,52% 13%,57% 1%,64% 13%,73% 13%,78% 28%,91% 31%,100% 53%,95% 82%,78% 97%,21% 100%,4% 82%,0 52%);
+    border-radius:0;
+  }
+  .landmark-library:focus-visible { outline:none; background:transparent; }
+  .landmark-factory {
+    clip-path: polygon(12% 22%,30% 10%,38% 0,51% 8%,63% 17%,86% 21%,100% 42%,96% 87%,77% 100%,22% 98%,3% 78%,0 43%);
+    border-radius:0;
+  }
+  .landmark-factory:focus-visible { outline:none; background:transparent; }
+  .landmark-label { position:fixed; z-index:34; left:var(--landmark-label-x,50%); top:var(--landmark-label-y,50%); translate:-50% calc(-100% - .5rem); min-width:max-content; opacity:0; padding:.38rem .65rem; border:2px solid rgba(255,197,118,.9); border-radius:999px; color:#fff7df; background:rgba(79,42,18,.9); box-shadow:0 2px 0 var(--line); pointer-events:none; text-align:center; font-size:.76rem; transition:opacity .18s ease,translate .18s ease; }
+  .landmark-label small { display:block; font-size:.54rem; letter-spacing:.09em; opacity:.75; }
+  .landmark-label[data-visible=true] { opacity:1; translate:-50% calc(-100% - .75rem); }
+  .landmark-label[data-landmark=castle] { border-color:rgba(202,177,125,.96); color:#fff8de; background:rgba(45,55,45,.94); }
+  .landmark-label[data-landmark=harbor] { border-color:rgba(125,204,201,.96); color:#fff8de; background:rgba(20,69,73,.94); }
+  .landmark-label[data-landmark=cafe] { border-color:rgba(243,199,79,.92); color:#fff8d8; background:rgba(25,75,72,.93); }
+  .landmark-label[data-landmark=workshop] { border-color:rgba(119,193,184,.94); color:#fff6d8; background:rgba(25,64,61,.94); }
+  .landmark-label[data-landmark=library] { border-color:rgba(159,183,219,.95); color:#fff8de; background:rgba(35,48,72,.94); }
+  .landmark-label[data-landmark=factory] { border-color:rgba(214,132,76,.96); color:#fff3d3; background:rgba(83,38,25,.94); }
   .hud-panel,.title-plaque,.world-status>div,.mobile-tools button,.spatial { border:3px solid var(--line); box-shadow:inset 0 0 0 2px rgba(255,244,191,.65),0 4px 0 rgba(8,43,40,.45); background:linear-gradient(#f8e8bb,#e6c879); }
   .title-plaque { position:fixed; z-index:30; top:max(.55rem,env(safe-area-inset-top)); left:50%; translate:-50% 0; min-width:19rem; padding:.45rem 2rem; border-radius:1.1rem 1.1rem 2.2rem 2.2rem; text-align:center; color:#0a5e61; display:flex; align-items:center; gap:.8rem; justify-content:center; }
   .title-plaque b { font-family:Georgia,serif; font-size:clamp(1.35rem,3vw,2.45rem); letter-spacing:.12em; text-shadow:0 2px #fff0be; }
@@ -330,7 +567,7 @@ const landmarks: LandmarkDefinition[] = [];
   [hidden] { display:none!important; }
   .dialogue { position:fixed; z-index:29; left:50%; translate:-50% 0; bottom:6.2rem; max-width:min(35rem,72vw); border-radius:.8rem; padding:.5rem 1rem; text-align:center; background:rgba(247,226,176,.93); transition:.25s; }.dialogue p{margin:0;font-size:.85rem}.dialogue small{display:block}
   .mobile-tools { position:fixed; z-index:35; top:max(.65rem,env(safe-area-inset-top)); right:max(.65rem,env(safe-area-inset-right)); display:flex; gap:.35rem; }.mobile-tools button{border-radius:999px;padding:.45rem .65rem;color:var(--deep);font:inherit}.mobile-tools button:not(.spatial){display:none}
-  .loading { position:fixed; z-index:60; inset:0; display:grid; place-content:center; text-align:center; color:#fff1c3; background:#0b5b62; transition:opacity .45s; }.loading[hidden]{display:none}.loading span{font-size:1.1rem}.loading small{display:block}
+  .loading { position:fixed; z-index:60; inset:0; display:grid; place-content:center; text-align:center; color:#fff1c3; background:#183d38; opacity:1; transition:opacity .24s ease,visibility 0s linear .24s; }.loading[aria-hidden=true]{visibility:hidden;opacity:0;pointer-events:none}.loading span{font-size:1.1rem}.loading small{display:block}
   .swipe-cue{display:none}
   @media (max-width: 800px), (pointer: coarse) {
     .title-plaque { min-width:0; padding:.3rem .7rem; top:max(.35rem,env(safe-area-inset-top)); }.title-plaque b{font-size:.86rem}.title-plaque i{display:none}
@@ -351,5 +588,5 @@ const landmarks: LandmarkDefinition[] = [];
     75% { opacity:.15; transform:translate(calc(-50% + var(--steam-counter)),-166%) scale(1.28,1.18) rotate(var(--steam-counter-turn)); }
     100% { opacity:0; transform:translate(calc(-50% + var(--steam-sway)),-250%) scale(1.62,1.34) rotate(var(--steam-turn)); }
   }
-  @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}.plane{transform:none!important}.factory-steam{display:none}}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}.plane{transform:none!important}.factory-steam{display:none}.loading{transition-duration:1ms}}
 </style>

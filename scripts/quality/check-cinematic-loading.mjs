@@ -1,5 +1,5 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
-import { extname, resolve } from 'node:path';
+import { dirname, extname, resolve } from 'node:path';
 import { cinematicDeliveryConfig as config } from './cinematic-delivery.config.mjs';
 
 const profileArgument = process.argv.find((argument) =>
@@ -93,6 +93,219 @@ function report(message, route = null, bypassable = true) {
   (canWarn ? warnings : failures).push(message);
 }
 
+function attribute(tag, name) {
+  return tag.match(new RegExp(`\\s${name}=["']([^"']*)["']`))?.[1];
+}
+
+function unique(values) {
+  return new Set(values).size === values.length;
+}
+
+function isNormalizedBounds(bounds) {
+  return Boolean(
+    bounds &&
+    Number.isFinite(bounds.x) &&
+    Number.isFinite(bounds.y) &&
+    Number.isFinite(bounds.width) &&
+    Number.isFinite(bounds.height) &&
+    bounds.x >= 0 &&
+    bounds.y >= 0 &&
+    bounds.width > 0 &&
+    bounds.height > 0 &&
+    bounds.x + bounds.width <= 1.000001 &&
+    bounds.y + bounds.height <= 1.000001
+  );
+}
+
+function validateNormalizedBounds(tag, label, route) {
+  const style = attribute(tag, 'style') ?? '';
+  const values = Object.fromEntries(
+    [...style.matchAll(/(left|top|width|height):([\d.]+)%/g)].map(
+      (match) => [match[1], Number(match[2]) / 100]
+    )
+  );
+  const complete = ['left', 'top', 'width', 'height'].every(
+    (key) => Number.isFinite(values[key])
+  );
+  const inRange =
+    complete &&
+    values.left >= 0 &&
+    values.top >= 0 &&
+    values.width > 0 &&
+    values.height > 0 &&
+    values.left + values.width <= 1.000001 &&
+    values.top + values.height <= 1.000001;
+
+  if (!inRange) {
+    report(`${route.label}: ${label} has invalid normalized bounds`, route, false);
+  }
+}
+
+async function readWebpDimensions(path) {
+  const bytes = await readFile(path);
+  if (
+    bytes.toString('ascii', 0, 4) !== 'RIFF' ||
+    bytes.toString('ascii', 8, 12) !== 'WEBP'
+  ) {
+    throw new Error('not a WebP file');
+  }
+
+  const chunk = bytes.toString('ascii', 12, 16);
+  if (chunk === 'VP8X') {
+    return {
+      width: 1 + bytes.readUIntLE(24, 3),
+      height: 1 + bytes.readUIntLE(27, 3)
+    };
+  }
+  if (chunk === 'VP8 ') {
+    return {
+      width: bytes.readUInt16LE(26) & 0x3fff,
+      height: bytes.readUInt16LE(28) & 0x3fff
+    };
+  }
+  if (chunk === 'VP8L') {
+    const b1 = bytes[21];
+    const b2 = bytes[22];
+    const b3 = bytes[23];
+    const b4 = bytes[24];
+    return {
+      width: 1 + b1 + ((b2 & 0x3f) << 8),
+      height: 1 + (b2 >> 6) + (b3 << 2) + ((b4 & 0x0f) << 10)
+    };
+  }
+
+  throw new Error(`unsupported WebP chunk ${chunk}`);
+}
+
+async function validateLibraryManifest(route) {
+  let manifest;
+  try {
+    manifest = JSON.parse(await readFile(resolve(route.manifest), 'utf8'));
+  } catch (error) {
+    report(
+      `${route.label}: focus manifest cannot be read (${error.message})`,
+      route,
+      false
+    );
+    return;
+  }
+
+  if (
+    manifest.schemaVersion !== 2 ||
+    manifest.geometryMaster?.width !== 4096 ||
+    manifest.geometryMaster?.height !== 1536
+  ) {
+    report(`${route.label}: immutable 4096x1536 geometry master contract is missing`, route, false);
+  }
+
+  if (
+    manifest.geometryMaster?.path !== 'source/library-grand-hall-full-tile-v3.png' ||
+    manifest.geometryMaster?.version !== 3 ||
+    typeof manifest.geometryMaster?.authoringManifest !== 'string'
+  ) {
+    report(`${route.label}: refined v2 geometry master contract is missing`, route, false);
+  } else {
+    try {
+      const authoringPath = resolve(
+        dirname(route.manifest),
+        manifest.geometryMaster.authoringManifest
+      );
+      const authoring = JSON.parse(await readFile(authoringPath, 'utf8'));
+      if (
+        authoring.version !== 3 ||
+        authoring.canvas?.width !== 4096 ||
+        authoring.canvas?.height !== 1536 ||
+        (authoring.composite?.changedPixelsOutsideDeclaredRegions ??
+          authoring.composite?.changedPixelsOutsideCombinedMask) !== 0 ||
+        authoring.regions?.length !== 3
+      ) {
+        report(`${route.label}: exterior-refinement authoring contract is invalid`, route, false);
+      }
+    } catch (error) {
+      report(`${route.label}: exterior-refinement manifest cannot be read (${error.message})`, route, false);
+    }
+  }
+
+  const plates = manifest.focusPlates ?? [];
+  const plateIds = plates.map((plate) => plate.id);
+  if (plates.length !== 2 || !unique(plateIds)) {
+    report(`${route.label}: focus plate IDs must be two unique values`, route, false);
+  }
+
+  for (const plate of plates) {
+    const registration = plate.registration ?? {};
+    if (registration.kind === 'registered-crop') {
+      const crop = registration.masterCrop ?? {};
+      if (
+        crop.left < 0 ||
+        crop.top < 0 ||
+        crop.width <= 0 ||
+        crop.height <= 0 ||
+        crop.left + crop.width > 4096 ||
+        crop.top + crop.height > 1536
+      ) {
+        report(`${route.label}: ${plate.id} crop leaves the geometry master`, route, false);
+      }
+      if (
+        !Array.isArray(registration.protectedAnchors) ||
+        registration.protectedAnchors.length < 2
+      ) {
+        report(`${route.label}: ${plate.id} needs registered transition anchors`, route, false);
+      }
+    } else if (registration.kind === 'independent-viewpoint') {
+      if (!isNormalizedBounds(registration.sourceZone)) {
+        report(`${route.label}: ${plate.id} has an invalid source hall zone`, route, false);
+      }
+      if (
+        typeof registration.cameraDescription !== 'string' ||
+        registration.cameraDescription.trim().length < 24
+      ) {
+        report(`${route.label}: ${plate.id} needs an independent camera description`, route, false);
+      }
+      if (
+        !Array.isArray(registration.continuityAnchors) ||
+        registration.continuityAnchors.length < 3
+      ) {
+        report(`${route.label}: ${plate.id} needs at least three continuity anchors`, route, false);
+      }
+    } else {
+      report(`${route.label}: ${plate.id} has an unknown registration kind`, route, false);
+    }
+
+    try {
+      await stat(resolve('assets/cinematic/scenes/library-grand-hall', plate.source));
+    } catch {
+      report(`${route.label}: missing focus source ${plate.source}`, route, false);
+    }
+
+    for (const delivery of plate.delivery ?? []) {
+      const path = resolve(
+        'assets/cinematic/scenes/library-grand-hall',
+        delivery.path
+      );
+      try {
+        const dimensions = await readWebpDimensions(path);
+        if (
+          dimensions.width !== delivery.width ||
+          dimensions.height !== delivery.height
+        ) {
+          report(
+            `${route.label}: ${delivery.path} is ${dimensions.width}x${dimensions.height}, expected ${delivery.width}x${delivery.height}`,
+            route,
+            false
+          );
+        }
+      } catch (error) {
+        report(
+          `${route.label}: invalid focus delivery ${delivery.path} (${error.message})`,
+          route,
+          false
+        );
+      }
+    }
+  }
+}
+
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
@@ -123,6 +336,98 @@ async function measureInitialRouteCode(html, htmlPath) {
   return bytes;
 }
 
+const transitionSourcePaths = {
+  layout: 'src/layouts/ImmersiveLayout.astro',
+  navigation: 'src/utils/immersiveNavigation.ts',
+  mediaLoader: 'src/utils/cinematicMediaLoader.ts',
+  village: 'src/components/sections/GamifiedCoastalVillage.astro',
+  castle: 'src/components/sections/CastleVista.astro',
+  restaurant: 'src/components/sections/RestaurantVista.astro',
+  library: 'src/components/sections/LibraryExperience.astro',
+  libraryScene: 'src/data/libraryScene.ts',
+  libraryPage: 'src/pages/library.astro'
+};
+const transitionSources = Object.fromEntries(
+  await Promise.all(
+    Object.entries(transitionSourcePaths).map(async ([name, path]) => [
+      name,
+      await readFile(resolve(path), 'utf8')
+    ])
+  )
+);
+const transitionSourceBundle = Object.values(transitionSources).join('\n');
+
+if ((transitionSources.layout.match(/data-immersive-route-curtain/g) ?? []).length !== 1) {
+  failures.push('immersive transition: layout must own exactly one shared route curtain');
+}
+if (transitionSources.layout.includes('data-immersive-crossfade-overlay')) {
+  failures.push('immersive transition: debug baseline must not include a cloned-scene crossfade overlay');
+}
+if (
+  !transitionSources.navigation.includes('astro:before-preparation') ||
+  !transitionSources.navigation.includes('DESTINATION_PRELOAD_TIMEOUT_MS = 8_000') ||
+  !transitionSources.navigation.includes('preloadDestinationAssets(') ||
+  !transitionSources.navigation.includes('awaitImmersiveArrival') ||
+  !transitionSources.navigation.includes('ARRIVAL_READY_EVENT, releaseCurtain') ||
+  !transitionSources.layout.includes('transition:persist="immersive-route-curtain"')
+) {
+  failures.push('immersive transition: simplified preload/curtain navigation coordinator is incomplete');
+}
+if (
+  !transitionSources.mediaLoader.includes('PRIMARY_SCENE_TIMEOUT_MS = 8_000') ||
+  !transitionSources.mediaLoader.includes('OPTIONAL_DETAIL_TIMEOUT_MS = 4_000') ||
+  !transitionSources.mediaLoader.includes("'timed-out'") ||
+  !transitionSources.mediaLoader.includes('onLateReady')
+) {
+  failures.push('immersive loading: bounded primary/optional readiness and late recovery are required');
+}
+if (
+  !transitionSources.village.includes('window.setInterval') ||
+  !transitionSources.village.includes('window.clearInterval(clockTimer)') ||
+  !transitionSources.village.includes('deferFallbackArrival') ||
+  !transitionSources.village.includes('Promise.all([layerStates, fallbackState])') ||
+  transitionSources.village.includes('requestAnimationFrame(tick)') ||
+  transitionSources.village.includes('#0d4d52')
+) {
+  failures.push('village: shell continuity and teardown-safe clock contract are incomplete');
+}
+if (
+  transitionSources.village.includes('data-immersive-document-route') ||
+  transitionSources.library.includes('data-immersive-document-route') ||
+  transitionSources.libraryPage.includes('clientRouter={false}')
+) {
+  failures.push('library: debug baseline must use the shared client navigation path');
+}
+if (
+  !transitionSources.libraryScene.includes('MAIN_GATE_AXIS_X = 2199') ||
+  !transitionSources.libraryScene.includes(
+    'initialFocalRatio: MAIN_GATE_AXIS_X / LIBRARY_CANVAS_WIDTH'
+  ) ||
+  transitionSources.library.includes('data-zone-focal-ratio') ||
+  transitionSources.library.includes('trigger.dataset.zoneFocalRatio')
+) {
+  failures.push('library: overview must start on the central gate and remain stationary while close-ups open');
+}
+for (const name of ['village', 'castle', 'restaurant', 'library']) {
+  const source = transitionSources[name];
+  if (
+    !source.includes('waitForCinematicImage') ||
+    !source.includes('settleImmersiveArrival') ||
+    !source.includes('data-immersive-loading') ||
+    source.includes('data-route-curtain')
+  ) {
+    failures.push(`${name}: shared bounded loading and transition ownership are incomplete`);
+  }
+}
+if (
+  transitionSourceBundle.includes('CinematicSceneExitOverlay') ||
+  transitionSourceBundle.includes('cinematicExitSequence') ||
+  transitionSourceBundle.includes('is-returning-to-village') ||
+  transitionSourceBundle.includes('is-village-intro-pending')
+) {
+  failures.push('immersive transition: obsolete video handoff state remains referenced');
+}
+
 for (const route of config.routes) {
   const path = resolve(route.html);
   let html;
@@ -133,18 +438,54 @@ for (const route of config.routes) {
     continue;
   }
 
-  const videos = html.match(/<video\b[^>]*>/g) ?? [];
   const deferredImages = html.match(/<img\b[^>]*\sdata-src=[^>]*>/g) ?? [];
   const stylesheetPaths = [
     ...html.matchAll(/href=["']([^"']+\.css)["']/g)
+  ].map((match) => match[1]);
+  const scriptPaths = [
+    ...html.matchAll(/src=["']([^"']+\.js)["']/g)
   ].map((match) => match[1]);
   const stylesheets = await Promise.all(
     stylesheetPaths.map((href) =>
       readFile(resolve('dist', href.replace(/^\//, '')), 'utf8')
     )
   );
+  const scripts = await Promise.all(
+    scriptPaths.map((src) =>
+      readFile(resolve('dist', src.replace(/^\//, '')), 'utf8')
+    )
+  );
   const routeCss = [html, ...stylesheets].join('\n');
+  const routeRuntime = [html, ...scripts].join('\n');
   const initialCodeBytes = await measureInitialRouteCode(html, route.html);
+  const routeCurtains = html.match(/\bdata-immersive-route-curtain\b/g) ?? [];
+  const routeLoaders = html.match(
+    /<[a-z][^>]*\bdata-immersive-loading\b[^>]*>/gi
+  ) ?? [];
+
+  if (routeCurtains.length !== 1) {
+    report(
+      `${route.label}: expected one layout-owned route curtain, found ${routeCurtains.length}`,
+      route,
+      false
+    );
+  }
+  if (routeLoaders.length !== 1) {
+    report(
+      `${route.label}: expected one handoff-aware loader, found ${routeLoaders.length}`,
+      route,
+      false
+    );
+  }
+  if (
+    !routeCss.includes('#183d38') ||
+    (!routeCss.includes('180ms') && !routeCss.includes('.18s')) ||
+    !routeCss.includes('immersive-route-curtain') ||
+    !routeCss.includes('data-skip-arrival-reveal') ||
+    routeCss.includes('immersive-crossfade-overlay')
+  ) {
+    report(`${route.label}: simplified curtain transition contract is missing`, route, false);
+  }
 
   if (route.id === 'village') {
     const registeredPlanes = html.match(/data-plane="[^"]+"/g) ?? [];
@@ -164,6 +505,268 @@ for (const route of config.routes) {
     }
     if (!html.includes('class="factory-steam"')) {
       report(`${route.label}: factory steam must remain a layer-owned browser effect`, route, false);
+    }
+    if (
+      !html.includes('data-landmark="castle"') ||
+      !html.includes('data-route="/castle"')
+    ) {
+      report(`${route.label}: castle landmark must route to /castle`, route, false);
+    }
+    if (
+      !html.includes('data-landmark="harbor"') ||
+      !html.includes('data-route="/harbor"')
+    ) {
+      report(`${route.label}: harbor landmark must route to /harbor`, route, false);
+    }
+    const landmarkLinks = html.match(/<a\b[^>]*data-landmark=[^>]*>/g) ?? [];
+    if (
+      landmarkLinks.length === 0 ||
+      !landmarkLinks.every((link) => /\shref=/.test(link)) ||
+      !landmarkLinks.every((link) => link.includes('data-immersive-route'))
+    ) {
+      report(`${route.label}: landmarks must be semantic links on the shared client route`, route, false);
+    }
+  }
+
+  if (route.id === 'library' && !html.includes('data-immersive-route')) {
+    report(`${route.label}: village exit must use the shared client route`, route, false);
+  }
+
+  if (
+    route.sceneKind === 'static-artwork' &&
+    !html.includes('href="/"')
+  ) {
+    report(`${route.label}: village return link is missing`, route, false);
+  }
+
+  if (route.sceneKind === 'static-artwork') {
+    const staticArtwork = html.match(/<img\b[^>]*data-scene-art[^>]*>/g) ?? [];
+    const registeredPlanes = html.match(/data-plane="[^"]+"/g) ?? [];
+    if (staticArtwork.length !== 1) {
+      report(
+        `${route.label}: expected one approved static artwork, found ${staticArtwork.length}`,
+        route,
+        false
+      );
+    }
+    if (registeredPlanes.length > 0) {
+      report(
+        `${route.label}: static artwork route must not ship parallax planes`,
+        route,
+        false
+      );
+    }
+  }
+
+  if (route.sceneKind === 'interactive-artifact-scene') {
+    await validateLibraryManifest(route);
+
+    const hallArtwork = html.match(
+      /<img\b[^>]*data-library-hall-art[^>]*>/g
+    ) ?? [];
+    const focusArtwork = html.match(
+      /<img\b[^>]*data-focus-image[^>]*>/g
+    ) ?? [];
+    const zoneTags = html.match(
+      /<button\b[^>]*data-zone-trigger=[^>]*>/g
+    ) ?? [];
+    const artifactTags = html.match(
+      /<button\b[^>]*data-artifact-trigger=[^>]*>/g
+    ) ?? [];
+    const bookTags = html.match(
+      /<article\b[^>]*data-book=[^>]*>/g
+    ) ?? [];
+    const pageImageTags = html.match(
+      /<img\b[^>]*data-page-image[^>]*>/g
+    ) ?? [];
+    const expectedArtifactIds = route.artifactRoutes.map((artifact) => artifact.id);
+    const placedArtifactIds = artifactTags.map((tag) =>
+      attribute(tag, 'data-artifact-trigger')
+    );
+    const inspectedArtifactIds = bookTags.map((tag) =>
+      attribute(tag, 'data-book')
+    );
+    const zoneIds = zoneTags.map((tag) => attribute(tag, 'data-zone-trigger'));
+
+    if (hallArtwork.length !== 1 || !attribute(hallArtwork[0] ?? '', 'src')) {
+      report(`${route.label}: exactly one eager panorama master is required`, route, false);
+    }
+    if (focusArtwork.length !== 2) {
+      report(`${route.label}: expected two focus plates, found ${focusArtwork.length}`, route, false);
+    }
+    if (
+      zoneIds.length !== 2 ||
+      !unique(zoneIds) ||
+      !zoneIds.includes('reading-table') ||
+      !zoneIds.includes('west-shelf')
+    ) {
+      report(`${route.label}: reading-table and west-shelf zones must be unique`, route, false);
+    }
+    if (
+      !unique(placedArtifactIds) ||
+      !unique(inspectedArtifactIds) ||
+      expectedArtifactIds.some((id) => !placedArtifactIds.includes(id)) ||
+      expectedArtifactIds.some((id) => !inspectedArtifactIds.includes(id)) ||
+      placedArtifactIds.length !== expectedArtifactIds.length ||
+      inspectedArtifactIds.length !== expectedArtifactIds.length
+    ) {
+      report(`${route.label}: scene placements and book inspectors are out of sync`, route, false);
+    }
+
+    for (const tag of zoneTags) {
+      validateNormalizedBounds(
+        tag,
+        `zone ${attribute(tag, 'data-zone-trigger')}`,
+        route
+      );
+    }
+    for (const tag of artifactTags) {
+      validateNormalizedBounds(
+        tag,
+        `artifact ${attribute(tag, 'data-artifact-trigger')}`,
+        route
+      );
+    }
+    for (const tag of [...focusArtwork, ...pageImageTags]) {
+      if (!(attribute(tag, 'alt') ?? '').trim()) {
+        report(`${route.label}: focus and book media require non-empty alt text`, route, false);
+      }
+    }
+    for (const tag of focusArtwork) {
+      if (!attribute(tag, 'data-src') || attribute(tag, 'src')) {
+        report(`${route.label}: focus plates must defer requests until zone intent`, route, false);
+      }
+    }
+    for (const tag of pageImageTags) {
+      if (!attribute(tag, 'data-src') || attribute(tag, 'src')) {
+        report(`${route.label}: closed book images must remain deferred`, route, false);
+      }
+    }
+    if (
+      !html.includes('data-reveal-control') ||
+      !html.includes('data-book-layer') ||
+      !routeRuntime.includes('sessionStorage') ||
+      !routeRuntime.includes('popstate') ||
+      !routeCss.includes('prefers-reduced-motion') ||
+      /<audio\b/i.test(html)
+    ) {
+      report(`${route.label}: immersive accessibility and history contract is incomplete`, route, false);
+    }
+    if (
+      !/html\.immersive-document[^{}]{0,220}\{[^}]*overflow\s*:\s*hidden/.test(
+        routeCss
+      )
+    ) {
+      report(`${route.label}: body-level overflow containment is missing`, route, false);
+    }
+
+    for (const artifact of route.artifactRoutes) {
+      const bookTag = bookTags.find(
+        (tag) => attribute(tag, 'data-book') === artifact.id
+      );
+      const declaredPages = Number(attribute(bookTag ?? '', 'data-page-count'));
+      if (
+        artifact.pages < 2 ||
+        artifact.pages > 4 ||
+        declaredPages !== artifact.pages
+      ) {
+        report(`${route.label}: ${artifact.id} page count is invalid`, route, false);
+      }
+
+      let artifactHtml;
+      try {
+        artifactHtml = await readFile(resolve(artifact.html), 'utf8');
+      } catch {
+        report(`${route.label}: direct artifact route is missing at ${artifact.html}`, route, false);
+        continue;
+      }
+      const semanticPages = artifactHtml.match(/<section\b[^>]*data-book-page=/g) ?? [];
+      const ownBook = artifactHtml.match(
+        new RegExp(`<article\\b[^>]*data-book=["']${artifact.id}["'][^>]*>`)
+      )?.[0];
+      if (
+        !artifactHtml.includes(`data-initial-artifact="${artifact.id}"`) ||
+        !ownBook ||
+        attribute(ownBook, 'aria-hidden') !== 'false' ||
+        semanticPages.length < artifact.pages ||
+        !/<meta\b[^>]*name="robots"[^>]*noindex/i.test(artifactHtml)
+      ) {
+        report(`${route.label}: ${artifact.id} direct/no-JavaScript route contract failed`, route, false);
+      }
+    }
+
+    for (const media of route.bookMedia) {
+      const path = resolve(media.path);
+      try {
+        const dimensions = await readWebpDimensions(path);
+        const bytes = (await stat(path)).size;
+        const stem = path.split('/').at(-1).replace(/\.webp$/, '');
+        if (
+          dimensions.width !== media.width ||
+          dimensions.height !== media.height
+        ) {
+          report(
+            `${route.label}: ${media.path} is ${dimensions.width}x${dimensions.height}, expected ${media.width}x${media.height}`,
+            route,
+            false
+          );
+        }
+        if (bytes > config.budgets.deliveryImageBytes) {
+          report(`${route.label}: ${media.path} exceeds the individual image budget`, route);
+        }
+        if (!html.includes(stem)) {
+          report(`${route.label}: orphaned responsive book media ${stem}`, route, false);
+        }
+      } catch (error) {
+        report(`${route.label}: invalid responsive book media ${media.path} (${error.message})`, route, false);
+      }
+    }
+
+    const deliveryFiles = (await walk(route.mediaRoots[0])).filter(
+      (path) => extname(path).toLowerCase() === '.webp'
+    );
+    for (const deliveryPath of deliveryFiles) {
+      const stem = deliveryPath.split('/').at(-1).replace(/\.webp$/, '');
+      if (!html.includes(stem)) {
+        report(`${route.label}: orphaned delivery media ${stem}`, route, false);
+      }
+    }
+  }
+
+  if (route.castleScene) {
+    const castleViews = {
+      gate: '/castle',
+      courtyard: '/castle/courtyard',
+      arcade: '/castle/arcade'
+    };
+    const sceneAttribute = `data-castle-scene="${route.castleScene}"`;
+    if (!html.includes('data-castle-vista') || !html.includes(sceneAttribute)) {
+      report(`${route.label}: castle scene identity is missing`, route, false);
+    }
+    if (!html.includes('data-castle-navigator')) {
+      report(`${route.label}: three-view castle navigator is missing`, route, false);
+    }
+    for (const [view, href] of Object.entries(castleViews)) {
+      if (
+        !html.includes(`data-castle-view="${view}"`) ||
+        !html.includes(`href="${href}"`)
+      ) {
+        report(`${route.label}: castle navigator is missing ${view}`, route, false);
+      }
+    }
+    const activeView = new RegExp(
+      `<a[^>]*data-castle-view="${route.castleScene}"[^>]*aria-current="page"`
+    );
+    const currentPages = html.match(/aria-current="page"/g) ?? [];
+    if (!activeView.test(html) || currentPages.length !== 1) {
+      report(`${route.label}: castle navigator active view is incorrect`, route, false);
+    }
+    const activeArtwork = `castle-${route.castleScene}-`;
+    const inactiveArtwork = Object.keys(castleViews)
+      .filter((view) => view !== route.castleScene)
+      .some((view) => html.includes(`castle-${view}-`));
+    if (!html.includes(activeArtwork) || inactiveArtwork) {
+      report(`${route.label}: only the active castle artwork may be requested`, route, false);
     }
   }
 
@@ -215,33 +818,46 @@ for (const route of config.routes) {
     report(`${route.label}: editorial font bundle leaked into immersive route`, route);
   }
 
-  for (const video of videos) {
-    if (/\ssrc=/.test(video)) {
-      report(`${route.label}: video has an eager src attribute`, route);
-    }
-    if (/\sposter=/.test(video)) {
-      report(`${route.label}: video has an eager poster attribute`, route);
-    }
-    if (/\spreload=["']auto["']/.test(video)) {
-      report(`${route.label}: video uses preload=auto`, route);
-    }
-  }
-
   for (const image of deferredImages) {
     if (/\ssrc=/.test(image)) {
       report(`${route.label}: deferred layer image has an eager src attribute`, route);
     }
   }
 
-  if (route.deliveryStatus === 'production' && route.id !== 'village') {
-    const exits = videos.filter((video) => video.includes('data-exit-video'));
-    if (exits.length !== 1) {
-      report(
-        `${route.label}: expected one reusable exit video, found ${exits.length}`,
-        route,
-        false
-      );
+}
+
+let sitemapXml = '';
+try {
+  const sitemapFiles = (await walk(resolve('dist'))).filter(
+    (path) => /\/sitemap[^/]*\.xml$/.test(path)
+  );
+  sitemapXml = (
+    await Promise.all(sitemapFiles.map((path) => readFile(path, 'utf8')))
+  ).join('\n');
+  if (sitemapFiles.length === 0) {
+    failures.push('sitemap: no generated XML files found');
+  }
+} catch (error) {
+  failures.push(`sitemap: unable to inspect generated XML (${error.message})`);
+}
+for (const fragment of config.sitemapExcludedFragments) {
+  if (sitemapXml.includes(fragment)) {
+    failures.push(`sitemap: excluded route remains published: ${fragment}`);
+  }
+}
+
+for (const legacyPath of config.legacyRedirects) {
+  const redirectPath = resolve('dist', legacyPath, 'index.html');
+  try {
+    const redirectHtml = await readFile(redirectPath, 'utf8');
+    if (
+      !/http-equiv=["']refresh["']/i.test(redirectHtml) ||
+      !redirectHtml.includes('/library')
+    ) {
+      failures.push(`${legacyPath}: static redirect to /library is invalid`);
     }
+  } catch {
+    failures.push(`${legacyPath}: static redirect output is missing`);
   }
 }
 
@@ -288,16 +904,6 @@ for (const route of config.routes) {
       ) {
         report(
           `${path}: delivery image exceeds ${config.budgets.deliveryImageBytes} bytes`,
-          route
-        );
-      }
-      if (
-        path.includes('/transitions/') &&
-        extension === '.mp4' &&
-        (await stat(path)).size > config.budgets.transitionVideoBytes
-      ) {
-        report(
-          `${path}: transition delivery exceeds ${config.budgets.transitionVideoBytes} bytes`,
           route
         );
       }

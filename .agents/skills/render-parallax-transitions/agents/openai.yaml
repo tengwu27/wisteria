@@ -1,0 +1,4 @@
+interface:
+  display_name: "Parallax Transition Renderer"
+  short_description: "Render time-driven parallax reveal videos"
+  default_prompt: "Use $render-parallax-transitions to render these registered depth plates as a controlled transition video."

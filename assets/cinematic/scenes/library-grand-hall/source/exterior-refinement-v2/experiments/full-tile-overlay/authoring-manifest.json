@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "sceneId": "library-grand-hall",
+  "version": 3,
+  "status": "approved",
+  "canvas": { "width": 4096, "height": 1536 },
+  "immutableV1": {
+    "path": "../../immutable/library-grand-hall-approved-v1.png",
+    "sha256": "ca4c7518cbc57a8734e444197b60c5bb524c3f5435be52075715d7a04654b34c"
+  },
+  "previousV2": {
+    "path": "../../../library-grand-hall-refined-v2.png",
+    "sha256": "44807216bca2776e349a94dc0d626a2e4ef9b85154ce101214dea2518a4303cd"
+  },
+  "composite": {
+    "path": "library-grand-hall-full-tile-candidate.png",
+    "promotedPath": "../../../library-grand-hall-full-tile-v3.png",
+    "sha256": "ef78783b35b3288e6c7dd3ce32a721c92caf47d0e83655d5b3723d3110b423cb",
+    "method": "direct byte-preserving RGB replacement of three complete contextual tiles over immutable v1",
+    "changedPixelsOutsideDeclaredRegions": 0,
+    "apertureMasks": false
+  },
+  "regions": [
+    {
+      "id": "west",
+      "masterBounds": { "left": 0, "top": 40, "width": 760, "height": 1220 },
+      "donor": "../../donors/west-registered.png",
+      "donorSha256": "70076d9f6ae181bf945a4fe44c9d5b712e965546c55fa2e27beafd86b1c0e25d"
+    },
+    {
+      "id": "center",
+      "masterBounds": { "left": 1660, "top": 0, "width": 1000, "height": 1300 },
+      "donor": "../../donors/center-registered.png",
+      "donorSha256": "5eb2362820f1cbc7625e8a6077871f5a3a02f392bbf896361e8b2ac46c3e6b51"
+    },
+    {
+      "id": "east",
+      "masterBounds": { "left": 3336, "top": 40, "width": 760, "height": 1220 },
+      "donor": "../../donors/east-registered.png",
+      "donorSha256": "aca31251e806dda858830657f87c76b6f2df6098ce774de29303026736dd6429"
+    }
+  ],
+  "runtimeContract": {
+    "canvasUnchanged": true,
+    "normalizedHotspotsUnchanged": true,
+    "focusPlatesUnchanged": true,
+    "routesUnchanged": true
+  }
+}

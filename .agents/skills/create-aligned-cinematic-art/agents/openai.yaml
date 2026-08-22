@@ -1,0 +1,4 @@
+interface:
+  display_name: "Aligned Cinematic Art"
+  short_description: "Refine holistic art and registered variants"
+  default_prompt: "Use $create-aligned-cinematic-art to refine an approved holistic scene or create geometry-aligned artwork variants."

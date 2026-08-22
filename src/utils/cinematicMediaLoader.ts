@@ -1,173 +1,103 @@
-export interface CinematicVideoMedia {
-  src: string;
-  poster?: string;
-}
+export const PRIMARY_SCENE_TIMEOUT_MS = 8_000;
+export const OPTIONAL_DETAIL_TIMEOUT_MS = 4_000;
 
-interface LayerBundleLoaderOptions<Theme extends string> {
-  stacks: Record<Theme, HTMLElement>;
-  imageSelector: string;
+export type CinematicImageState =
+  | 'loaded'
+  | 'timed-out'
+  | 'failed'
+  | 'aborted';
+
+interface CinematicImageOptions {
   signal: AbortSignal;
+  timeoutMs?: number;
+  onLateReady?: () => void;
 }
 
-export interface LayerBundleLoader<Theme extends string> {
-  load: (theme: Theme) => Promise<boolean>;
-  isLoaded: (theme: Theme) => boolean;
-}
-
-interface NetworkInformationLike {
-  effectiveType?: string;
-  saveData?: boolean;
+async function decodeLoadedImage(image: HTMLImageElement) {
+  if (typeof image.decode !== 'function') return;
+  await image.decode().catch(() => undefined);
 }
 
 /**
- * Run optional cinematic loading only after the first scene has had time to
- * settle. Slow connections and data-saving users never receive this traffic.
+ * Wait for a scene image without allowing a stalled request to trap the page.
+ * A timed-out image keeps its load listener so callers can recover if it
+ * becomes ready later.
  */
-export function scheduleCinematicWarmup(
-  task: () => void | Promise<unknown>,
-  signal: AbortSignal,
-  delay = 4000
+export function waitForCinematicImage(
+  image: HTMLImageElement,
+  {
+    signal,
+    timeoutMs = PRIMARY_SCENE_TIMEOUT_MS,
+    onLateReady
+  }: CinematicImageOptions
 ) {
-  const connection = (
-    navigator as Navigator & { connection?: NetworkInformationLike }
-  ).connection;
-  if (
-    signal.aborted ||
-    connection?.saveData ||
-    connection?.effectiveType?.includes('2g')
-  ) return;
-
-  let idleId: number | undefined;
-  const run = () => {
-    if (signal.aborted || document.hidden) return;
-    void task();
-  };
-  const delayId = window.setTimeout(() => {
-    if ('requestIdleCallback' in window) {
-      idleId = window.requestIdleCallback(run, { timeout: 3000 });
-    } else {
-      run();
-    }
-  }, delay);
-
-  signal.addEventListener('abort', () => {
-    window.clearTimeout(delayId);
-    if (idleId !== undefined && 'cancelIdleCallback' in window) {
-      window.cancelIdleCallback(idleId);
-    }
-  }, { once: true });
-}
-
-export function showDeferredVideoPoster(
-  video: HTMLVideoElement,
-  media: CinematicVideoMedia
-) {
-  if (media.poster && video.getAttribute('poster') !== media.poster) {
-    video.setAttribute('poster', media.poster);
-  }
-}
-
-export function loadDeferredVideo(
-  video: HTMLVideoElement,
-  media: CinematicVideoMedia
-) {
-  video.muted = true;
-  showDeferredVideoPoster(video, media);
-  if (video.getAttribute('src') !== media.src) {
-    video.setAttribute('src', media.src);
-    video.load();
-  }
-}
-
-export function releaseDeferredVideo(
-  video: HTMLVideoElement,
-  options: { keepPoster?: boolean } = {}
-) {
-  video.pause();
-  video.removeAttribute('src');
-  if (!options.keepPoster) video.removeAttribute('poster');
-  video.load();
-}
-
-function waitForImage(image: HTMLImageElement, signal: AbortSignal) {
-  return new Promise<void>((resolve, reject) => {
-    if (signal.aborted) {
-      reject(new DOMException('Layer loading aborted', 'AbortError'));
-      return;
-    }
-
-    const decode = () => {
-      if (typeof image.decode === 'function') {
-        image.decode().then(resolve).catch(resolve);
-      } else {
-        resolve();
-      }
-    };
-
-    if (image.complete && image.naturalWidth > 0) {
-      decode();
-      return;
-    }
+  return new Promise<CinematicImageState>((resolve) => {
+    let initialState: CinematicImageState | null = null;
+    let timer = 0;
 
     const cleanup = () => {
+      window.clearTimeout(timer);
       image.removeEventListener('load', onLoad);
       image.removeEventListener('error', onError);
+      signal.removeEventListener('abort', onAbort);
+    };
+    const settle = (state: CinematicImageState, keepListening = false) => {
+      if (initialState) return;
+      initialState = state;
+      window.clearTimeout(timer);
+      if (!keepListening) cleanup();
+      resolve(state);
     };
     const onLoad = () => {
-      cleanup();
-      decode();
+      void decodeLoadedImage(image).then(() => {
+        if (signal.aborted || image.naturalWidth <= 0) return;
+        if (initialState === 'timed-out') {
+          cleanup();
+          onLateReady?.();
+          return;
+        }
+        settle('loaded');
+      });
     };
     const onError = () => {
-      cleanup();
-      reject(new Error(`Layer failed: ${image.dataset.src ?? 'unknown'}`));
+      if (initialState === 'timed-out') {
+        cleanup();
+        return;
+      }
+      settle('failed');
+    };
+    const onAbort = () => {
+      if (!initialState) settle('aborted');
+      else cleanup();
     };
 
-    image.addEventListener('load', onLoad, { once: true });
-    image.addEventListener('error', onError, { once: true });
+    if (signal.aborted) {
+      settle('aborted');
+      return;
+    }
+
+    image.addEventListener('load', onLoad);
+    image.addEventListener('error', onError);
+    signal.addEventListener('abort', onAbort, { once: true });
+    timer = window.setTimeout(
+      () => settle('timed-out', Boolean(onLateReady)),
+      timeoutMs
+    );
+
+    if (image.complete) {
+      if (image.naturalWidth > 0) onLoad();
+      else onError();
+    }
   });
 }
 
-export function createLayerBundleLoader<Theme extends string>({
-  stacks,
-  imageSelector,
-  signal
-}: LayerBundleLoaderOptions<Theme>): LayerBundleLoader<Theme> {
-  const promises = new Map<Theme, Promise<boolean>>();
-
-  const load = (theme: Theme) => {
-    const existing = promises.get(theme);
-    if (existing) return existing;
-
-    const stack = stacks[theme];
-    const images = Array.from(
-      stack.querySelectorAll<HTMLImageElement>(imageSelector)
-    );
-    for (const image of images) {
-      if (!image.hasAttribute('src') && image.dataset.src) {
-        image.src = image.dataset.src;
-      }
-    }
-
-    const promise = Promise.all(images.map((image) => waitForImage(image, signal)))
-      .then(() => {
-        stack.dataset.loaded = 'true';
-        delete stack.dataset.failed;
-        return true;
-      })
-      .catch((error: unknown) => {
-        if (!(error instanceof DOMException && error.name === 'AbortError')) {
-          stack.dataset.failed = 'true';
-        }
-        promises.delete(theme);
-        return false;
-      });
-
-    promises.set(theme, promise);
-    return promise;
-  };
-
-  return {
-    load,
-    isLoaded: (theme) => stacks[theme].dataset.loaded === 'true'
-  };
+export function afterCinematicPaint(
+  callback: () => void,
+  signal?: AbortSignal
+) {
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      if (!signal?.aborted) callback();
+    });
+  });
 }

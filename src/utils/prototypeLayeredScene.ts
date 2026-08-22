@@ -32,7 +32,6 @@ export function createPrototypeLayeredSceneController(options: {
 }): PrototypeLayeredSceneController {
   const { root, viewport, world, planes, signal } = options;
   const neutral = options.neutralFocalRatio ?? 0.53;
-  const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let target = { x: 0, y: 0 };
   let current = { x: 0, y: 0 };
@@ -41,7 +40,6 @@ export function createPrototypeLayeredSceneController(options: {
   let overflow = false;
   let exploredRatio = neutral;
   let initialized = false;
-  let edgePanVelocity = 0;
   let frame = 0;
 
   const apply = () => {
@@ -60,15 +58,6 @@ export function createPrototypeLayeredSceneController(options: {
 
   const animate = () => {
     frame = requestAnimationFrame(animate);
-    if (
-      overflow &&
-      !suspended &&
-      finePointer.matches &&
-      !reducedMotion.matches &&
-      Math.abs(edgePanVelocity) > 0.01
-    ) {
-      viewport.scrollLeft += edgePanVelocity;
-    }
     const ease = reducedMotion.matches ? 1 : 0.085;
     current.x += (target.x - current.x) * ease;
     current.y += (target.y - current.y) * ease;
@@ -104,31 +93,6 @@ export function createPrototypeLayeredSceneController(options: {
     }
   };
 
-  const onPointerMove = (event: PointerEvent) => {
-    if (suspended || !finePointer.matches || reducedMotion.matches) return;
-    const rect = viewport.getBoundingClientRect();
-    if (overflow) {
-      const normalizedX = clamp((event.clientX - rect.left) / rect.width, 0, 1);
-      const edgeZone = 0.18;
-      const maximumVelocity = Math.max(4, viewport.clientWidth * 0.006);
-      if (normalizedX < edgeZone) {
-        const strength = (edgeZone - normalizedX) / edgeZone;
-        edgePanVelocity = -maximumVelocity * strength * strength;
-      } else if (normalizedX > 1 - edgeZone) {
-        const strength = (normalizedX - (1 - edgeZone)) / edgeZone;
-        edgePanVelocity = maximumVelocity * strength * strength;
-      } else {
-        edgePanVelocity = 0;
-      }
-      return;
-    }
-    target.x = clamp((0.5 - (event.clientX - rect.left) / rect.width) * 2, -1, 1);
-    target.y = clamp((0.5 - (event.clientY - rect.top) / rect.height) * 2, -1, 1);
-  };
-  const onPointerLeave = () => {
-    edgePanVelocity = 0;
-    if (!overflow) target = { x: 0, y: 0 };
-  };
   const onKey = (event: KeyboardEvent) => {
     if (!overflow) return;
     const amount = Math.max(120, viewport.clientWidth * 0.22);
@@ -140,8 +104,6 @@ export function createPrototypeLayeredSceneController(options: {
     event.preventDefault();
   };
 
-  viewport.addEventListener('pointermove', onPointerMove, { signal });
-  viewport.addEventListener('pointerleave', onPointerLeave, { signal });
   viewport.addEventListener('scroll', syncScrollFocus, { signal, passive: true });
   viewport.addEventListener('keydown', onKey, { signal });
   const observer = new ResizeObserver(recalculate);
@@ -161,7 +123,6 @@ export function createPrototypeLayeredSceneController(options: {
     setSuspended(next, immediate = false) {
       suspended = next;
       if (next) {
-        edgePanVelocity = 0;
         spatial = { x: 0, y: 0 };
         if (!overflow) target = { x: 0, y: 0 };
         if (immediate) current = { ...target };
@@ -169,7 +130,6 @@ export function createPrototypeLayeredSceneController(options: {
       apply();
     },
     reset(immediate = false) {
-      edgePanVelocity = 0;
       target = { x: 0, y: 0 };
       spatial = { x: 0, y: 0 };
       if (immediate) current = { x: 0, y: 0 };

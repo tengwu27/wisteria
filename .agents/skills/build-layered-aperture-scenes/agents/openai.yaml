@@ -1,0 +1,4 @@
+interface:
+  display_name: "Layered Aperture Scenes"
+  short_description: "Build exact window and aperture layer contracts"
+  default_prompt: "Use $build-layered-aperture-scenes to create an exact registered aperture scene from this artwork."

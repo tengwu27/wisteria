@@ -1,6 +1,7 @@
 :root {
   --immersive-viewport-width: 100vw;
   --immersive-viewport-height: 100vh;
+  --immersive-transition-background: #183d38;
 }
 
 @supports (width: 100dvw) and (height: 100dvh) {
@@ -20,12 +21,45 @@ html.immersive-document body > main {
   margin: 0;
   overflow: hidden;
   overscroll-behavior: none;
-  background: #101d1b;
+  background: var(--immersive-transition-background);
 }
 
 html.immersive-document body > main {
   position: relative;
   isolation: isolate;
+}
+
+:root::view-transition-group(root),
+:root::view-transition-old(root),
+:root::view-transition-new(root) {
+  animation: none !important;
+}
+
+.immersive-route-curtain {
+  position: fixed;
+  z-index: 2147483646;
+  inset: 0;
+  visibility: hidden;
+  background: var(--immersive-transition-background);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 180ms cubic-bezier(.22, .72, .22, 1),
+    visibility 0s linear 180ms;
+}
+
+.immersive-route-curtain[data-active='true'] {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+[data-immersive-loading][data-skip-arrival-reveal='true'] {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: none !important;
 }
 
 .spatial-effect-toggle {
@@ -83,5 +117,11 @@ html.immersive-document body > main {
     min-height: 2.6rem;
     padding: 0.42rem 0.65rem;
     font-size: 0.68rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .immersive-route-curtain {
+    transition-duration: 1ms;
   }
 }

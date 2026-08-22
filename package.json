@@ -11,6 +11,8 @@
     "audit:cinematic-loading": "node scripts/quality/check-cinematic-loading.mjs --profile=production",
     "audit:cinematic-loading:prototype": "node scripts/quality/check-cinematic-loading.mjs --profile=prototype",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "assets:library:build": "node assets/cinematic/scenes/library-grand-hall/scripts/build-static-bundle.mjs",
+    "assets:library-books:build": "node scripts/assets/build-library-book-media.mjs",
     "assets:house:validate": ".venv/bin/python scripts/assets/validate-house.py",
     "supabase:seed:generate": "node scripts/content/export-to-supabase.mjs"
   },
