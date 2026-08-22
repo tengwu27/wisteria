@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cinematic Interaction Coordinator"
+  short_description: "Route cinematic art, motion, and web workflows"
+  default_prompt: "Use $coordinate-cinematic-interactions to route this scene through the smallest complete cinematic workflow."

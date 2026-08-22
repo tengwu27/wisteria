@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ambient Cinematic Loops"
+  short_description: "Animate subtle loops without structural drift"
+  default_prompt: "Use $render-ambient-cinematic-loops to turn this approved scene into a subtle ambient video loop."

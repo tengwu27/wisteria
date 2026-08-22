@@ -1,0 +1,592 @@
+---
+import holisticCandidate from '../../../assets/cinematic/scenes/gamified-coastal-village/isometric-parallax/registered/fallback.webp';
+import cloudPlate from '../../../assets/cinematic/scenes/gamified-coastal-village/isometric-parallax/registered/01-clouds.webp';
+import villagePlate from '../../../assets/cinematic/scenes/gamified-coastal-village/isometric-parallax/registered/02-village.webp';
+
+const planningMode = false;
+const compositionReview = true;
+type PlaneDefinition = { id: string; src: string; owner: string; z: number; pointerX: number; pointerY: number; spatialX: number; spatialY: number; minX?: number; maxX?: number };
+type LandmarkDefinition = { id: string; zh: string; en: string; x: number; y: number; w: number; h: number; plane: string; route?: string };
+const planes: PlaneDefinition[] = [
+  { id: 'village', src: villagePlate.src, owner: 'registered isometric village, roads, farms, harbor, structures, vehicles, and factory', z: 2, pointerX: .28, pointerY: .09, spatialX: -.10, spatialY: -.04 },
+  { id: 'clouds', src: cloudPlate.src, owner: 'near aerial cloud field', z: 5, pointerX: 2.124, pointerY: .756, spatialX: 1.548, spatialY: .612 },
+];
+const landmarks: LandmarkDefinition[] = [
+  {
+    id: 'castle',
+    zh: '城堡',
+    en: 'CASTLE',
+    x: 39.5,
+    y: 1,
+    w: 23,
+    h: 42.5,
+    plane: 'village',
+    route: '/castle'
+  },
+  {
+    id: 'harbor',
+    zh: '港湾观景厅',
+    en: 'HARBOR VISTA',
+    x: 30.6,
+    y: 38.5,
+    w: 12.3,
+    h: 33,
+    plane: 'village',
+    route: '/harbor'
+  },
+  {
+    id: 'restaurant',
+    zh: '海湾餐厅',
+    en: 'BAY RESTAURANT',
+    x: 65.3,
+    y: 38.26,
+    w: 14.72,
+    h: 31.88,
+    plane: 'village',
+    route: '/restaurant'
+  },
+  {
+    id: 'cafe',
+    zh: '风车咖啡馆',
+    en: 'WINDMILL CAFÉ',
+    x: 67.1,
+    y: 17.6,
+    w: 10.8,
+    h: 28.4,
+    plane: 'village',
+    route: '/cafe'
+  },
+  {
+    id: 'workshop',
+    zh: '海湾工坊',
+    en: 'BAY WORKSHOP',
+    x: 50.8,
+    y: 43.9,
+    w: 13.4,
+    h: 34.2,
+    plane: 'village',
+    route: '/workshop'
+  },
+  {
+    id: 'library',
+    zh: '大教堂图书馆',
+    en: 'CATHEDRAL LIBRARY',
+    x: 78.8,
+    y: 3.4,
+    w: 13.4,
+    h: 34.6,
+    plane: 'village',
+    route: '/library'
+  },
+  {
+    id: 'factory',
+    zh: '咖啡工厂',
+    en: 'COFFEE FACTORY',
+    x: 81.2,
+    y: 69.8,
+    w: 10.8,
+    h: 25.4,
+    plane: 'village',
+    route: '/factory'
+  }
+];
+---
+
+<section class="game" data-game-root data-review-mode={planningMode ? 'true' : undefined} data-composition-review={compositionReview ? 'true' : undefined} aria-label="Wisteria 海岸村庄多层视差原型">
+  <div class="scene-viewport" data-scene-viewport tabindex="0" aria-label="可水平探索的海岸村庄">
+    <div class="scene-world" data-scene-world>
+      <img class="fallback" src={holisticCandidate.src} alt="Wisteria 等距海岸村庄、城堡、港口、海湾工坊、咖啡工厂、风车咖啡馆与山城图书馆" data-fallback data-geography-master />
+      <div class="layer-stack" data-layer-stack aria-hidden="true">
+        {planes.map((plane) => (
+          <div
+            class:list={['plane', `plane-${plane.id}`]}
+            data-plane={plane.id}
+            data-owner={plane.owner}
+            data-z={plane.z}
+            data-pointer-x={plane.pointerX}
+            data-pointer-y={plane.pointerY}
+            data-spatial-x={plane.spatialX}
+            data-spatial-y={plane.spatialY}
+            data-min-x={plane.minX}
+            data-max-x={plane.maxX}
+            style={`z-index:${plane.z}`}
+          >
+            <div class="plane-ambient">
+              <img data-src={plane.src} alt="" draggable="false" />
+              {plane.id === 'village' && (
+                <span class="factory-steam" aria-hidden="true">
+                  <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                </span>
+              )}
+            </div>
+            {landmarks.filter((landmark) => landmark.plane === plane.id).map((landmark) => (
+              landmark.route ? (
+                <a
+                  class:list={['landmark', `landmark-${landmark.id}`]}
+                  href={landmark.route}
+                  data-immersive-route
+                  data-landmark={landmark.id}
+                  data-name-zh={landmark.zh}
+                  data-name-en={landmark.en}
+                  data-route={landmark.route}
+                  style={`left:${landmark.x}%;top:${landmark.y}%;width:${landmark.w}%;height:${landmark.h}%`}
+                  aria-label={`进入${landmark.zh} · ENTER ${landmark.en}`}
+                ></a>
+              ) : (
+                <button
+                  class:list={['landmark', `landmark-${landmark.id}`]}
+                  type="button"
+                  data-landmark={landmark.id}
+                  data-name-zh={landmark.zh}
+                  data-name-en={landmark.en}
+                  style={`left:${landmark.x}%;top:${landmark.y}%;width:${landmark.w}%;height:${landmark.h}%`}
+                  aria-label={`${landmark.zh} · ${landmark.en}`}
+                ></button>
+              )
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <div class="landmark-label" data-landmark-label data-visible="false" aria-hidden="true">
+    <span data-landmark-label-zh></span>
+    <small data-landmark-label-en></small>
+  </div>
+
+  <header class="title-plaque" aria-label="Wisteria"><i></i><b>WISTERIA</b><i></i></header>
+  <aside class="player-panel hud-panel">
+    <div class="portrait" aria-hidden="true">⚓</div>
+    <div class="needs" data-needs>
+      <div><span>活力 <small>ENERGY</small></span><meter min="0" max="100" value="86"></meter></div>
+      <div><span>灵感 <small>SPARK</small></span><meter min="0" max="100" value="74"></meter></div>
+      <div><span>好奇 <small>WONDER</small></span><meter min="0" max="100" value="92"></meter></div>
+      <div><span>心情 <small>MOOD</small></span><meter min="0" max="100" value="88"></meter></div>
+    </div>
+    <button class="drawer-button" type="button" data-drawer-toggle="needs">状态 <small>NEEDS</small></button>
+  </aside>
+
+  <aside class="quests hud-panel" data-drawer="quests">
+    <h2>今日任务 <small>QUESTS</small></h2>
+    <p data-quest="cafe"><span>☕</span> 拜访咖啡馆 <small>VISIT THE CAFÉ</small><b>◇</b></p>
+    <p data-quest="map"><span>🗺</span> 寻找旧地图 <small>FIND THE OLD MAP</small><b>◇</b></p>
+  </aside>
+
+  <aside class="world-status">
+    <div class="currency hud-panel"><span>◉</span><b data-currency>2,840</b></div>
+    <div class="weather hud-panel"><span>☀</span><b>24°C</b><small>晴朗 · SUNNY</small></div>
+  </aside>
+
+  <nav class="actions hud-panel" aria-label="互动方式">
+    <button type="button" data-action="explore" aria-pressed="true"><span>🥾</span>探索<small>EXPLORE</small></button>
+    <button type="button" data-action="talk" aria-pressed="false"><span>💬</span>交谈<small>TALK</small></button>
+    <button type="button" data-action="inspect" aria-pressed="false"><span>⌕</span>观察<small>INSPECT</small></button>
+  </nav>
+
+  <aside class="time-inventory">
+    <div class="clock hud-panel">
+      <div><strong>第 12 天</strong><small>DAY 12</small><time data-clock>09:00</time></div>
+      <nav aria-label="时间速度">
+        <button type="button" data-speed="0" aria-label="暂停">Ⅱ</button>
+        <button type="button" data-speed="1" aria-label="正常速度" aria-pressed="true">▶</button>
+        <button type="button" data-speed="3" aria-label="快速">▶▶</button>
+      </nav>
+    </div>
+    <div class="inventory hud-panel" data-drawer="inventory">
+      <h2>随身物品 <small>INVENTORY</small></h2>
+      <div><span title="紫藤花">♣<b>12</b></span><span title="贝壳">◒<b>7</b></span><span title="海晶">◇<b>4</b></span><span data-map-item hidden title="旧地图">🗺<b>1</b></span></div>
+    </div>
+  </aside>
+
+  <div class="mobile-tools">
+    <button class="spatial" type="button" data-spatial-effect-toggle hidden><span aria-hidden="true">◎</span><span data-spatial-effect-label>空间感</span></button>
+    <button type="button" data-drawer-toggle="quests">任务</button>
+    <button type="button" data-drawer-toggle="inventory">物品</button>
+  </div>
+  <p class="swipe-cue" aria-hidden="true">← 滑动探索 · SWIPE TO EXPLORE →</p>
+  <div class="dialogue hud-panel" data-dialogue role="status" aria-live="polite">
+    <p>选择一种互动方式，然后探索村庄。</p><small>Choose an action, then discover the village.</small>
+  </div>
+  <div class="loading" data-loading data-immersive-loading aria-hidden="false"><span>正在准备海岸村庄…</span><small>PREPARING LAYERED VILLAGE</small></div>
+</section>
+
+<script>
+  import { createPrototypeLayeredSceneController, type LayeredScenePlane } from '@/utils/prototypeLayeredScene';
+  import { createDeviceOrientationSpatialEffect } from '@/utils/deviceOrientationSpatialEffect';
+  import {
+    afterCinematicPaint,
+    waitForCinematicImage
+  } from '@/utils/cinematicMediaLoader';
+  import {
+    NAVIGATION_START_EVENT,
+    settleImmersiveArrival
+  } from '@/utils/immersiveNavigation';
+
+  const SESSION_KEY = 'wisteria-gamified-coastal-prototype';
+  type ActionMode = 'explore' | 'talk' | 'inspect';
+  type PrototypeState = { action: ActionMode; cafeDone: boolean; mapDone: boolean; currency: number; minutes: number; speed: number };
+  const initialState: PrototypeState = { action: 'explore', cafeDone: false, mapDone: false, currency: 2840, minutes: 540, speed: 1 };
+
+  function initGame() {
+    const root = document.querySelector<HTMLElement>('[data-game-root]');
+    if (!root || root.dataset.ready === 'true') return;
+    root.dataset.ready = 'true';
+    const abort = new AbortController();
+    const { signal } = abort;
+    const viewport = root.querySelector<HTMLElement>('[data-scene-viewport]')!;
+    const world = root.querySelector<HTMLElement>('[data-scene-world]')!;
+    const stack = root.querySelector<HTMLElement>('[data-layer-stack]')!;
+    const fallback = root.querySelector<HTMLImageElement>('[data-fallback]')!;
+    const loading = root.querySelector<HTMLElement>('[data-loading]')!;
+    const landmarkLabel = root.querySelector<HTMLElement>('[data-landmark-label]')!;
+    const landmarkLabelZh = landmarkLabel.querySelector<HTMLElement>('[data-landmark-label-zh]')!;
+    const landmarkLabelEn = landmarkLabel.querySelector<HTMLElement>('[data-landmark-label-en]')!;
+    if (root.dataset.reviewMode === 'true') {
+      const terrain = root.querySelector<HTMLImageElement>('[data-geography-master]')!;
+      const reveal = () => {
+        root.dataset.terrainReady = 'true';
+        afterCinematicPaint(() => {
+          loading.setAttribute('aria-hidden', 'true');
+          settleImmersiveArrival();
+        }, signal);
+      };
+      void waitForCinematicImage(terrain, { signal }).then(reveal);
+      document.addEventListener('astro:before-swap', () => abort.abort(), { once: true });
+      return;
+    }
+    const dialogue = root.querySelector<HTMLElement>('[data-dialogue]')!;
+    const spatialButton = root.querySelector<HTMLButtonElement>('[data-spatial-effect-toggle]')!;
+    let state = { ...initialState };
+    try { state = { ...state, ...JSON.parse(sessionStorage.getItem(SESSION_KEY) ?? '{}') }; } catch {}
+    const persist = () => { try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(state)); } catch {} };
+    const announce = (zh: string, en: string) => { dialogue.innerHTML = `<p>${zh}</p><small>${en}</small>`; };
+
+    const planeRecords: LayeredScenePlane[] = [...root.querySelectorAll<HTMLElement>('[data-plane]')].map((element) => ({
+      element,
+      owner: element.dataset.owner ?? '',
+      z: Number(element.dataset.z),
+      pointerX: Number(element.dataset.pointerX),
+      pointerY: Number(element.dataset.pointerY),
+      spatialX: Number(element.dataset.spatialX),
+      spatialY: Number(element.dataset.spatialY),
+      minX: element.dataset.minX === undefined ? undefined : Number(element.dataset.minX),
+      maxX: element.dataset.maxX === undefined ? undefined : Number(element.dataset.maxX),
+      hotspotAssociation: [...element.querySelectorAll<HTMLElement>('[data-landmark]')].map((item) => item.dataset.landmark ?? '')
+    }));
+    const parallax = createPrototypeLayeredSceneController({ root, viewport, world, planes: planeRecords, neutralFocalRatio: .674, signal });
+    const spatial = createDeviceOrientationSpatialEffect({
+      button: spatialButton,
+      signal,
+      axes: 'both',
+      isInteractive: () => root.dataset.layersReady === 'true' && !document.hidden,
+      onFocus: (focus) => parallax.setSpatialFocus(focus),
+      onStatus: (message) => { if (message) announce(message, 'SPATIAL EFFECT'); }
+    });
+
+    const updateState = () => {
+      root.querySelectorAll<HTMLElement>('[data-action]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.action === state.action)));
+      root.querySelectorAll<HTMLElement>('[data-speed]').forEach((button) => button.setAttribute('aria-pressed', String(Number(button.dataset.speed) === state.speed)));
+      root.querySelector<HTMLElement>('[data-currency]')!.textContent = state.currency.toLocaleString();
+      root.querySelector<HTMLElement>('[data-map-item]')!.hidden = !state.mapDone;
+      for (const [quest, done] of [['cafe', state.cafeDone], ['map', state.mapDone]] as const) {
+        const element = root.querySelector<HTMLElement>(`[data-quest="${quest}"]`)!;
+        element.toggleAttribute('data-complete', done);
+        element.querySelector('b')!.textContent = done ? '◆' : '◇';
+      }
+      const hours = Math.floor(state.minutes / 60) % 24;
+      const minutes = Math.floor(state.minutes % 60);
+      root.querySelector('time')!.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      root.style.setProperty('--ambient-speed', state.speed === 0 ? '0' : String(1 / state.speed));
+      root.toggleAttribute('data-paused', state.speed === 0);
+    };
+    updateState();
+
+    root.querySelectorAll<HTMLButtonElement>('[data-action]').forEach((button) => button.addEventListener('click', () => {
+      state.action = button.dataset.action as ActionMode;
+      persist(); updateState(); announce(`${button.textContent?.trim()}模式已选择`, `${state.action.toUpperCase()} MODE`);
+    }, { signal }));
+    root.querySelectorAll<HTMLButtonElement>('[data-speed]').forEach((button) => button.addEventListener('click', () => {
+      state.speed = Number(button.dataset.speed); persist(); updateState();
+      announce(state.speed === 0 ? '村庄的时间暂停了。' : state.speed > 1 ? '海风和时钟加快了。' : '时间恢复到平静的步调。', 'TIME CONTROL UPDATED');
+    }, { signal }));
+
+    let labelledLandmark: HTMLElement | null = null;
+    let labelFrame = 0;
+    const positionLandmarkLabel = () => {
+      if (!labelledLandmark) return;
+      const rect = labelledLandmark.getBoundingClientRect();
+      landmarkLabel.style.setProperty('--landmark-label-x', `${rect.left + rect.width / 2}px`);
+      landmarkLabel.style.setProperty('--landmark-label-y', `${rect.bottom}px`);
+      labelFrame = requestAnimationFrame(positionLandmarkLabel);
+    };
+    const showLandmarkLabel = (button: HTMLElement) => {
+      labelledLandmark = button;
+      landmarkLabelZh.textContent = button.dataset.nameZh ?? '';
+      landmarkLabelEn.textContent = button.dataset.nameEn ?? '';
+      landmarkLabel.dataset.landmark = button.dataset.landmark ?? '';
+      landmarkLabel.dataset.visible = 'true';
+      cancelAnimationFrame(labelFrame);
+      positionLandmarkLabel();
+    };
+    const hideLandmarkLabel = (button: HTMLElement) => {
+      if (labelledLandmark !== button) return;
+      labelledLandmark = null;
+      landmarkLabel.dataset.visible = 'false';
+      cancelAnimationFrame(labelFrame);
+    };
+
+    root.querySelectorAll<HTMLElement>('[data-landmark]').forEach((button) => {
+      const activateLandmark = () => {
+      const id = button.dataset.landmark!;
+      const name = button.dataset.nameZh!;
+      if (id === 'cafe' && (state.action === 'explore' || state.action === 'talk')) {
+        if (!state.cafeDone) { state.cafeDone = true; state.currency += 60; }
+        announce('画廊咖啡馆飘来烘焙香气。任务完成：拜访咖啡馆。', 'QUEST COMPLETE · VISIT THE CAFÉ');
+      } else if ((id === 'lighthouse' || id === 'harbor') && state.action === 'inspect') {
+        if (!state.mapDone) { state.mapDone = true; state.currency += 90; }
+        announce('你在旧航标盒里找到一张褪色的海湾地图。', 'OLD MAP ADDED TO INVENTORY');
+      } else {
+        const lines: Record<ActionMode, [string, string]> = {
+          explore: [`你沿着通往${name}的小路继续探索。`, `EXPLORING ${button.dataset.nameEn}`],
+          talk: [`${name}附近没有人回应，只有海风轻声经过。`, `THE COAST ANSWERS SOFTLY`],
+          inspect: [`${name}带着盐雾与时光留下的细小痕迹。`, `A CLOSER LOOK REVEALS ITS HISTORY`]
+        };
+        announce(...lines[state.action]);
+      }
+      persist(); updateState();
+      };
+      button.addEventListener('pointerenter', () => showLandmarkLabel(button), { signal });
+      button.addEventListener('pointerleave', () => hideLandmarkLabel(button), { signal });
+      button.addEventListener('focus', () => showLandmarkLabel(button), { signal });
+      button.addEventListener('blur', () => hideLandmarkLabel(button), { signal });
+      if (button instanceof HTMLButtonElement) {
+        button.addEventListener('click', activateLandmark, { signal });
+      }
+    });
+
+    root.querySelectorAll<HTMLButtonElement>('[data-drawer-toggle]').forEach((button) => button.addEventListener('click', () => {
+      const drawer = button.dataset.drawerToggle!;
+      const open = root.dataset.openDrawer === drawer;
+      root.dataset.openDrawer = open ? '' : drawer;
+      button.setAttribute('aria-expanded', String(!open));
+    }, { signal }));
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') root.dataset.openDrawer = ''; }, { signal });
+
+    const clockTimer = window.setInterval(() => {
+      if (document.hidden || state.speed <= 0) return;
+      state.minutes = (state.minutes + state.speed * 2) % 1440;
+      updateState();
+      persist();
+    }, 1000);
+
+    const images = [...stack.querySelectorAll<HTMLImageElement>('img[data-src]')];
+    const loadedLayers = new Set<HTMLImageElement>();
+    let layersPromoted = false;
+    let primarySettled = false;
+    const deferFallbackArrival =
+      document.documentElement.dataset.immersiveNavigating === 'true';
+    const hideLoadingAfterPaint = () => {
+      if (primarySettled) return;
+      primarySettled = true;
+      afterCinematicPaint(() => {
+        loading.setAttribute('aria-hidden', 'true');
+        settleImmersiveArrival();
+      }, signal);
+    };
+    const promoteLayers = () => {
+      if (layersPromoted || loadedLayers.size !== images.length || signal.aborted) return;
+      layersPromoted = true;
+      root.dataset.layersReady = 'true';
+      delete root.dataset.fallback;
+      stack.setAttribute('aria-hidden', 'false');
+      fallback.setAttribute('aria-hidden', 'true');
+      parallax.setSuspended(false);
+      spatial.setSuspended(false);
+      hideLoadingAfterPaint();
+    };
+    const markLayerReady = (image: HTMLImageElement) => {
+      loadedLayers.add(image);
+      promoteLayers();
+    };
+    const layerStates = Promise.all(images.map(async (image) => {
+      image.src = image.dataset.src!;
+      const result = await waitForCinematicImage(image, {
+        signal,
+        onLateReady: () => markLayerReady(image)
+      });
+      if (result === 'loaded') markLayerReady(image);
+      return result;
+    }));
+    void layerStates.then((states) => {
+      if (signal.aborted || states.every((state) => state === 'loaded')) return;
+      root.dataset.fallback = 'true';
+      parallax.setSuspended(true, true);
+      spatial.setSuspended(true, true);
+    });
+    const fallbackState = waitForCinematicImage(fallback, {
+      signal,
+      onLateReady: deferFallbackArrival ? undefined : hideLoadingAfterPaint
+    }).then((result) => {
+      if (result === 'aborted' || layersPromoted) return result;
+      root.dataset.fallback = 'true';
+      parallax.setSuspended(true, true);
+      spatial.setSuspended(true, true);
+      if (!deferFallbackArrival) hideLoadingAfterPaint();
+      if (result !== 'loaded') {
+        announce('海岸画面仍在载入，你可以稍后重试。', 'VILLAGE ARTWORK IS STILL LOADING');
+      }
+      return result;
+    });
+    void Promise.all([layerStates, fallbackState]).then(() => {
+      if (signal.aborted || layersPromoted || !deferFallbackArrival) return;
+      hideLoadingAfterPaint();
+    });
+
+    const visibility = () => { const hidden = document.hidden; parallax.setSuspended(hidden, true); spatial.setSuspended(hidden, true); };
+    document.addEventListener('visibilitychange', visibility, { signal });
+    document.addEventListener(NAVIGATION_START_EVENT, () => {
+      parallax.setSuspended(true, true);
+      spatial.setSuspended(true, true);
+    }, { signal });
+    window.addEventListener('orientationchange', () => { spatial.recalibrate(); requestAnimationFrame(parallax.recalculate); }, { signal });
+    document.addEventListener('astro:before-swap', () => {
+      window.clearInterval(clockTimer);
+      cancelAnimationFrame(labelFrame);
+      abort.abort();
+      parallax.destroy();
+      spatial.destroy();
+    }, { once: true });
+  }
+  initGame();
+  document.addEventListener('astro:page-load', initGame);
+</script>
+
+<style>
+  :global(html), :global(body), :global(main) { margin: 0; width: 100%; height: 100%; overflow: hidden; background: var(--immersive-transition-background, #183d38); }
+  .game { --cream:#f5dfaa; --teal:#0b6568; --deep:#073f44; --coral:#d86d49; --gold:#d5a63c; --line:#183d38; --ambient-speed:1; position:fixed; inset:0; width:var(--immersive-viewport-width,100dvw); height:var(--immersive-viewport-height,100dvh); overflow:hidden; color:#183d38; font-family:'Wisteria Immersive UI',system-ui,sans-serif; background:var(--immersive-transition-background, #183d38); }
+  .scene-viewport { position:absolute; inset:0; overflow-x:auto; overflow-y:hidden; overscroll-behavior-x:contain; scrollbar-width:none; outline:none; -webkit-overflow-scrolling:touch; }
+  .scene-viewport::-webkit-scrollbar { display:none; }
+  .scene-world { position:relative; top:50%; translate:0 -50%; width:max(100%,calc(var(--immersive-viewport-height,100dvh) * 2412 / 941)); min-width:100%; min-height:100%; aspect-ratio:2412/941; overflow:hidden; }
+  .fallback,.layer-stack,.plane,.plane-ambient,.plane img { position:absolute; inset:0; width:100%; height:100%; object-fit:fill; }
+  .fallback { z-index:0; }
+  [data-review-mode=true] > :not(.scene-viewport):not(.loading) { display:none!important; }
+  [data-review-mode=true] .layer-stack { display:none; }
+  [data-review-mode=true] .fallback { opacity:1; object-fit:contain; background:var(--immersive-transition-background, #183d38); }
+  [data-layers-ready=true] .fallback { opacity:0; }
+  .layer-stack { opacity:0; pointer-events:none; }
+  [data-layers-ready=true] .layer-stack { opacity:1; }
+  .plane { transform:translate3d(var(--plane-x,0),var(--plane-y,0),0); transform-origin:center; will-change:transform; pointer-events:none; }
+  .plane > .plane-ambient { inset:-3.1% -3.15%; width:auto; height:auto; }
+  .plane > .plane-ambient > img { inset:0; width:100%; height:100%; }
+  .plane img { user-select:none; }
+  .plane-clouds > .plane-ambient { inset:-7.2% -7.4%; opacity:.27; }
+  .plane-clouds img { filter:drop-shadow(0 .18rem .2rem rgba(75,100,105,.16)); }
+  .factory-steam { position:absolute; z-index:2; left:84.72%; top:74.18%; width:1.94%; height:10.5%; translate:-50% -100%; pointer-events:none; }
+  .factory-steam i { --steam-sway:18%; --steam-mid:8%; --steam-counter:-6%; --steam-turn:8deg; --steam-mid-turn:-3deg; --steam-counter-turn:3deg; position:absolute; left:50%; bottom:0; width:48%; height:38%; border-radius:48% 52% 45% 55%; opacity:0; background:radial-gradient(ellipse at 50% 72%,rgba(246,241,219,.52) 0 18%,rgba(228,230,213,.32) 44%,rgba(220,226,211,0) 74%); filter:blur(.65px); transform-origin:50% 100%; animation:factory-steam-rise calc(5.8s * var(--ambient-speed)) ease-out infinite; }
+  .factory-steam i:nth-child(2) { --steam-sway:-24%; --steam-mid:-10%; --steam-counter:7%; --steam-turn:-11deg; --steam-mid-turn:4deg; --steam-counter-turn:-4deg; animation-delay:-.82s; width:55%; }
+  .factory-steam i:nth-child(3) { --steam-sway:32%; --steam-mid:12%; --steam-counter:-9%; --steam-turn:13deg; animation-delay:-1.64s; width:42%; }
+  .factory-steam i:nth-child(4) { --steam-sway:-18%; --steam-mid:-8%; --steam-counter:6%; --steam-turn:-8deg; --steam-mid-turn:3deg; --steam-counter-turn:-3deg; animation-delay:-2.46s; width:61%; }
+  .factory-steam i:nth-child(5) { --steam-sway:25%; --steam-mid:10%; --steam-counter:-7%; --steam-turn:10deg; animation-delay:-3.28s; width:50%; }
+  .factory-steam i:nth-child(6) { --steam-sway:-30%; --steam-mid:-12%; --steam-counter:9%; --steam-turn:-14deg; --steam-mid-turn:5deg; --steam-counter-turn:-5deg; animation-delay:-4.10s; width:58%; }
+  .factory-steam i:nth-child(7) { --steam-sway:16%; --steam-mid:7%; --steam-counter:-5%; --steam-turn:7deg; animation-delay:-4.92s; width:46%; }
+  [data-paused] .factory-steam i { animation-play-state:paused; }
+  [data-composition-review=true] > :not(.scene-viewport):not(.loading):not(.mobile-tools):not(.swipe-cue):not(.landmark-label) { display:none!important; }
+  [data-composition-review=true] .mobile-tools button:not(.spatial) { display:none!important; }
+  .landmark { position:absolute; border:0; padding:0; background:transparent; pointer-events:auto; cursor:pointer; border-radius:40%; color:white; }
+  .landmark:focus-visible { outline:3px solid #fff2a9; outline-offset:3px; background:rgba(255,235,130,.13); }
+  .landmark-castle {
+    clip-path: polygon(4% 35%,16% 31%,20% 16%,31% 15%,36% 4%,44% 11%,50% 0,57% 13%,67% 11%,73% 25%,88% 27%,99% 43%,100% 70%,91% 85%,72% 94%,51% 100%,26% 96%,9% 84%,0 65%);
+    border-radius:0;
+  }
+  .landmark-castle:focus-visible { outline:none; background:transparent; }
+  .landmark-harbor {
+    clip-path: polygon(5% 8%,37% 3%,47% 20%,64% 27%,99% 35%,100% 90%,80% 100%,16% 97%,0 75%,0 30%);
+    border-radius:0;
+  }
+  .landmark-harbor:focus-visible { outline:none; background:transparent; }
+  .landmark-restaurant {
+    clip-path: polygon(2% 30%,14% 16%,30% 16%,38% 23%,61% 24%,72% 18%,88% 25%,98% 42%,98% 73%,88% 87%,68% 97%,35% 96%,12% 86%,2% 65%);
+    border-radius: 0;
+  }
+  .landmark-restaurant:focus-visible { outline:none; background:transparent; }
+  .landmark-cafe {
+    clip-path: polygon(18% 0,52% 0,66% 16%,86% 25%,98% 48%,90% 82%,68% 100%,24% 98%,4% 76%,0 35%);
+    border-radius:0;
+  }
+  .landmark-cafe:focus-visible { outline:none; background:transparent; }
+  .landmark-workshop {
+    clip-path: polygon(6% 18%,18% 7%,65% 0,91% 12%,100% 40%,96% 88%,72% 100%,23% 96%,0 76%,0 34%);
+    border-radius:0;
+  }
+  .landmark-workshop:focus-visible { outline:none; background:transparent; }
+  .landmark-library {
+    clip-path: polygon(7% 29%,18% 29%,22% 13%,32% 13%,37% 2%,44% 13%,52% 13%,57% 1%,64% 13%,73% 13%,78% 28%,91% 31%,100% 53%,95% 82%,78% 97%,21% 100%,4% 82%,0 52%);
+    border-radius:0;
+  }
+  .landmark-library:focus-visible { outline:none; background:transparent; }
+  .landmark-factory {
+    clip-path: polygon(12% 22%,30% 10%,38% 0,51% 8%,63% 17%,86% 21%,100% 42%,96% 87%,77% 100%,22% 98%,3% 78%,0 43%);
+    border-radius:0;
+  }
+  .landmark-factory:focus-visible { outline:none; background:transparent; }
+  .landmark-label { position:fixed; z-index:34; left:var(--landmark-label-x,50%); top:var(--landmark-label-y,50%); translate:-50% calc(-100% - .5rem); min-width:max-content; opacity:0; padding:.38rem .65rem; border:2px solid rgba(255,197,118,.9); border-radius:999px; color:#fff7df; background:rgba(79,42,18,.9); box-shadow:0 2px 0 var(--line); pointer-events:none; text-align:center; font-size:.76rem; transition:opacity .18s ease,translate .18s ease; }
+  .landmark-label small { display:block; font-size:.54rem; letter-spacing:.09em; opacity:.75; }
+  .landmark-label[data-visible=true] { opacity:1; translate:-50% calc(-100% - .75rem); }
+  .landmark-label[data-landmark=castle] { border-color:rgba(202,177,125,.96); color:#fff8de; background:rgba(45,55,45,.94); }
+  .landmark-label[data-landmark=harbor] { border-color:rgba(125,204,201,.96); color:#fff8de; background:rgba(20,69,73,.94); }
+  .landmark-label[data-landmark=cafe] { border-color:rgba(243,199,79,.92); color:#fff8d8; background:rgba(25,75,72,.93); }
+  .landmark-label[data-landmark=workshop] { border-color:rgba(119,193,184,.94); color:#fff6d8; background:rgba(25,64,61,.94); }
+  .landmark-label[data-landmark=library] { border-color:rgba(159,183,219,.95); color:#fff8de; background:rgba(35,48,72,.94); }
+  .landmark-label[data-landmark=factory] { border-color:rgba(214,132,76,.96); color:#fff3d3; background:rgba(83,38,25,.94); }
+  .hud-panel,.title-plaque,.world-status>div,.mobile-tools button,.spatial { border:3px solid var(--line); box-shadow:inset 0 0 0 2px rgba(255,244,191,.65),0 4px 0 rgba(8,43,40,.45); background:linear-gradient(#f8e8bb,#e6c879); }
+  .title-plaque { position:fixed; z-index:30; top:max(.55rem,env(safe-area-inset-top)); left:50%; translate:-50% 0; min-width:19rem; padding:.45rem 2rem; border-radius:1.1rem 1.1rem 2.2rem 2.2rem; text-align:center; color:#0a5e61; display:flex; align-items:center; gap:.8rem; justify-content:center; }
+  .title-plaque b { font-family:Georgia,serif; font-size:clamp(1.35rem,3vw,2.45rem); letter-spacing:.12em; text-shadow:0 2px #fff0be; }
+  .title-plaque i { width:1.8rem; height:.7rem; background:#9a77ad; border-radius:60% 20%; transform:rotate(25deg); }
+  .player-panel { position:fixed; z-index:31; left:max(.65rem,env(safe-area-inset-left)); top:max(.65rem,env(safe-area-inset-top)); width:17rem; padding:.55rem; border-radius:1rem; display:flex; gap:.6rem; }
+  .portrait { width:4.5rem; aspect-ratio:1; border:3px solid var(--line); border-radius:45% 45% 50% 50%; background:radial-gradient(circle at 50% 45%,#f4c9a4 0 34%,#244b46 35% 42%,#74b1af 43% 100%); display:grid; place-items:center; font-size:2rem; }
+  .needs { flex:1; display:grid; gap:.16rem; }
+  .needs div { display:grid; grid-template-columns:4.6rem 1fr; align-items:center; font-size:.62rem; }
+  small { letter-spacing:.08em; font-size:.7em; opacity:.7; }
+  meter { width:100%; height:.7rem; accent-color:#d36646; }
+  .drawer-button { display:none; }
+  .quests { position:fixed; z-index:30; left:max(.65rem,env(safe-area-inset-left)); top:8.4rem; width:15rem; border-radius:1rem; overflow:hidden; }
+  .quests h2,.inventory h2 { margin:0; padding:.35rem .65rem; color:#f8e6b6; background:var(--teal); font-size:.9rem; }
+  .quests p { margin:.45rem; padding:.45rem; border:1px solid #9c7838; border-radius:.5rem; background:#f8e6b6; display:grid; grid-template-columns:1.6rem 1fr auto; align-items:center; font-size:.75rem; }
+  .quests p small { grid-column:2; }
+  .quests p[data-complete] { opacity:.65; text-decoration:line-through; }
+  .world-status { position:fixed; z-index:31; right:max(.65rem,env(safe-area-inset-right)); top:max(.65rem,env(safe-area-inset-top)); display:grid; gap:.5rem; min-width:10rem; }
+  .world-status>div { border-radius:.8rem; padding:.4rem .7rem; display:grid; grid-template-columns:auto 1fr; gap:.25rem .6rem; align-items:center; }
+  .weather span { grid-row:1/3; font-size:1.7rem; }.weather small{grid-column:2}.currency b{font-size:1.25rem}.currency span{color:#c28320}
+  .actions { position:fixed; z-index:32; bottom:max(.65rem,env(safe-area-inset-bottom)); left:50%; translate:-50% 0; display:flex; gap:.3rem; padding:.45rem; border-radius:1.4rem; }
+  .actions button { border:0; border-radius:1rem; min-width:5.6rem; padding:.25rem .65rem; background:transparent; color:var(--deep); font:inherit; cursor:pointer; }
+  .actions button span,.actions button small { display:block; }.actions button span{font-size:1.2rem}.actions button[aria-pressed=true]{background:var(--teal);color:#fff3c7;box-shadow:inset 0 -3px rgba(0,0,0,.25)}
+  .time-inventory { position:fixed; z-index:31; right:max(.65rem,env(safe-area-inset-right)); bottom:max(.65rem,env(safe-area-inset-bottom)); width:18rem; display:grid; gap:.5rem; }
+  .clock { border-radius:1rem; padding:.45rem; display:flex; justify-content:space-between; align-items:center; }.clock time{display:block;font-size:1.35rem;font-family:Georgia,serif}.clock button{border:1px solid var(--line);border-radius:50%;width:2.05rem;height:2.05rem;background:#f7df9e}.clock button[aria-pressed=true]{background:var(--coral);color:white}
+  .inventory { border-radius:1rem; overflow:hidden; }.inventory>div{display:flex;gap:.35rem;padding:.5rem}.inventory span{display:grid;place-items:center;width:3rem;height:2.7rem;border:1px solid #9b723b;border-radius:.45rem;background:#f7e4b4;font-size:1.25rem;position:relative}.inventory span b{position:absolute;right:.2rem;bottom:.05rem;font-size:.65rem}
+  [hidden] { display:none!important; }
+  .dialogue { position:fixed; z-index:29; left:50%; translate:-50% 0; bottom:6.2rem; max-width:min(35rem,72vw); border-radius:.8rem; padding:.5rem 1rem; text-align:center; background:rgba(247,226,176,.93); transition:.25s; }.dialogue p{margin:0;font-size:.85rem}.dialogue small{display:block}
+  .mobile-tools { position:fixed; z-index:35; top:max(.65rem,env(safe-area-inset-top)); right:max(.65rem,env(safe-area-inset-right)); display:flex; gap:.35rem; }.mobile-tools button{border-radius:999px;padding:.45rem .65rem;color:var(--deep);font:inherit}.mobile-tools button:not(.spatial){display:none}
+  .loading { position:fixed; z-index:60; inset:0; display:grid; place-content:center; text-align:center; color:#fff1c3; background:#183d38; opacity:1; transition:opacity .24s ease,visibility 0s linear .24s; }.loading[aria-hidden=true]{visibility:hidden;opacity:0;pointer-events:none}.loading span{font-size:1.1rem}.loading small{display:block}
+  .swipe-cue{display:none}
+  @media (max-width: 800px), (pointer: coarse) {
+    .title-plaque { min-width:0; padding:.3rem .7rem; top:max(.35rem,env(safe-area-inset-top)); }.title-plaque b{font-size:.86rem}.title-plaque i{display:none}
+    .player-panel{width:auto;padding:.22rem;top:max(.35rem,env(safe-area-inset-top));left:max(.35rem,env(safe-area-inset-left))}.portrait{width:2.2rem;font-size:1rem}.needs{display:none}.drawer-button{display:block;border:0;background:transparent;font:inherit}.drawer-button small{display:none}
+    .world-status,.quests,.inventory{display:none}.mobile-tools{top:max(.35rem,env(safe-area-inset-top));right:max(.35rem,env(safe-area-inset-right))}.mobile-tools button:not(.spatial){display:block}
+    .actions{bottom:max(.35rem,env(safe-area-inset-bottom));padding:.25rem}.actions button{min-width:4rem;padding:.2rem;font-size:.68rem}.actions button span{font-size:.9rem}
+    .time-inventory{right:max(.35rem,env(safe-area-inset-right));bottom:4.3rem;width:auto}.clock{padding:.3rem}.clock>div strong,.clock>div small{display:none}.clock time{font-size:.85rem}.clock button{width:1.7rem;height:1.7rem;font-size:.65rem}
+    .dialogue{bottom:7.2rem;max-width:68vw;padding:.3rem .65rem}.dialogue p{font-size:.68rem}
+    .swipe-cue{display:block;position:fixed;z-index:20;left:50%;bottom:7.8rem;translate:-50% 0;color:white;text-shadow:0 2px 4px #063b3e;font-size:.65rem;animation:cue 3s ease both 1s}
+    [data-open-drawer=quests] .quests,[data-open-drawer=inventory] .inventory,[data-open-drawer=needs] .needs{display:block;position:fixed;z-index:50;inset:auto max(.6rem,env(safe-area-inset-right)) max(4.4rem,env(safe-area-inset-bottom)) max(.6rem,env(safe-area-inset-left));width:auto;max-height:50vh;overflow:auto}
+    [data-open-drawer=needs] .needs{padding:1rem;border:3px solid var(--line);border-radius:1rem;background:#f5dfaa}.needs div{grid-template-columns:6rem 1fr}
+  }
+  @keyframes cue{0%,70%{opacity:0}85%{opacity:1}100%{opacity:0}}
+  @keyframes factory-steam-rise {
+    0% { opacity:0; transform:translate(-50%,8%) scale(.34,.28) rotate(0); }
+    13% { opacity:.42; }
+    48% { opacity:.28; transform:translate(calc(-50% + var(--steam-mid)),-92%) scale(.92,1.05) rotate(var(--steam-mid-turn)); }
+    75% { opacity:.15; transform:translate(calc(-50% + var(--steam-counter)),-166%) scale(1.28,1.18) rotate(var(--steam-counter-turn)); }
+    100% { opacity:0; transform:translate(calc(-50% + var(--steam-sway)),-250%) scale(1.62,1.34) rotate(var(--steam-turn)); }
+  }
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}.plane{transform:none!important}.factory-steam{display:none}.loading{transition-duration:1ms}}
+</style>

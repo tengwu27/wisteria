@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hinged Cinematic Transitions"
+  short_description: "Render deterministic door and gate motion"
+  default_prompt: "Use $render-hinged-cinematic-transitions to render a registered hinged-door transition from these plates."

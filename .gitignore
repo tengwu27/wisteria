@@ -8,4 +8,8 @@ __pycache__/
 *.py[cod]
 .claude/
 
+# Local cinematic authoring history; production deliveries and approved masters
+# remain tracked in assets/cinematic/scenes/.
+/assets/cinematic/archive/
+
 .env

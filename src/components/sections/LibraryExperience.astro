@@ -1,0 +1,992 @@
+---
+import { libraryScene, findArtifactPlacement } from '@/data/libraryScene';
+import type { LibraryBook } from '@/lib/artifacts';
+import '@/styles/library-experience.css';
+
+interface Props {
+  books: LibraryBook[];
+  initialArtifactId?: string;
+}
+
+const { books, initialArtifactId } = Astro.props;
+const initialBook = initialArtifactId
+  ? books.find((book) => book.artifactId === initialArtifactId)
+  : undefined;
+const initialPlacement = initialBook
+  ? findArtifactPlacement(initialBook.artifactId)
+  : undefined;
+const hallSrcset = libraryScene.overviewAssets
+  .map((asset) => asset.src + ' ' + asset.width + 'w')
+  .join(', ');
+const largestHall = libraryScene.overviewAssets.at(-1)!;
+const boundsStyle = (bounds: {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}) =>
+  'left:' +
+  bounds.x * 100 +
+  '%;top:' +
+  bounds.y * 100 +
+  '%;width:' +
+  bounds.width * 100 +
+  '%;height:' +
+  bounds.height * 100 +
+  '%';
+const emblem = {
+  wisteria: '❦',
+  sun: '✺',
+  wave: '≋'
+} as const;
+---
+
+<section
+  class="library-experience"
+  data-library-root
+  data-state={initialBook ? 'reading' : 'hall'}
+  data-initial-artifact={initialBook?.artifactId}
+  data-initial-zone={initialPlacement?.zone.id}
+  data-initial-focal-ratio={libraryScene.initialFocalRatio}
+  style={
+    '--hall-width:' +
+    libraryScene.canvas.width +
+    ';--hall-height:' +
+    libraryScene.canvas.height
+  }
+  aria-label="Wisteria 大教堂图书馆互动藏书室"
+>
+  <div class="library-overview" data-library-overview>
+    <div
+      class="library-viewport"
+      data-library-viewport
+      tabindex="0"
+      aria-label="可水平探索的大教堂图书馆大厅"
+    >
+      <div class="library-world" data-library-world>
+        <img
+          class="library-hall-art"
+          src={largestHall.src}
+          srcset={hallSrcset}
+          sizes="(min-aspect-ratio: 8/3) 100vw, 267vh"
+          width={largestHall.width}
+          height={largestHall.height}
+          alt="宽阔的大教堂风格图书馆大厅，中央长毯通向山崖高处的主门，两侧是玫瑰窗、多层书架、阅读桌与暖色灯光"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          draggable="false"
+          data-library-hall-art
+        />
+
+        <div class="overview-hotspots" aria-label="图书馆可探索区域">
+          {libraryScene.zones.map((zone) => (
+            <button
+              class="zone-hotspot"
+              type="button"
+              data-zone-trigger={zone.id}
+              style={boundsStyle(zone.overviewBounds)}
+              aria-label={'靠近' + zone.labelZh + ' · APPROACH ' + zone.labelEn}
+            >
+              <span aria-hidden="true">
+                <b>{zone.labelZh}</b>
+                <small>{zone.labelEn}</small>
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {libraryScene.zones.map((zone) => {
+    const activeInitially = initialPlacement?.zone.id === zone.id;
+    const focusSrcset = zone.assets
+      .map((asset) => asset.src + ' ' + asset.width + 'w')
+      .join(', ');
+    const focusLargest = zone.assets.at(-1)!;
+
+    return (
+      <section
+        class="focus-stage"
+        data-zone-stage={zone.id}
+        data-zone-visible={activeInitially ? 'true' : 'false'}
+        hidden={!activeInitially}
+        aria-label={zone.labelZh + ' · ' + zone.labelEn}
+      >
+        <div
+          class="focus-viewport"
+          data-focus-viewport
+          tabindex="-1"
+          aria-label={zone.description}
+        >
+          <div
+            class="focus-world"
+            style={
+              '--focus-width:' +
+              focusLargest.width +
+              ';--focus-height:' +
+              focusLargest.height
+            }
+          >
+            <img
+              class="focus-art"
+              src={activeInitially ? focusLargest.src : undefined}
+              srcset={activeInitially ? focusSrcset : undefined}
+              data-src={focusLargest.src}
+              data-srcset={focusSrcset}
+              sizes="(min-aspect-ratio: 1672/941) 100vw, 178vh"
+              width={focusLargest.width}
+              height={focusLargest.height}
+              alt={zone.description}
+              decoding="async"
+              draggable="false"
+              data-focus-image
+            />
+
+            <div class="artifact-hotspots">
+              {zone.artifacts.map((artifact) => (
+                <button
+                  class="artifact-hotspot"
+                  type="button"
+                  data-artifact-trigger={artifact.artifactId}
+                  data-artifact-kind={artifact.kind}
+                  data-zone-id={zone.id}
+                  style={boundsStyle(artifact.bounds)}
+                  aria-label={artifact.labelZh + ' · ' + artifact.labelEn}
+                >
+                  <span aria-hidden="true">
+                    <b>{artifact.labelZh.replace('查看', '')}</b>
+                    <small>{artifact.labelEn.replace('INSPECT ', '')}</small>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <header class="focus-heading">
+          <p>{zone.labelZh}<small>{zone.labelEn}</small></p>
+        </header>
+        <button
+          class="zone-back"
+          type="button"
+          data-zone-back
+          aria-label="退回图书馆大厅 · BACK TO GRAND HALL"
+        >
+          <span aria-hidden="true">←</span>
+          <span>返回大厅<small>BACK TO HALL</small></span>
+        </button>
+        <p class="focus-failure" data-focus-failure role="status" hidden>
+          细节画面未能载入，藏书仍可通过标记打开。
+          <small>DETAIL PLATE UNAVAILABLE · BOOKS REMAIN ACCESSIBLE</small>
+        </p>
+      </section>
+    );
+  })}
+
+  <a
+    class="library-exit"
+    href="/"
+    aria-label="返回 Wisteria 村庄"
+    data-immersive-route
+  >
+    <span aria-hidden="true">←</span>
+    <span>返回村庄<small>BACK TO VILLAGE</small></span>
+  </a>
+
+  <button
+    class="reveal-control"
+    type="button"
+    data-reveal-control
+    aria-pressed="false"
+  >
+    <span aria-hidden="true">✦</span>
+    <span>显示可互动处<small>SHOW INTERACTABLES</small></span>
+  </button>
+
+  <p class="library-cue" aria-hidden="true">
+    ← 滑动探索 · 发现书桌与书架 · SWIPE TO EXPLORE →
+  </p>
+
+  <div
+    class="book-layer"
+    data-book-layer
+    hidden={!initialBook}
+    aria-live="off"
+  >
+    <div class="book-backdrop" aria-hidden="true"></div>
+    {books.map((book) => {
+      const isInitial = book.artifactId === initialBook?.artifactId;
+      const cover = book.presentation.cover;
+      return (
+        <article
+          class="book-inspector"
+          data-book={book.artifactId}
+          data-page-count={book.pages.length}
+          data-phase={isInitial ? 'reading' : 'closed'}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={'book-title-' + book.artifactId}
+          aria-describedby={'book-description-' + book.artifactId}
+          aria-hidden={isInitial ? 'false' : 'true'}
+          hidden={!isInitial}
+          style={'--cover-color:' + cover.color + ';--cover-foil:' + cover.foil}
+        >
+          <a
+            class="book-close"
+            data-book-close
+            href="/library"
+            aria-label={'合上《' + cover.titleZh + '》并返回藏书位置'}
+          >
+            <span aria-hidden="true">×</span>
+            <span>合上<small>CLOSE BOOK</small></span>
+          </a>
+
+          <div class="book-shell">
+            <div class="book-cover" aria-hidden="true">
+              <span class="cover-frame"></span>
+              <span class="cover-emblem">{emblem[cover.emblem]}</span>
+              <strong id={'book-title-' + book.artifactId}>
+                {cover.titleZh}
+              </strong>
+              <small>{cover.titleEn}</small>
+              {book.presentation.fixture && <i>可替换示例 · FIXTURE</i>}
+            </div>
+
+            <div class="book-spread" data-book-spread>
+              {book.pages.map((page) => (
+                <section
+                  class:list={[
+                    'book-page',
+                    'book-page--' + page.layout
+                  ]}
+                  data-book-page={page.index}
+                  aria-label={'第 ' + (page.index + 1) + ' 页'}
+                >
+                  {page.imageSrc && (
+                    <figure>
+                      <img
+                        src={isInitial ? page.imageSrc : undefined}
+                        srcset={isInitial ? page.imageSrcset : undefined}
+                        data-src={page.imageSrc}
+                        data-srcset={page.imageSrcset}
+                        sizes="(max-width: 760px) 76vw, 38vw"
+                        alt={page.imageAlt}
+                        loading="lazy"
+                        decoding="async"
+                        data-page-image
+                      />
+                      {page.imageCaption && (
+                        <figcaption>{page.imageCaption}</figcaption>
+                      )}
+                    </figure>
+                  )}
+                  <div class="book-copy" set:html={page.html}></div>
+                </section>
+              ))}
+            </div>
+          </div>
+
+          <nav class="book-pagination" aria-label="书页导航">
+            <button type="button" data-page-previous>
+              <span aria-hidden="true">←</span>
+              <span>上一页<small>PREVIOUS</small></span>
+            </button>
+            <p>
+              <span data-page-position>1 / {book.pages.length}</span>
+              <small>{cover.titleEn}</small>
+            </p>
+            <button type="button" data-page-next>
+              <span>下一页<small>NEXT</small></span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </nav>
+          <p
+            class="sr-status"
+            id={'book-description-' + book.artifactId}
+          >
+            {book.excerpt}
+          </p>
+        </article>
+      );
+    })}
+  </div>
+
+  <p class="library-status" data-library-status role="status" aria-live="polite">
+    在大厅中寻找微光标记，靠近书桌或书架。
+  </p>
+  <div class="library-loading" data-library-loading data-immersive-loading aria-hidden="false">
+    <p>正在准备馆藏…<small>PREPARING THE COLLECTION</small></p>
+  </div>
+  <div class="library-load-error" data-library-load-error role="status" hidden>
+    <p>图书馆大厅画面暂时无法载入。<small>THE GRAND HALL IS STILL LOADING</small></p>
+  </div>
+</section>
+
+<script>
+  import {
+    afterCinematicPaint,
+    OPTIONAL_DETAIL_TIMEOUT_MS,
+    waitForCinematicImage
+  } from '@/utils/cinematicMediaLoader';
+  import { settleImmersiveArrival } from '@/utils/immersiveNavigation';
+
+  type LibraryState =
+    | 'hall'
+    | 'focusing'
+    | 'zone'
+    | 'opening'
+    | 'reading'
+    | 'closing';
+
+  const SESSION_KEY = 'wisteria-library-opened-books';
+
+  function initLibraryExperience() {
+    const root = document.querySelector<HTMLElement>('[data-library-root]');
+    if (!root || root.dataset.initialized === 'true') return;
+    root.dataset.initialized = 'true';
+    root.dataset.enhanced = 'true';
+
+    const abort = new AbortController();
+    const { signal } = abort;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const singlePage = window.matchMedia('(max-width: 760px)');
+    const viewport = root.querySelector<HTMLElement>('[data-library-viewport]')!;
+    const world = root.querySelector<HTMLElement>('[data-library-world]')!;
+    const hallImage = root.querySelector<HTMLImageElement>('[data-library-hall-art]')!;
+    const loading = root.querySelector<HTMLElement>('[data-library-loading]')!;
+    const loadError = root.querySelector<HTMLElement>('[data-library-load-error]')!;
+    const status = root.querySelector<HTMLElement>('[data-library-status]')!;
+    const revealControl = root.querySelector<HTMLButtonElement>('[data-reveal-control]')!;
+    const bookLayer = root.querySelector<HTMLElement>('[data-book-layer]')!;
+    const zoneStages = new Map(
+      [...root.querySelectorAll<HTMLElement>('[data-zone-stage]')].map(
+        (stage) => [stage.dataset.zoneStage!, stage]
+      )
+    );
+    const zoneTriggers = new Map(
+      [...root.querySelectorAll<HTMLButtonElement>('[data-zone-trigger]')].map(
+        (button) => [button.dataset.zoneTrigger!, button]
+      )
+    );
+    const artifactButtons = [
+      ...root.querySelectorAll<HTMLButtonElement>('[data-artifact-trigger]')
+    ];
+    const artifactZones = new Map(
+      artifactButtons.map((button) => [
+        button.dataset.artifactTrigger!,
+        button.dataset.zoneId!
+      ])
+    );
+    let state: LibraryState = root.dataset.initialArtifact ? 'reading' : 'hall';
+    let activeZoneId = root.dataset.initialZone ?? null;
+    let activeArtifactId = root.dataset.initialArtifact ?? null;
+    let activePageIndex = 0;
+    let overviewCenterRatio = Number(root.dataset.initialFocalRatio ?? 0.5369);
+    let resizeFrame = 0;
+    let transitionToken = 0;
+    let openedByScene = false;
+    let pointerStartX: number | null = null;
+    let lastTrigger: HTMLElement | null = null;
+    const bookPagePositions = new Map<string, number>();
+
+    const setState = (next: LibraryState) => {
+      state = next;
+      root.dataset.state = next;
+    };
+    const announce = (message: string) => {
+      status.textContent = message;
+    };
+    const wait = (duration: number) =>
+      new Promise((resolve) => window.setTimeout(resolve, duration));
+    const motionDuration = () => (reducedMotion.matches ? 1 : 280);
+    const overflow = () => Math.max(0, world.scrollWidth - viewport.clientWidth);
+    const clampScroll = (value: number) =>
+      Math.min(overflow(), Math.max(0, value));
+    const restoreOverview = () => {
+      window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = window.requestAnimationFrame(() => {
+        viewport.scrollLeft = clampScroll(
+          overviewCenterRatio * world.scrollWidth - viewport.clientWidth / 2
+        );
+      });
+    };
+    const rememberOverview = () => {
+      if (world.scrollWidth > 0 && overflow() > 1) {
+        overviewCenterRatio =
+          (viewport.scrollLeft + viewport.clientWidth / 2) / world.scrollWidth;
+      }
+    };
+
+    const readOpened = () => {
+      try {
+        return new Set<string>(
+          JSON.parse(sessionStorage.getItem(SESSION_KEY) ?? '[]')
+        );
+      } catch {
+        return new Set<string>();
+      }
+    };
+    const opened = readOpened();
+    const renderOpened = () => {
+      artifactButtons.forEach((button) => {
+        button.toggleAttribute(
+          'data-opened',
+          opened.has(button.dataset.artifactTrigger!)
+        );
+      });
+    };
+    const rememberOpened = (artifactId: string) => {
+      opened.add(artifactId);
+      try {
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify([...opened]));
+      } catch {}
+      renderOpened();
+    };
+
+    const loadDeferredImage = async (image: HTMLImageElement) => {
+      if (!image.getAttribute('src')) {
+        image.src = image.dataset.src ?? '';
+        if (image.dataset.srcset) image.srcset = image.dataset.srcset;
+      }
+      return waitForCinematicImage(image, {
+        signal,
+        timeoutMs: OPTIONAL_DETAIL_TIMEOUT_MS,
+        onLateReady: () => {
+          const stage = image.closest<HTMLElement>('[data-zone-stage]');
+          const failure = stage?.querySelector<HTMLElement>('[data-focus-failure]');
+          if (stage) delete stage.dataset.failed;
+          if (failure) failure.hidden = true;
+        }
+      });
+    };
+
+    const setZoneStageVisible = (
+      stage: HTMLElement,
+      visible: boolean
+    ) => {
+      if (visible) {
+        stage.hidden = false;
+        window.requestAnimationFrame(() => {
+          stage.dataset.zoneVisible = 'true';
+        });
+      } else {
+        stage.dataset.zoneVisible = 'false';
+        window.setTimeout(() => {
+          if (stage.dataset.zoneVisible !== 'true') stage.hidden = true;
+        }, motionDuration());
+      }
+    };
+
+    const loadZone = async (zoneId: string) => {
+      const stage = zoneStages.get(zoneId);
+      if (!stage) return false;
+      const image = stage.querySelector<HTMLImageElement>('[data-focus-image]')!;
+      const failure = stage.querySelector<HTMLElement>('[data-focus-failure]')!;
+      const imageState = await loadDeferredImage(image);
+      if (imageState === 'loaded') {
+        delete stage.dataset.failed;
+        failure.hidden = true;
+        return true;
+      }
+      if (imageState !== 'aborted') {
+        stage.dataset.failed = 'true';
+        failure.hidden = false;
+      }
+      return false;
+    };
+
+    const focusZoneViewport = (stage: HTMLElement) => {
+      const focusViewport =
+        stage.querySelector<HTMLElement>('[data-focus-viewport]')!;
+      const focusWorld = focusViewport.firstElementChild as HTMLElement;
+      focusViewport.scrollLeft = Math.max(
+        0,
+        (focusWorld.scrollWidth - focusViewport.clientWidth) / 2
+      );
+    };
+
+    const openZone = async (
+      zoneId: string,
+      options: { immediate?: boolean; focus?: boolean } = {}
+    ) => {
+      if (
+        !options.immediate &&
+        state !== 'hall' &&
+        !(state === 'zone' && activeZoneId === zoneId)
+      ) {
+        return;
+      }
+      const stage = zoneStages.get(zoneId);
+      const trigger = zoneTriggers.get(zoneId);
+      if (!stage || !trigger) return;
+      const token = ++transitionToken;
+      lastTrigger = trigger;
+      rememberOverview();
+      activeZoneId = zoneId;
+      root.dataset.activeZone = zoneId;
+      setState('focusing');
+
+      const loaded = await loadZone(zoneId);
+      if (token !== transitionToken) return;
+      if (!options.immediate) await wait(motionDuration());
+      if (token !== transitionToken) return;
+      setZoneStageVisible(stage, true);
+      focusZoneViewport(stage);
+      setState('zone');
+      announce(
+        loaded
+          ? '已靠近藏书位置。选择一本书进行查看。'
+          : '细节画面未能载入，仍可使用书本标记继续阅读。'
+      );
+      if (options.focus !== false) {
+        window.requestAnimationFrame(() => {
+          stage.querySelector<HTMLButtonElement>('[data-artifact-trigger]')?.focus();
+        });
+      }
+    };
+
+    const closeZone = async () => {
+      if (state !== 'zone' || !activeZoneId) return;
+      const zoneId = activeZoneId;
+      const stage = zoneStages.get(zoneId);
+      if (!stage) return;
+      ++transitionToken;
+      setState('focusing');
+      setZoneStageVisible(stage, false);
+      await wait(motionDuration());
+      activeZoneId = null;
+      delete root.dataset.activeZone;
+      setState('hall');
+      restoreOverview();
+      zoneTriggers.get(zoneId)?.focus();
+      announce('已返回图书馆大厅。');
+    };
+
+    const currentBook = () =>
+      activeArtifactId
+        ? root.querySelector<HTMLElement>(
+            '[data-book="' + CSS.escape(activeArtifactId) + '"]'
+          )
+        : null;
+
+    const requestPageImage = (image: HTMLImageElement) => {
+      if (image.dataset.srcset) image.srcset = image.dataset.srcset;
+      if (!image.getAttribute('src')) image.src = image.dataset.src ?? '';
+    };
+
+    const loadVisiblePageImages = (book: HTMLElement) => {
+      book
+        .querySelectorAll<HTMLImageElement>('[data-book-page]:not([hidden]) [data-page-image]')
+        .forEach(requestPageImage);
+    };
+
+    const loadActivatedBookImages = (book: HTMLElement) => {
+      book.querySelectorAll<HTMLImageElement>('[data-page-image]').forEach(
+        (image) => {
+          image.loading = 'eager';
+          requestPageImage(image);
+        }
+      );
+    };
+
+    const syncPages = (direction: 'next' | 'previous' | 'none' = 'none') => {
+      const book = currentBook();
+      if (!book) return;
+      const pages = [
+        ...book.querySelectorAll<HTMLElement>('[data-book-page]')
+      ];
+      const visibleCount = singlePage.matches ? 1 : 2;
+      if (!singlePage.matches) {
+        activePageIndex = Math.floor(activePageIndex / 2) * 2;
+      }
+      activePageIndex = Math.max(
+        0,
+        Math.min(activePageIndex, Math.max(0, pages.length - visibleCount))
+      );
+      if (activeArtifactId) {
+        bookPagePositions.set(activeArtifactId, activePageIndex);
+      }
+      pages.forEach((page, index) => {
+        page.hidden =
+          index < activePageIndex || index >= activePageIndex + visibleCount;
+      });
+      book.dataset.turn = direction;
+      window.setTimeout(() => {
+        if (book.dataset.turn === direction) book.dataset.turn = 'none';
+      }, reducedMotion.matches ? 1 : 240);
+      const previous =
+        book.querySelector<HTMLButtonElement>('[data-page-previous]')!;
+      const next = book.querySelector<HTMLButtonElement>('[data-page-next]')!;
+      previous.disabled = activePageIndex === 0;
+      next.disabled = activePageIndex + visibleCount >= pages.length;
+      const lastVisible = Math.min(
+        pages.length,
+        activePageIndex + visibleCount
+      );
+      book.querySelector<HTMLElement>('[data-page-position]')!.textContent =
+        visibleCount === 1
+          ? String(activePageIndex + 1) + ' / ' + String(pages.length)
+          : String(activePageIndex + 1) +
+            '–' +
+            String(lastVisible) +
+            ' / ' +
+            String(pages.length);
+      loadVisiblePageImages(book);
+      announce(
+        '正在阅读第 ' +
+          String(activePageIndex + 1) +
+          (lastVisible > activePageIndex + 1
+            ? ' 至 ' + String(lastVisible)
+            : '') +
+          ' 页，共 ' +
+          String(pages.length) +
+          ' 页。'
+      );
+    };
+
+    const closeBookView = async (restoreFocus = true) => {
+      const book = currentBook();
+      if (!book || state === 'closing') return;
+      setState('closing');
+      book.dataset.phase = 'closing';
+      await wait(motionDuration());
+      book.hidden = true;
+      book.setAttribute('aria-hidden', 'true');
+      book.dataset.phase = 'closed';
+      bookLayer.hidden = true;
+      const closingArtifact = activeArtifactId;
+      activeArtifactId = null;
+      delete root.dataset.activeArtifact;
+      setState(activeZoneId ? 'zone' : 'hall');
+      if (restoreFocus && closingArtifact) {
+        root
+          .querySelector<HTMLButtonElement>(
+            '[data-artifact-trigger="' +
+              CSS.escape(closingArtifact) +
+              '"]'
+          )
+          ?.focus();
+      }
+      announce('书本已合上。');
+    };
+
+    const openBook = async (
+      artifactId: string,
+      options: { push?: boolean; immediate?: boolean } = {}
+    ) => {
+      const zoneId = artifactZones.get(artifactId);
+      const book = root.querySelector<HTMLElement>(
+        '[data-book="' + CSS.escape(artifactId) + '"]'
+      );
+      if (!zoneId || !book) return;
+      if (activeZoneId !== zoneId || state === 'hall') {
+        await openZone(zoneId, { immediate: true, focus: false });
+      }
+      if (activeArtifactId === artifactId && state === 'reading') return;
+
+      activeArtifactId = artifactId;
+      root.dataset.activeArtifact = artifactId;
+      activePageIndex = bookPagePositions.get(artifactId) ?? 0;
+      lastTrigger = root.querySelector<HTMLElement>(
+        '[data-artifact-trigger="' + CSS.escape(artifactId) + '"]'
+      );
+      root
+        .querySelectorAll<HTMLElement>('[data-book]')
+        .forEach((item) => {
+          const active = item === book;
+          item.hidden = !active;
+          item.setAttribute('aria-hidden', String(!active));
+          if (!active) item.dataset.phase = 'closed';
+        });
+      bookLayer.hidden = false;
+      book.hidden = false;
+      book.setAttribute('aria-hidden', 'false');
+      loadActivatedBookImages(book);
+      book.dataset.phase = options.immediate ? 'reading' : 'opening';
+      setState(options.immediate ? 'reading' : 'opening');
+      syncPages();
+      rememberOpened(artifactId);
+
+      if (options.push) {
+        history.replaceState(
+          { wisteriaView: 'zone', zoneId },
+          '',
+          '/library'
+        );
+        history.pushState(
+          { wisteriaView: 'artifact', artifactId, zoneId },
+          '',
+          '/collection/' + artifactId
+        );
+        openedByScene = true;
+      }
+
+      if (!options.immediate) {
+        await wait(reducedMotion.matches ? 1 : 360);
+        if (activeArtifactId !== artifactId) return;
+        book.dataset.phase = 'reading';
+        setState('reading');
+      }
+      book.querySelector<HTMLElement>('[data-book-close]')?.focus();
+    };
+
+    const requestCloseBook = async (event?: Event) => {
+      event?.preventDefault();
+      if (!activeArtifactId || state === 'closing') return;
+      if (
+        openedByScene &&
+        history.state?.wisteriaView === 'artifact'
+      ) {
+        history.back();
+        return;
+      }
+      const zoneId = activeZoneId;
+      history.replaceState(
+        zoneId ? { wisteriaView: 'zone', zoneId } : null,
+        '',
+        '/library'
+      );
+      await closeBookView(true);
+      openedByScene = false;
+    };
+
+    const turnPage = (direction: 'next' | 'previous') => {
+      if (state !== 'reading') return;
+      const step = singlePage.matches ? 1 : 2;
+      activePageIndex += direction === 'next' ? step : -step;
+      syncPages(direction);
+    };
+
+    viewport.addEventListener('scroll', rememberOverview, {
+      passive: true,
+      signal
+    });
+    viewport.addEventListener(
+      'keydown',
+      (event) => {
+        if (state !== 'hall') return;
+        const distance = Math.max(64, viewport.clientWidth * 0.12);
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+          event.preventDefault();
+          viewport.scrollBy({
+            left: event.key === 'ArrowLeft' ? -distance : distance,
+            behavior: reducedMotion.matches ? 'auto' : 'smooth'
+          });
+        } else if (event.key === 'Home' || event.key === 'End') {
+          event.preventDefault();
+          viewport.scrollTo({
+            left: event.key === 'Home' ? 0 : overflow(),
+            behavior: 'auto'
+          });
+        }
+      },
+      { signal }
+    );
+    zoneTriggers.forEach((button, zoneId) => {
+      button.addEventListener(
+        'click',
+        () => void openZone(zoneId),
+        { signal }
+      );
+    });
+    root.querySelectorAll<HTMLButtonElement>('[data-zone-back]').forEach(
+      (button) => {
+        button.addEventListener('click', () => void closeZone(), { signal });
+      }
+    );
+    artifactButtons.forEach((button) => {
+      button.addEventListener(
+        'click',
+        () =>
+          void openBook(button.dataset.artifactTrigger!, {
+            push: true
+          }),
+        { signal }
+      );
+    });
+    root.querySelectorAll<HTMLElement>('[data-book-close]').forEach((button) => {
+      button.addEventListener('click', requestCloseBook, { signal });
+    });
+    root
+      .querySelectorAll<HTMLButtonElement>('[data-page-previous]')
+      .forEach((button) => {
+        button.addEventListener('click', () => turnPage('previous'), {
+          signal
+        });
+      });
+    root
+      .querySelectorAll<HTMLButtonElement>('[data-page-next]')
+      .forEach((button) => {
+        button.addEventListener('click', () => turnPage('next'), {
+          signal
+        });
+      });
+    revealControl.addEventListener(
+      'click',
+      () => {
+        const active = root.dataset.revealInteractables !== 'true';
+        root.dataset.revealInteractables = String(active);
+        revealControl.setAttribute('aria-pressed', String(active));
+        announce(
+          active
+            ? '可互动位置已显示。'
+            : '可互动位置恢复为微光提示。'
+        );
+      },
+      { signal }
+    );
+    bookLayer.addEventListener(
+      'pointerdown',
+      (event) => {
+        pointerStartX = event.clientX;
+      },
+      { signal }
+    );
+    bookLayer.addEventListener(
+      'pointerup',
+      (event) => {
+        if (pointerStartX === null) return;
+        const delta = event.clientX - pointerStartX;
+        pointerStartX = null;
+        if (Math.abs(delta) < 54) return;
+        turnPage(delta < 0 ? 'next' : 'previous');
+      },
+      { signal }
+    );
+    root.addEventListener(
+      'keydown',
+      (event) => {
+        if (state === 'reading') {
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            void requestCloseBook();
+          } else if (event.key === 'ArrowLeft') {
+            event.preventDefault();
+            turnPage('previous');
+          } else if (event.key === 'ArrowRight') {
+            event.preventDefault();
+            turnPage('next');
+          } else if (event.key === 'Tab') {
+            const book = currentBook();
+            if (!book) return;
+            const focusable = [
+              ...book.querySelectorAll<HTMLElement>(
+                'a[href],button:not(:disabled),[tabindex]:not([tabindex="-1"])'
+              )
+            ].filter((item) => !item.hidden);
+            if (focusable.length === 0) return;
+            const first = focusable[0];
+            const last = focusable.at(-1)!;
+            if (event.shiftKey && document.activeElement === first) {
+              event.preventDefault();
+              last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+              event.preventDefault();
+              first.focus();
+            }
+          }
+        } else if (state === 'zone' && event.key === 'Escape') {
+          event.preventDefault();
+          void closeZone();
+        }
+      },
+      { signal }
+    );
+
+    const handleHistory = async () => {
+      const match = window.location.pathname.match(
+        /^\/collection\/([^/]+)\/?$/
+      );
+      if (match) {
+        openedByScene = history.state?.wisteriaView === 'artifact';
+        await openBook(decodeURIComponent(match[1]), {
+          immediate: reducedMotion.matches
+        });
+        return;
+      }
+      const zoneId = history.state?.zoneId as string | undefined;
+      await closeBookView(false);
+      openedByScene = false;
+      if (zoneId && activeZoneId !== zoneId) {
+        await openZone(zoneId, { immediate: true, focus: false });
+      }
+      if (zoneId) {
+        root
+          .querySelector<HTMLButtonElement>(
+            '[data-artifact-trigger="' +
+              CSS.escape(lastTrigger?.dataset.artifactTrigger ?? '') +
+              '"]'
+          )
+          ?.focus();
+      }
+    };
+    window.addEventListener('popstate', () => void handleHistory(), {
+      signal
+    });
+    singlePage.addEventListener(
+      'change',
+      () => {
+        if (activeArtifactId) syncPages();
+      },
+      { signal }
+    );
+
+    const resizeObserver = new ResizeObserver(() => {
+      restoreOverview();
+      if (activeZoneId) {
+        const stage = zoneStages.get(activeZoneId);
+        if (stage) focusZoneViewport(stage);
+      }
+    });
+    resizeObserver.observe(viewport);
+    resizeObserver.observe(world);
+    window.addEventListener('orientationchange', restoreOverview, {
+      passive: true,
+      signal
+    });
+
+    const reveal = (available: boolean) => {
+      if (signal.aborted) return;
+      restoreOverview();
+      loadError.hidden = available;
+      afterCinematicPaint(() => {
+        loading.setAttribute('aria-hidden', 'true');
+        settleImmersiveArrival();
+      }, signal);
+    };
+    void waitForCinematicImage(hallImage, {
+      signal,
+      onLateReady: () => {
+        loadError.hidden = true;
+        restoreOverview();
+      }
+    }).then((imageState) => {
+      if (imageState !== 'aborted') reveal(imageState === 'loaded');
+    });
+
+    renderOpened();
+    if (activeArtifactId && activeZoneId) {
+      openedByScene = history.state?.wisteriaView === 'artifact';
+      void openZone(activeZoneId, { immediate: true, focus: false }).then(() =>
+        openBook(activeArtifactId!, { immediate: true })
+      );
+    } else {
+      setState('hall');
+    }
+
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        abort.abort();
+        resizeObserver.disconnect();
+        window.cancelAnimationFrame(resizeFrame);
+      },
+      { once: true }
+    );
+  }
+
+  initLibraryExperience();
+  document.addEventListener('astro:page-load', initLibraryExperience);
+</script>

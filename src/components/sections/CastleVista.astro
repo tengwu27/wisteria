@@ -1,0 +1,496 @@
+---
+import castleGate1254 from '../../../assets/cinematic/scenes/castle-interior/delivery/castle-gate-1254.webp';
+import castleGate1672 from '../../../assets/cinematic/scenes/castle-interior/delivery/castle-gate-1672.webp';
+import castleCourtyard1254 from '../../../assets/cinematic/scenes/castle-interior/delivery/castle-courtyard-1254.webp';
+import castleCourtyard1672 from '../../../assets/cinematic/scenes/castle-interior/delivery/castle-courtyard-1672.webp';
+import castleArcade1254 from '../../../assets/cinematic/scenes/castle-interior/delivery/castle-arcade-1254.webp';
+import castleArcade1672 from '../../../assets/cinematic/scenes/castle-interior/delivery/castle-arcade-1672.webp';
+
+type CastleScene = 'gate' | 'courtyard' | 'arcade';
+
+interface Props {
+  scene: CastleScene;
+}
+
+const { scene } = Astro.props;
+const sceneConfigs = {
+  gate: {
+    artwork: castleGate1254,
+    responsiveArtwork: [castleGate1254, castleGate1672],
+    initialFocalRatio: 0.5,
+    rootLabel: 'Wisteria 城堡桥头与正门',
+    viewportLabel: '可水平探索的城堡桥头与正门景观',
+    artworkAlt: '石砌桥道通向城堡正门，门洞后方可见庭院以及蓝色屋顶与橙色屋顶的主堡塔楼',
+    loadingZh: '正在准备城堡正门…',
+    loadingEn: 'PREPARING THE CASTLE GATE',
+    errorZh: '城堡正门景观暂时无法载入。',
+    errorEn: 'THE CASTLE GATE COULD NOT BE LOADED.'
+  },
+  courtyard: {
+    artwork: castleCourtyard1254,
+    responsiveArtwork: [castleCourtyard1254, castleCourtyard1672],
+    initialFocalRatio: 0.5,
+    rootLabel: 'Wisteria 城堡内庭院',
+    viewportLabel: '可水平探索的城堡内庭院景观',
+    artworkAlt: '从主堡拱门内眺望开阔的石砌庭院、前门以及层叠城墙与塔楼',
+    loadingZh: '正在准备城堡内庭院…',
+    loadingEn: 'PREPARING THE CASTLE COURTYARD',
+    errorZh: '城堡内庭院景观暂时无法载入。',
+    errorEn: 'THE CASTLE COURTYARD COULD NOT BE LOADED.'
+  },
+  arcade: {
+    artwork: castleArcade1254,
+    responsiveArtwork: [castleArcade1254, castleArcade1672],
+    initialFocalRatio: 0.32,
+    rootLabel: 'Wisteria 城堡后拱廊',
+    viewportLabel: '可水平探索的城堡后拱廊景观',
+    artworkAlt: '从三开间石砌拱廊眺望种满花木的庭院、蓝色屋顶主堡与橙色屋顶塔楼',
+    loadingZh: '正在准备城堡拱廊…',
+    loadingEn: 'PREPARING THE CASTLE ARCADE',
+    errorZh: '城堡拱廊景观暂时无法载入。',
+    errorEn: 'THE CASTLE ARCADE COULD NOT BE LOADED.'
+  }
+} satisfies Record<CastleScene, {
+  artwork: ImageMetadata;
+  responsiveArtwork: ImageMetadata[];
+  initialFocalRatio: number;
+  rootLabel: string;
+  viewportLabel: string;
+  artworkAlt: string;
+  loadingZh: string;
+  loadingEn: string;
+  errorZh: string;
+  errorEn: string;
+}>;
+const castleViews: Array<{
+  id: CastleScene;
+  href: string;
+  zh: string;
+  en: string;
+}> = [
+  { id: 'gate', href: '/castle', zh: '正门', en: 'GATE' },
+  { id: 'courtyard', href: '/castle/courtyard', zh: '庭院', en: 'COURTYARD' },
+  { id: 'arcade', href: '/castle/arcade', zh: '拱廊', en: 'ARCADE' }
+];
+const sceneConfig = sceneConfigs[scene];
+const artworkSrcset = sceneConfig.responsiveArtwork
+  .map((artwork) => `${artwork.src} ${artwork.width}w`)
+  .join(', ');
+---
+
+<section
+  class="castle-vista"
+  data-castle-vista
+  data-castle-scene={scene}
+  data-initial-focal-ratio={sceneConfig.initialFocalRatio}
+  aria-label={sceneConfig.rootLabel}
+  style={`--scene-width:${sceneConfig.artwork.width};--scene-height:${sceneConfig.artwork.height}`}
+>
+  <div
+    class="scene-viewport"
+    data-scene-viewport
+    tabindex="0"
+    aria-label={sceneConfig.viewportLabel}
+  >
+    <div class="scene-world" data-scene-world>
+      <img
+        class="scene-art"
+        src={sceneConfig.artwork.src}
+        srcset={artworkSrcset}
+        sizes="(min-aspect-ratio: 1672/941) 100vw, 178vh"
+        width={sceneConfig.artwork.width}
+        height={sceneConfig.artwork.height}
+        alt={sceneConfig.artworkAlt}
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        draggable="false"
+        data-scene-art
+      />
+    </div>
+  </div>
+
+  <a
+    class="back-control"
+    href="/"
+    aria-label="返回 Wisteria 村庄"
+    data-castle-route
+    data-back-control
+    data-immersive-route
+  >
+    <span aria-hidden="true">←</span>
+    <span>返回村庄<small>BACK TO VILLAGE</small></span>
+  </a>
+
+  <nav class="castle-navigator" aria-label="城堡景观导航 · Castle view navigation" data-castle-navigator>
+    {castleViews.map((view) => (
+      <a
+        href={view.href}
+        data-castle-route
+        data-castle-view={view.id}
+        data-immersive-route
+        aria-current={view.id === scene ? 'page' : undefined}
+      >
+        <span>{view.zh}</span>
+        <small>{view.en}</small>
+      </a>
+    ))}
+  </nav>
+
+  <p class="swipe-cue" aria-hidden="true">← 滑动探索 · SWIPE TO EXPLORE →</p>
+
+  <div class="loading-veil" data-loading-veil data-immersive-loading aria-hidden="false">
+    <p>{sceneConfig.loadingZh}<small>{sceneConfig.loadingEn}</small></p>
+  </div>
+
+  <div class="load-error" data-load-error role="status" hidden>
+    <p>{sceneConfig.errorZh}<small>{sceneConfig.errorEn}</small></p>
+  </div>
+</section>
+
+<script>
+  import {
+    afterCinematicPaint,
+    waitForCinematicImage
+  } from '@/utils/cinematicMediaLoader';
+  import { settleImmersiveArrival } from '@/utils/immersiveNavigation';
+
+  function initCastleVista() {
+    const root = document.querySelector<HTMLElement>('[data-castle-vista]');
+    if (!root || root.dataset.initialized === 'true') return;
+    root.dataset.initialized = 'true';
+
+    const abort = new AbortController();
+    const { signal } = abort;
+    const viewport = root.querySelector<HTMLElement>('[data-scene-viewport]')!;
+    const world = root.querySelector<HTMLElement>('[data-scene-world]')!;
+    const image = root.querySelector<HTMLImageElement>('[data-scene-art]')!;
+    const loading = root.querySelector<HTMLElement>('[data-loading-veil]')!;
+    const loadError = root.querySelector<HTMLElement>('[data-load-error]')!;
+    const routeControls = [...root.querySelectorAll<HTMLAnchorElement>('[data-castle-route]')];
+    let centerRatio = Number(root.dataset.initialFocalRatio ?? 0.5);
+    let resizeFrame = 0;
+
+    const overflow = () => Math.max(0, world.scrollWidth - viewport.clientWidth);
+    const clampScroll = (value: number) => Math.min(overflow(), Math.max(0, value));
+    const restoreFocalPoint = () => {
+      window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = window.requestAnimationFrame(() => {
+        const available = overflow();
+        root.dataset.overflowing = String(available > 1);
+        viewport.scrollLeft = clampScroll(
+          centerRatio * world.scrollWidth - viewport.clientWidth / 2
+        );
+      });
+    };
+    const rememberFocalPoint = () => {
+      if (world.scrollWidth > 0 && overflow() > 1) {
+        centerRatio = (viewport.scrollLeft + viewport.clientWidth / 2) / world.scrollWidth;
+      }
+    };
+
+    viewport.addEventListener('scroll', rememberFocalPoint, { passive: true, signal });
+    viewport.addEventListener('keydown', (event) => {
+      const distance = Math.max(64, viewport.clientWidth * 0.12);
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        viewport.scrollBy({
+          left: event.key === 'ArrowLeft' ? -distance : distance,
+          behavior: reducedMotion ? 'auto' : 'smooth'
+        });
+      } else if (event.key === 'Home' || event.key === 'End') {
+        event.preventDefault();
+        viewport.scrollTo({
+          left: event.key === 'Home' ? 0 : overflow(),
+          behavior: 'auto'
+        });
+      }
+    }, { signal });
+
+    const resizeObserver = new ResizeObserver(restoreFocalPoint);
+    resizeObserver.observe(viewport);
+    resizeObserver.observe(world);
+    window.visualViewport?.addEventListener('resize', restoreFocalPoint, { passive: true, signal });
+    window.addEventListener('orientationchange', restoreFocalPoint, { passive: true, signal });
+
+    routeControls.forEach((control) => control.addEventListener('click', (event) => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const destination = new URL(control.href);
+      if (destination.pathname === window.location.pathname) {
+        event.preventDefault();
+      }
+    }, { signal }));
+
+    const reveal = () => {
+      if (signal.aborted) return;
+      root.dataset.ready = 'true';
+      delete root.dataset.failed;
+      loadError.hidden = true;
+      restoreFocalPoint();
+      afterCinematicPaint(() => {
+        loading.setAttribute('aria-hidden', 'true');
+        settleImmersiveArrival();
+      }, signal);
+    };
+    const fail = () => {
+      if (signal.aborted) return;
+      root.dataset.failed = 'true';
+      loadError.hidden = false;
+      afterCinematicPaint(() => {
+        loading.setAttribute('aria-hidden', 'true');
+        settleImmersiveArrival();
+      }, signal);
+    };
+
+    void waitForCinematicImage(image, {
+      signal,
+      onLateReady: reveal
+    }).then((state) => {
+      if (state === 'loaded') reveal();
+      else if (state !== 'aborted') fail();
+    });
+
+    document.addEventListener('astro:before-swap', () => {
+      abort.abort();
+      resizeObserver.disconnect();
+      window.cancelAnimationFrame(resizeFrame);
+    }, { once: true });
+  }
+
+  initCastleVista();
+  document.addEventListener('astro:page-load', initCastleVista);
+</script>
+
+<style>
+  :global(html), :global(body), :global(main) {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--immersive-transition-background, #183d38);
+  }
+
+  .castle-vista {
+    position: fixed;
+    inset: 0;
+    width: var(--immersive-viewport-width, 100dvw);
+    height: var(--immersive-viewport-height, 100dvh);
+    overflow: hidden;
+    color: #fff4d2;
+    background: var(--immersive-transition-background, #183d38);
+    font-family: 'Wisteria Immersive UI', system-ui, sans-serif;
+  }
+
+  .scene-viewport {
+    position: absolute;
+    inset: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    outline: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scene-viewport::-webkit-scrollbar { display: none; }
+
+  .scene-viewport:focus-visible {
+    box-shadow: inset 0 0 0 3px rgba(255, 239, 184, 0.8);
+  }
+
+  .scene-world {
+    position: relative;
+    top: 50%;
+    width: max(100%, calc(var(--immersive-viewport-height, 100dvh) * var(--scene-width) / var(--scene-height)));
+    min-width: 100%;
+    aspect-ratio: var(--scene-width) / var(--scene-height);
+    overflow: hidden;
+    translate: 0 -50%;
+  }
+
+  .scene-art {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    opacity: 0;
+    user-select: none;
+  }
+
+  [data-ready='true'] .scene-art { opacity: 1; }
+
+  .back-control {
+    position: fixed;
+    z-index: 10;
+    top: max(0.65rem, env(safe-area-inset-top));
+    left: max(0.65rem, env(safe-area-inset-left));
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid rgba(255, 241, 197, 0.65);
+    border-radius: 999px;
+    color: #fff4d2;
+    background: rgba(34, 47, 39, 0.8);
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.28);
+    text-decoration: none;
+    backdrop-filter: blur(0.55rem);
+    -webkit-backdrop-filter: blur(0.55rem);
+  }
+
+  .back-control > span:first-child { font-size: 1.25rem; }
+  .back-control small,
+  .castle-navigator small {
+    display: block;
+    margin-top: 0.1rem;
+    font-size: 0.52rem;
+    letter-spacing: 0.1em;
+    opacity: 0.72;
+  }
+
+  .back-control:hover,
+  .back-control:focus-visible {
+    border-color: #fff2b2;
+    background: rgba(62, 76, 59, 0.96);
+    outline: 2px solid rgba(255, 242, 178, 0.72);
+    outline-offset: 2px;
+  }
+
+  .castle-navigator {
+    position: fixed;
+    z-index: 10;
+    left: 50%;
+    bottom: max(0.65rem, env(safe-area-inset-bottom));
+    display: grid;
+    grid-template-columns: repeat(3, minmax(5.5rem, 1fr));
+    gap: 0.3rem;
+    width: min(24rem, calc(100% - 2rem));
+    padding: 0.35rem;
+    border: 1px solid rgba(255, 241, 197, 0.62);
+    border-radius: 1.25rem;
+    translate: -50% 0;
+    background: rgba(34, 47, 39, 0.82);
+    box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(0.65rem);
+    -webkit-backdrop-filter: blur(0.65rem);
+  }
+
+  .castle-navigator a {
+    min-height: 2.75rem;
+    display: grid;
+    place-content: center;
+    border: 1px solid transparent;
+    border-radius: 0.9rem;
+    color: #fff4d2;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .castle-navigator a:hover,
+  .castle-navigator a:focus-visible {
+    border-color: rgba(255, 239, 177, 0.7);
+    background: rgba(102, 116, 82, 0.72);
+    outline: 2px solid rgba(255, 242, 178, 0.72);
+    outline-offset: 1px;
+  }
+
+  .castle-navigator a[aria-current='page'] {
+    color: #203d37;
+    background: linear-gradient(180deg, #f8e8bb, #d7b66e);
+    box-shadow: inset 0 0 0 1px rgba(255, 249, 218, 0.75);
+  }
+
+  .loading-veil {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    background: #183d38;
+    opacity: 1;
+    transition: opacity 240ms ease, visibility 0s linear 240ms;
+  }
+
+  .loading-veil[aria-hidden='true'] {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .loading-veil p,
+  .load-error p { margin: 0; }
+  .loading-veil small,
+  .load-error small {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.64rem;
+    letter-spacing: 0.12em;
+    opacity: 0.72;
+  }
+
+  .load-error {
+    position: fixed;
+    z-index: 5;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    text-align: center;
+    background: #172421;
+  }
+
+  .load-error[hidden] { display: none; }
+  .swipe-cue { display: none; }
+
+  @media (max-width: 800px), (pointer: coarse) {
+    .back-control {
+      top: max(0.4rem, env(safe-area-inset-top));
+      left: max(0.4rem, env(safe-area-inset-left));
+      min-height: 2.55rem;
+      padding: 0.36rem 0.62rem;
+      font-size: 0.75rem;
+    }
+
+    .castle-navigator {
+      bottom: max(0.4rem, env(safe-area-inset-bottom));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      width: calc(100% - max(0.8rem, env(safe-area-inset-left)) - max(0.8rem, env(safe-area-inset-right)));
+      padding: 0.25rem;
+    }
+
+    .castle-navigator a {
+      min-height: 2.5rem;
+      font-size: 0.73rem;
+    }
+
+    [data-overflowing='true'] .swipe-cue {
+      position: fixed;
+      z-index: 8;
+      left: 50%;
+      bottom: max(4.3rem, calc(env(safe-area-inset-bottom) + 4.3rem));
+      display: block;
+      margin: 0;
+      translate: -50% 0;
+      color: #fff8dc;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-shadow: 0 2px 5px rgba(14, 35, 32, 0.95);
+      animation: swipe-cue 3.2s ease both 0.8s;
+      pointer-events: none;
+    }
+  }
+
+  @keyframes swipe-cue {
+    0%, 18%, 100% { opacity: 0; }
+    38%, 72% { opacity: 0.92; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loading-veil { transition-duration: 1ms; }
+    .swipe-cue { animation: none; opacity: 0.85; }
+  }
+</style>

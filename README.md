@@ -62,7 +62,6 @@ Add the same environment variables in Netlify, then create a Netlify build hook 
 Core site settings live in `src/data`. Structured content lives in `src/content`:
 
 - `src/data/site.ts`: site title, tagline, hero settings, introduction, SEO defaults, and replacement placeholders
-- `src/data/services.ts`: home page chapter links for Art, Lifestyle, and Travel
 - `src/content/art`: artworks, studies, experiments, and detail stories
 - `src/content/lifestyle`: original stories and external discoveries
 - `src/content/travel`: timeline entries and travel-story pages
@@ -105,20 +104,20 @@ Placeholder images are mapped in `src/assets/images/placeholders.ts`. Add new lo
 
 Do not autoplay video with sound.
 
-## World Asset Architecture
+## Village Artwork Architecture
 
-- `src/assets/images/world/`: canonical, versioned modular-object packages,
-  geometry contracts, and the runtime images imported by Astro.
-- `assets/cinematic/`: editable cinematic source frames and masks.
-- `public/media/village/`: approved ambient and interaction video delivery
-  copies.
+- `assets/cinematic/scenes/gamified-coastal-village/isometric-parallax/source/`:
+  approved geometry master and overlapping high-detail authoring tiles.
+- `assets/cinematic/scenes/gamified-coastal-village/isometric-parallax/registered/`:
+  optimized village, cloud, and flattened fallback plates imported by Astro.
+- `assets/cinematic/scenes/gamified-coastal-village/isometric-parallax/proofs/`:
+  the accepted neutral registered composite used for visual validation.
 - `scripts/`: asset validation, content generation, and media-rendering tools,
   grouped by responsibility.
 
-See [`src/assets/images/world/README.md`](src/assets/images/world/README.md) for
-the component and layering contract, and
-[`assets/cinematic/README.md`](assets/cinematic/README.md) for cinematic-source
-organization.
+The approved tile-stitch recipe lives beside the scene under
+`isometric-parallax/scripts/` so the master can be reproduced without retaining
+experimental generations.
 
 ## Privacy Notes
 

@@ -1,0 +1,31 @@
+---
+import LibraryExperience from '@/components/sections/LibraryExperience.astro';
+import ImmersiveLayout from '@/layouts/ImmersiveLayout.astro';
+import { getLibraryBooks, type LibraryBook } from '@/lib/artifacts';
+
+interface Props {
+  book: LibraryBook;
+  books: LibraryBook[];
+}
+
+export async function getStaticPaths() {
+  const books = await getLibraryBooks();
+
+  return books.map((book) => ({
+    params: { artifactId: book.artifactId },
+    props: { book, books }
+  }));
+}
+
+const { book, books } = Astro.props;
+---
+
+<ImmersiveLayout
+  title={`${book.presentation.cover.titleZh} · ${book.presentation.cover.titleEn} · Wisteria`}
+  description={book.excerpt}
+  type="article"
+  noindex={book.presentation.noindex}
+  clientRouter={false}
+>
+  <LibraryExperience books={books} initialArtifactId={book.artifactId} />
+</ImmersiveLayout>

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Interactive Parallax Scenes"
+  short_description: "Turn flat art into responsive multilayer depth scenes"
+  default_prompt: "Use $build-interactive-parallax-scenes to turn this flat artwork into a registered interactive parallax scene."

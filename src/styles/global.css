@@ -43,8 +43,6 @@ video {
   color: #fffdf8;
 }
 
-/* Interactive world styles live in src/components/world/WorldScene.astro */
-
 .arrival-badge {
   display: inline-flex;
   align-items: center;
@@ -300,31 +298,4 @@ video {
 @keyframes sticker-float {
   from { margin-top: 0; }
   to { margin-top: -8px; }
-}
-html.is-returning-to-village::after {
-  position: fixed;
-  z-index: 2147483647;
-  inset: 0;
-  content: '';
-  background: #101d1b;
-  opacity: 1;
-  pointer-events: auto;
-  transition: opacity 500ms cubic-bezier(.22, .72, .22, 1);
-}
-
-html.is-returning-to-village-ready::after {
-  opacity: 0;
-  pointer-events: none;
-}
-
-html.is-village-intro-pending,
-html.is-village-intro-pending body {
-  background: #101d1b;
-  overflow: hidden;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html.is-returning-to-village::after {
-    transition-duration: 1ms;
-  }
 }

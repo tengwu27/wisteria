@@ -1,6 +1,7 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { marked } from 'marked';
 import { createClient } from '@supabase/supabase-js';
+import type { BookPresentation } from '@/types/immersive';
 
 export type ContentCollection = 'art' | 'lifestyle' | 'travel';
 
@@ -26,6 +27,7 @@ interface RemoteContentEntry<Collection extends ContentCollection, Data> {
   collection: Collection;
   slug: string;
   data: Data;
+  bodyMarkdown: string;
   bodyHtml: string;
   source: 'supabase';
 }
@@ -53,9 +55,12 @@ const supabase = hasSupabaseConfig
 export async function getPublishedEntries<Collection extends ContentCollection>(
   collection: Collection
 ): Promise<EntryByCollection[Collection][]> {
+  const localEntries = (await getCollection(collection)).filter(
+    (entry) => entry.data.published
+  ) as EntryByCollection[Collection][];
+
   if (!supabase) {
-    const localEntries = await getCollection(collection);
-    return localEntries.filter((entry) => entry.data.published) as EntryByCollection[Collection][];
+    return localEntries;
   }
 
   const { data, error } = await supabase
@@ -65,10 +70,21 @@ export async function getPublishedEntries<Collection extends ContentCollection>(
     .eq('published', true);
 
   if (error) {
-    throw new Error(`Unable to load ${collection} content from Supabase: ${error.message}`);
+    console.warn(
+      `Unable to load ${collection} content from Supabase; using local content instead: ${error.message}`
+    );
+    return localEntries;
   }
 
-  return (data ?? []).map((row) => createRemoteEntry(collection, row)) as unknown as EntryByCollection[Collection][];
+  const remoteEntries = (data ?? []).map((row) =>
+    createRemoteEntry(collection, row)
+  ) as unknown as EntryByCollection[Collection][];
+  const remoteSlugs = new Set(remoteEntries.map((entry) => entry.slug));
+
+  return [
+    ...localEntries.filter((entry) => !remoteSlugs.has(entry.slug)),
+    ...remoteEntries
+  ];
 }
 
 function createRemoteEntry<Collection extends ContentCollection>(
@@ -80,9 +96,28 @@ function createRemoteEntry<Collection extends ContentCollection>(
     collection,
     slug: row.slug,
     data: normalizeEntryData(collection, row.data),
+    bodyMarkdown: row.body_markdown ?? '',
     bodyHtml: row.body_html ?? marked.parse(row.body_markdown ?? '', { async: false }),
     source: 'supabase'
   };
+}
+
+export async function getPublishedBookEntries() {
+  const collections: ContentCollection[] = ['art', 'lifestyle', 'travel'];
+  const entries = (await Promise.all(
+    collections.map((collection) => getPublishedEntries(collection))
+  )).flat() as AnyContentEntry[];
+
+  return entries.filter(
+    (entry): entry is AnyContentEntry & {
+      data: AnyContentEntry['data'] & { book: BookPresentation };
+    } => Boolean('book' in entry.data && entry.data.book)
+  );
+}
+
+export function getEntryBodyMarkdown(entry: AnyContentEntry) {
+  if ('bodyMarkdown' in entry) return entry.bodyMarkdown;
+  return entry.body ?? '';
 }
 
 function normalizeEntryData<Collection extends ContentCollection>(
