@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "sceneId": "castle-gallery-wall",
+  "registration": {
+    "kind": "independent-viewpoint",
+    "canvas": {
+      "width": 1672,
+      "height": 941
+    },
+    "camera": "Eye level near 1.6 m, level horizon, rectilinear natural wide angle near 30 mm, facing the principal wall nearly straight-on.",
+    "continuityAnchors": [
+      "terracotta-red salon wall within pale carved limestone",
+      "dark walnut dado, doors, and coffered ceiling",
+      "aged brass and patinated teal ornament",
+      "cool coastal daylight at the left arch against amber practical lights"
+    ]
+  },
+  "layerOrder": [
+    "base",
+    "framed-art-proxy",
+    "foreground-frame-shell"
+  ],
+  "apertures": {
+    "gallery-left-frame": {
+      "bounds": {
+        "x": 407,
+        "y": 338,
+        "width": 112,
+        "height": 204
+      },
+      "normalizedBounds": {
+        "x": 0.24342105263157895,
+        "y": 0.359192348565356,
+        "width": 0.06698564593301436,
+        "height": 0.21679064824654623
+      },
+      "mask": "gallery-left-frame-mask.png",
+      "aspectPolicy": "contain-with-mat"
+    },
+    "gallery-center-frame": {
+      "bounds": {
+        "x": 633,
+        "y": 292,
+        "width": 406,
+        "height": 267
+      },
+      "normalizedBounds": {
+        "x": 0.3785885167464115,
+        "y": 0.310308182784272,
+        "width": 0.24282296650717702,
+        "height": 0.28374070138150903
+      },
+      "mask": "gallery-center-frame-mask.png",
+      "aspectPolicy": "contain-with-mat"
+    },
+    "gallery-right-frame": {
+      "bounds": {
+        "x": 1153,
+        "y": 338,
+        "width": 112,
+        "height": 204
+      },
+      "normalizedBounds": {
+        "x": 0.6895933014354066,
+        "y": 0.359192348565356,
+        "width": 0.06698564593301436,
+        "height": 0.21679064824654623
+      },
+      "mask": "gallery-right-frame-mask.png",
+      "aspectPolicy": "contain-with-mat"
+    }
+  },
+  "occupied": {
+    "gallery-center-frame": {
+      "wisteriaId": "still-life-with-wisteria",
+      "artworkBounds": {
+        "x": 658,
+        "y": 292,
+        "width": 356,
+        "height": 267
+      },
+      "normalizedArtworkBounds": {
+        "x": 0.39354066985645936,
+        "y": 0.310308182784272,
+        "width": 0.21291866028708134,
+        "height": 0.28374070138150903
+      },
+      "sourceSha256": "60d56d0150d46b64524e99f367def985d36c1359bad99bd8d49b6bbc09043e53",
+      "proxySha256": "fc1ec2f6948a99f2ed99e08fc09f8998012e8a341d2384afed4539c25f3c5c95"
+    }
+  },
+  "protectedPixels": {
+    "outsideApertures": true,
+    "outsideDifferencePixels": 0
+  },
+  "source": {
+    "master": "source/castle-gallery-master-v2.png",
+    "masterSha256": "19588aeef66bbd26f71777c9efa61b4dcc8d8a0be5c67296b17315104eb76d7b"
+  }
+}

@@ -23,7 +23,14 @@ export type ConstructionRecordState =
   | 'unlocked'
   | 'retired';
 
-export type LibraryRepresentation = 'book' | 'letter' | 'object';
+export type WisteriaItemRepresentation =
+  | 'book'
+  | 'letter'
+  | 'object'
+  | 'framed-art';
+
+/** @deprecated Prefer the structure-neutral WisteriaItemRepresentation. */
+export type LibraryRepresentation = WisteriaItemRepresentation;
 
 export interface LibrarySpatialNode {
   roomId: string;
@@ -51,8 +58,11 @@ export interface LibraryRoomRef {
 
 export interface LibraryHotspotSlot {
   id: string;
-  representation: LibraryRepresentation;
+  representation: WisteriaItemRepresentation;
   bounds: NormalizedBounds;
+  apertureBounds?: NormalizedBounds;
+  apertureMaskId?: string;
+  aspectPolicy?: 'cover' | 'contain-with-mat';
   occupiedBy: string | null;
 }
 
@@ -66,9 +76,9 @@ export interface LibrarySceneRef {
   slots: LibraryHotspotSlot[];
 }
 
-export interface LibraryLocationRegistry {
+export interface WisteriaLocationRegistry {
   schemaVersion: 3;
-  structureId: 'library';
+  structureId: string;
   map: {
     discoveryStorageKey: string;
     nodes: LibrarySpatialNode[];
@@ -76,6 +86,10 @@ export interface LibraryLocationRegistry {
   };
   rooms: LibraryRoomRef[];
   scenes: LibrarySceneRef[];
+}
+
+export interface LibraryLocationRegistry extends WisteriaLocationRegistry {
+  structureId: 'library';
 }
 
 export interface DependencyLock {
@@ -137,8 +151,23 @@ export interface LibraryConstructionRecord extends RegisteredWisteriaEntity {
   sceneId: string;
   slotId: string;
   hotspotId: string;
-  representation: LibraryRepresentation;
+  representation: WisteriaItemRepresentation;
   bounds: NormalizedBounds;
+  apertureBounds?: NormalizedBounds;
+  apertureMaskId?: string;
+  sourceArtwork?: {
+    notionBlockId: string | null;
+    sha256: string;
+    width: number;
+    height: number;
+    contentType: string;
+    publicPath: string | null;
+  };
+  wallProxy?: {
+    assetPath: string;
+    sha256: string;
+    promptPath: string;
+  };
 }
 
 export interface LibraryEditorialMediaAttachment {
@@ -180,7 +209,7 @@ export interface LibraryNotionEntry extends LibraryNotionEntity {
   roomId: string;
   sceneId: string;
   hotspotId: string;
-  representation: LibraryRepresentation;
+  representation: WisteriaItemRepresentation;
   releaseId: string | null;
   bodyMarkdown: string;
   media: LibraryRuntimeMediaReference[];

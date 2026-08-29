@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 3,
+  "structureId": "castle",
+  "activeUnlocks": [],
+  "activeReservation": {
+    "sessionId": "a4969f2d-3b47-4128-8246-f10dda7cbefd",
+    "lockScope": "room:castle/castle-gallery-room",
+    "branch": "codex/castle-gallery-art-pilot",
+    "pullRequest": 9,
+    "baseCommit": "aa36cdf55d9ea7d146ac2112d6d2cb71d8be7627",
+    "entityIds": [
+      "castle",
+      "castle-gallery-room",
+      "castle-gallery-wall",
+      "still-life-with-wisteria"
+    ],
+    "approvedAt": "2026-08-28"
+  },
+  "records": [
+    {
+      "wisteriaId": "castle",
+      "entityKind": "structure",
+      "parentId": null,
+      "source": "repository",
+      "notionPageId": null,
+      "state": "locked",
+      "constructionVersion": 1,
+      "promptHash": "d175709ab3dbe201dc5bc2f194b0142e9e12dad74957d9f15f02dedf0686ccc1",
+      "constructionHash": "7d0e112104c9ccd34ce3f8dfc6df82755dff1dd3444a73b9d5f6aac2121d5e21",
+      "lockedConstructionHash": "7d0e112104c9ccd34ce3f8dfc6df82755dff1dd3444a73b9d5f6aac2121d5e21",
+      "releaseId": "castle-structure-v1",
+      "dependencyLock": {
+        "preserves": ["structure-identity", "character-guide", "village-entry-route"],
+        "protectedDescendantIds": ["castle-gallery-room"],
+        "allowParentRelighting": true
+      },
+      "pendingVersion": null,
+      "history": []
+    },
+    {
+      "wisteriaId": "castle-gallery-room",
+      "entityKind": "room",
+      "parentId": "castle",
+      "source": "notion",
+      "notionPageId": null,
+      "state": "pending",
+      "constructionVersion": 1,
+      "promptHash": "b41ef3387b4b0c3d2319815a1e81352906850e89537807e1b9b1b2ed08648183",
+      "constructionHash": "d02ed22ace4aee8698eb631556d779bada3d440977e6a1ace7d91d0a648b106c",
+      "lockedConstructionHash": "",
+      "releaseId": null,
+      "route": "/castle/gallery",
+      "mapNodeId": "castle-gallery-room",
+      "dependencyLock": {
+        "preserves": ["camera", "perspective", "architecture", "navigation", "apertures", "layer-ownership"],
+        "protectedDescendantIds": ["castle-gallery-wall"],
+        "allowParentRelighting": true
+      },
+      "pendingVersion": {
+        "version": 1,
+        "constructionHash": "d02ed22ace4aee8698eb631556d779bada3d440977e6a1ace7d91d0a648b106c",
+        "commit": null,
+        "pullRequest": 9,
+        "previewUrl": null,
+        "releaseId": null,
+        "state": "previewing"
+      },
+      "history": []
+    },
+    {
+      "wisteriaId": "castle-gallery-wall",
+      "entityKind": "scene",
+      "parentId": "castle-gallery-room",
+      "source": "notion",
+      "notionPageId": null,
+      "state": "pending",
+      "constructionVersion": 1,
+      "promptHash": "7e156a73ba6b62550f38e8f1d808e36a87c11fc31da9b5a194521abc565063bc",
+      "constructionHash": "5125735df8a39577233407050c5c7f33f72426a9d60aeb85a7a0dacc955e326c",
+      "lockedConstructionHash": "",
+      "releaseId": null,
+      "roomId": "castle-gallery-room",
+      "anchor": "gallery-principal-wall",
+      "dependencyLock": {
+        "preserves": ["parent-anchor", "camera-relationship", "geometry", "materials", "aperture-masks", "hotspots"],
+        "protectedDescendantIds": ["still-life-with-wisteria"],
+        "allowParentRelighting": true
+      },
+      "pendingVersion": {
+        "version": 1,
+        "constructionHash": "5125735df8a39577233407050c5c7f33f72426a9d60aeb85a7a0dacc955e326c",
+        "commit": null,
+        "pullRequest": 9,
+        "previewUrl": null,
+        "releaseId": null,
+        "state": "previewing"
+      },
+      "history": []
+    },
+    {
+      "wisteriaId": "still-life-with-wisteria",
+      "entityKind": "item",
+      "parentId": "castle-gallery-wall",
+      "source": "notion",
+      "notionPageId": null,
+      "state": "pending",
+      "roomId": "castle-gallery-room",
+      "sceneId": "castle-gallery-wall",
+      "slotId": "gallery-center-frame",
+      "hotspotId": "castle-gallery-still-life-with-wisteria",
+      "representation": "framed-art",
+      "bounds": {
+        "x": 0.366,
+        "y": 0.289,
+        "width": 0.269,
+        "height": 0.306
+      },
+      "apertureBounds": {
+        "x": 0.3785885167464115,
+        "y": 0.310308182784272,
+        "width": 0.24282296650717702,
+        "height": 0.28374070138150903
+      },
+      "apertureMaskId": "gallery-center-frame-mask",
+      "sourceArtwork": {
+        "notionBlockId": null,
+        "sha256": "60d56d0150d46b64524e99f367def985d36c1359bad99bd8d49b6bbc09043e53",
+        "width": 1448,
+        "height": 1086,
+        "contentType": "image/png",
+        "publicPath": null
+      },
+      "wallProxy": {
+        "assetPath": "assets/cinematic/art-pieces/still-life-with-wisteria/source/proxy/still-life-with-wisteria-wall-proxy-v1.png",
+        "sha256": "fc1ec2f6948a99f2ed99e08fc09f8998012e8a341d2384afed4539c25f3c5c95",
+        "promptPath": "assets/cinematic/art-pieces/still-life-with-wisteria/source/generation-notes.md"
+      },
+      "constructionVersion": 1,
+      "promptHash": "bc162942fdef5ea726260f6c93dc1210f8792b852ae53e8f16e13d363ea5af4e",
+      "constructionHash": "5723572d9d47ff24ef50648f58787a01a31bd7d2ff592a3c2d30ee7b97d40c82",
+      "lockedConstructionHash": "",
+      "releaseId": null,
+      "dependencyLock": {
+        "preserves": ["identity", "source-artwork", "aspect-ratio", "bounds", "aperture-mask", "wall-proxy", "hotspot", "content-binding"],
+        "protectedDescendantIds": [],
+        "allowParentRelighting": true
+      },
+      "pendingVersion": {
+        "version": 1,
+        "constructionHash": "5723572d9d47ff24ef50648f58787a01a31bd7d2ff592a3c2d30ee7b97d40c82",
+        "commit": null,
+        "pullRequest": 9,
+        "previewUrl": null,
+        "releaseId": null,
+        "state": "previewing"
+      },
+      "history": []
+    }
+  ]
+}
+

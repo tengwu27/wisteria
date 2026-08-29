@@ -19,10 +19,10 @@ const CONTENT_TYPE_EXTENSION = new Map([
 
 const ALLOWED_TYPES = new Set(CONTENT_TYPE_EXTENSION.keys());
 
-export function mediaPublicPath(wisteriaId, digest, contentType) {
+export function mediaPublicPath(wisteriaId, digest, contentType, structureId = 'library') {
   const extension = CONTENT_TYPE_EXTENSION.get(contentType);
   if (!extension) throw new Error(`Unsupported media type ${contentType}.`);
-  return `/media/notion/library/${slugify(wisteriaId)}/${digest.slice(0, 20)}.${extension}`;
+  return `/media/notion/${slugify(structureId)}/${slugify(wisteriaId)}/${digest.slice(0, 20)}.${extension}`;
 }
 
 function blockRichText(block) {
@@ -149,7 +149,9 @@ export async function mirrorMedia(attachment, context) {
   }
   const digest = sha256(buffer);
   const extension = CONTENT_TYPE_EXTENSION.get(contentType);
-  const entryDirectory = path.join(MEDIA_ROOT, slugify(context.wisteriaId));
+  const structureId = context.structureId ?? 'library';
+  const mediaRoot = context.mediaRoot ?? MEDIA_ROOT;
+  const entryDirectory = path.join(mediaRoot, slugify(context.wisteriaId));
   const diskPath = path.join(entryDirectory, `${digest.slice(0, 20)}.${extension}`);
   await mkdir(entryDirectory, { recursive: true });
   try {
@@ -162,7 +164,12 @@ export async function mirrorMedia(attachment, context) {
     kind: attachment.kind,
     filename: attachment.filename || `${digest.slice(0, 12)}.${extension}`,
     sha256: digest,
-    publicPath: mediaPublicPath(context.wisteriaId, digest, contentType),
+    publicPath: mediaPublicPath(
+      context.wisteriaId,
+      digest,
+      contentType,
+      structureId
+    ),
     contentType,
     byteLength: buffer.length,
     alt: attachment.alt || undefined,

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 3,
+  "structureId": "castle",
+  "structurePageId": null,
+  "dataSources": {
+    "rooms": {
+      "databaseId": null,
+      "dataSourceId": null
+    },
+    "scenes": {},
+    "items": {}
+  }
+}
+

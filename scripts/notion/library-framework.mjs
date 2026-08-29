@@ -11,6 +11,23 @@ export const SNAPSHOT_PATH = '.wisteria-cache/library-notion.json';
 export const IMPACT_MANIFEST_PATH = '.wisteria-cache/library-impact.json';
 export const MEDIA_ROOT = 'public/media/notion/library';
 
+export function structurePaths(structureId) {
+  const normalized = slugify(structureId);
+  if (!normalized) throw new Error('A structure ID is required.');
+  const root = `world/structures/${normalized}`;
+  return {
+    structureId: normalized,
+    root,
+    locationRegistryPath: `${root}/locations.json`,
+    constructionLedgerPath: `${root}/construction-ledger.json`,
+    notionConfigPath: `${root}/notion.json`,
+    protectedAssetsPath: `${root}/protected-assets.json`,
+    snapshotPath: `.wisteria-cache/${normalized}-notion.json`,
+    impactManifestPath: `.wisteria-cache/${normalized}-impact.json`,
+    mediaRoot: `public/media/notion/${normalized}`
+  };
+}
+
 const ENTITY_PROPERTIES = {
   room: { title: 'Room Name', prompt: 'Room Prompt' },
   scene: { title: 'Scene Name', prompt: 'Scene Prompt' },
@@ -134,14 +151,19 @@ export function findEntityRecord(entity, ledger) {
   );
 }
 
-export function findFreeSlot(scene, ledger) {
+export function findFreeSlot(scene, ledger, representation) {
   if (!scene) return undefined;
   const occupied = new Set(
     ledger.records
       .filter((record) => record.entityKind === 'item' && record.sceneId === scene.id)
       .map((record) => record.slotId)
   );
-  return scene.slots.find((slot) => !slot.occupiedBy && !occupied.has(slot.id));
+  return scene.slots.find(
+    (slot) =>
+      !slot.occupiedBy &&
+      !occupied.has(slot.id) &&
+      (!representation || slot.representation === representation)
+  );
 }
 
 export function computeSourceHash(entry, bodyMarkdown, media = []) {
@@ -238,7 +260,7 @@ export function resolveConstructionRequest(entity, registry, ledger) {
       executable: false
     };
   }
-  const compatibleSlot = findFreeSlot(scene, ledger);
+  const compatibleSlot = findFreeSlot(scene, ledger, entity.representation);
   return {
     intent: compatibleSlot ? 'bind-existing-object' : 'additive-construction',
     entityKind: 'item',
@@ -416,7 +438,13 @@ export async function notionRequest(token, endpoint, options = {}) {
   return response.json();
 }
 
-export async function queryDataSource(token, dataSourceId, statuses, statusProperty = 'Wisteria Status') {
+export async function queryDataSource(
+  token,
+  dataSourceId,
+  statuses,
+  statusProperty = 'Wisteria Status',
+  statusPropertyType = 'select'
+) {
   const results = [];
   let startCursor;
   do {
@@ -426,7 +454,7 @@ export async function queryDataSource(token, dataSourceId, statuses, statusPrope
       body.filter = {
         or: statuses.map((status) => ({
           property: statusProperty,
-          select: { equals: status }
+          [statusPropertyType]: { equals: status }
         }))
       };
     }

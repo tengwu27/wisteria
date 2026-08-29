@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 3,
+  "structureId": "castle",
+  "map": {
+    "discoveryStorageKey": "wisteria:castle:discovered-rooms:v1",
+    "nodes": [
+      {
+        "roomId": "castle-gallery-room",
+        "label": "Gallery Room",
+        "route": "/castle/gallery",
+        "x": 0.5,
+        "y": 0.5,
+        "initiallyDiscovered": true
+      }
+    ],
+    "edges": []
+  },
+  "rooms": [
+    {
+      "id": "castle-gallery-room",
+      "label": "Gallery Room",
+      "route": "/castle/gallery",
+      "characterVersion": 1,
+      "description": "An intimate terracotta-walled salon inside the Castle, with a collected frame rhythm, coastal daylight, and three registered feature apertures.",
+      "protectedSceneIds": ["castle-gallery-wall"]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "castle-gallery-wall",
+      "label": "Gallery Wall",
+      "roomId": "castle-gallery-room",
+      "characterVersion": 1,
+      "description": "The principal salon wall viewed nearly straight-on, with immutable frame geometry and three exact artwork apertures.",
+      "protectedRegion": {
+        "x": 0.14,
+        "y": 0.14,
+        "width": 0.75,
+        "height": 0.56
+      },
+      "slots": [
+        {
+          "id": "gallery-left-frame",
+          "representation": "framed-art",
+          "bounds": {
+            "x": 0.231,
+            "y": 0.337,
+            "width": 0.092,
+            "height": 0.241
+          },
+          "apertureBounds": {
+            "x": 0.24342105263157895,
+            "y": 0.359192348565356,
+            "width": 0.06698564593301436,
+            "height": 0.21679064824654623
+          },
+          "apertureMaskId": "gallery-left-frame-mask",
+          "aspectPolicy": "contain-with-mat",
+          "occupiedBy": null
+        },
+        {
+          "id": "gallery-center-frame",
+          "representation": "framed-art",
+          "bounds": {
+            "x": 0.366,
+            "y": 0.289,
+            "width": 0.269,
+            "height": 0.306
+          },
+          "apertureBounds": {
+            "x": 0.3785885167464115,
+            "y": 0.310308182784272,
+            "width": 0.24282296650717702,
+            "height": 0.28374070138150903
+          },
+          "apertureMaskId": "gallery-center-frame-mask",
+          "aspectPolicy": "contain-with-mat",
+          "occupiedBy": "still-life-with-wisteria"
+        },
+        {
+          "id": "gallery-right-frame",
+          "representation": "framed-art",
+          "bounds": {
+            "x": 0.677,
+            "y": 0.337,
+            "width": 0.092,
+            "height": 0.241
+          },
+          "apertureBounds": {
+            "x": 0.6895933014354066,
+            "y": 0.359192348565356,
+            "width": 0.06698564593301436,
+            "height": 0.21679064824654623
+          },
+          "apertureMaskId": "gallery-right-frame-mask",
+          "aspectPolicy": "contain-with-mat",
+          "occupiedBy": null
+        }
+      ]
+    }
+  ]
+}
+
