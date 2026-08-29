@@ -1,5 +1,9 @@
 ---
-import { libraryScene, findArtifactPlacement } from '@/data/libraryScene';
+import {
+  getLibrarySceneForBooks,
+  findArtifactPlacement,
+  librarySpatialGraph
+} from '@/data/libraryScene';
 import type { LibraryBook } from '@/lib/artifacts';
 import '@/styles/library-experience.css';
 
@@ -9,16 +13,17 @@ interface Props {
 }
 
 const { books, initialArtifactId } = Astro.props;
+const activeLibraryScene = getLibrarySceneForBooks(books);
 const initialBook = initialArtifactId
   ? books.find((book) => book.artifactId === initialArtifactId)
   : undefined;
 const initialPlacement = initialBook
-  ? findArtifactPlacement(initialBook.artifactId)
+  ? findArtifactPlacement(initialBook.artifactId, activeLibraryScene)
   : undefined;
-const hallSrcset = libraryScene.overviewAssets
+const hallSrcset = activeLibraryScene.overviewAssets
   .map((asset) => asset.src + ' ' + asset.width + 'w')
   .join(', ');
-const largestHall = libraryScene.overviewAssets.at(-1)!;
+const largestHall = activeLibraryScene.overviewAssets.at(-1)!;
 const boundsStyle = (bounds: {
   x: number;
   y: number;
@@ -44,15 +49,16 @@ const emblem = {
 <section
   class="library-experience"
   data-library-root
+  data-current-scene={activeLibraryScene.id}
   data-state={initialBook ? 'reading' : 'hall'}
   data-initial-artifact={initialBook?.artifactId}
   data-initial-zone={initialPlacement?.zone.id}
-  data-initial-focal-ratio={libraryScene.initialFocalRatio}
+  data-initial-focal-ratio={activeLibraryScene.initialFocalRatio}
   style={
     '--hall-width:' +
-    libraryScene.canvas.width +
+    activeLibraryScene.canvas.width +
     ';--hall-height:' +
-    libraryScene.canvas.height
+    activeLibraryScene.canvas.height
   }
   aria-label="Wisteria 大教堂图书馆互动藏书室"
 >
@@ -80,7 +86,7 @@ const emblem = {
         />
 
         <div class="overview-hotspots" aria-label="图书馆可探索区域">
-          {libraryScene.zones.map((zone) => (
+          {activeLibraryScene.zones.map((zone) => (
             <button
               class="zone-hotspot"
               type="button"
@@ -99,7 +105,7 @@ const emblem = {
     </div>
   </div>
 
-  {libraryScene.zones.map((zone) => {
+  {activeLibraryScene.zones.map((zone) => {
     const activeInitially = initialPlacement?.zone.id === zone.id;
     const focusSrcset = zone.assets
       .map((asset) => asset.src + ' ' + asset.width + 'w')
@@ -204,6 +210,48 @@ const emblem = {
     <span aria-hidden="true">✦</span>
     <span>显示可互动处<small>SHOW INTERACTABLES</small></span>
   </button>
+
+  <button
+    class="library-map-control"
+    type="button"
+    data-library-map-toggle
+    aria-expanded="false"
+    aria-controls="library-map-panel"
+  >
+    <span aria-hidden="true">⌘</span>
+    <span>馆内地图<small>DISCOVERED ROOMS</small></span>
+  </button>
+
+  <aside
+    class="library-map-panel"
+    id="library-map-panel"
+    data-library-map-panel
+    data-discovery-key={librarySpatialGraph.discoveryStorageKey}
+    hidden
+    aria-label="Library discovered-room map"
+  >
+    <header>
+      <p>馆内地图<small>LIBRARY MAP</small></p>
+      <button type="button" data-library-map-close aria-label="Close Library map">×</button>
+    </header>
+    <div class="library-map-canvas">
+      {librarySpatialGraph.nodes.map((node) => (
+        <a
+          href={node.route}
+          class="library-map-node"
+          data-library-map-node={node.roomId}
+          data-initially-discovered={String(node.initiallyDiscovered)}
+          data-current={node.roomId === activeLibraryScene.id ? 'true' : 'false'}
+          style={`--map-x:${node.x * 100}%;--map-y:${node.y * 100}%`}
+          aria-current={node.roomId === activeLibraryScene.id ? 'location' : undefined}
+        >
+          <span aria-hidden="true">✦</span>
+          <b>{node.label}</b>
+        </a>
+      ))}
+    </div>
+    <p>Only rooms you have reached are named here.</p>
+  </aside>
 
   <p class="library-cue" aria-hidden="true">
     ← 滑动探索 · 发现书桌与书架 · SWIPE TO EXPLORE →
@@ -359,6 +407,9 @@ const emblem = {
     const loadError = root.querySelector<HTMLElement>('[data-library-load-error]')!;
     const status = root.querySelector<HTMLElement>('[data-library-status]')!;
     const revealControl = root.querySelector<HTMLButtonElement>('[data-reveal-control]')!;
+    const mapToggle = root.querySelector<HTMLButtonElement>('[data-library-map-toggle]')!;
+    const mapPanel = root.querySelector<HTMLElement>('[data-library-map-panel]')!;
+    const mapClose = root.querySelector<HTMLButtonElement>('[data-library-map-close]')!;
     const bookLayer = root.querySelector<HTMLElement>('[data-book-layer]')!;
     const zoneStages = new Map(
       [...root.querySelectorAll<HTMLElement>('[data-zone-stage]')].map(
@@ -379,6 +430,20 @@ const emblem = {
         button.dataset.zoneId!
       ])
     );
+    const requestedReturnZone = new URLSearchParams(window.location.search).get(
+      'zone'
+    );
+    const historyReturnZone =
+      history.state?.wisteriaView === 'zone' &&
+      typeof history.state.zoneId === 'string'
+        ? history.state.zoneId
+        : null;
+    const restoredZoneId = root.dataset.initialArtifact
+      ? null
+      : [historyReturnZone, requestedReturnZone].find(
+          (zoneId): zoneId is string =>
+            typeof zoneId === 'string' && zoneStages.has(zoneId)
+        ) ?? null;
     let state: LibraryState = root.dataset.initialArtifact ? 'reading' : 'hall';
     let activeZoneId = root.dataset.initialZone ?? null;
     let activeArtifactId = root.dataset.initialArtifact ?? null;
@@ -390,6 +455,47 @@ const emblem = {
     let pointerStartX: number | null = null;
     let lastTrigger: HTMLElement | null = null;
     const bookPagePositions = new Map<string, number>();
+
+    const discoveryKey = mapPanel.dataset.discoveryKey!;
+    const mapNodes = [
+      ...mapPanel.querySelectorAll<HTMLAnchorElement>('[data-library-map-node]')
+    ];
+    const readDiscoveredRooms = () => {
+      const initial = mapNodes
+        .filter((node) => node.dataset.initiallyDiscovered === 'true')
+        .map((node) => node.dataset.libraryMapNode!);
+      try {
+        return new Set<string>([
+          ...initial,
+          ...JSON.parse(localStorage.getItem(discoveryKey) ?? '[]')
+        ]);
+      } catch {
+        return new Set<string>(initial);
+      }
+    };
+    const discoveredRooms = readDiscoveredRooms();
+    discoveredRooms.add(root.dataset.currentScene!);
+    try {
+      localStorage.setItem(discoveryKey, JSON.stringify([...discoveredRooms]));
+    } catch {}
+    mapNodes.forEach((node) => {
+      const discovered = discoveredRooms.has(node.dataset.libraryMapNode!);
+      node.toggleAttribute('data-undiscovered', !discovered);
+      if (!discovered) {
+        node.removeAttribute('href');
+        node.setAttribute('aria-disabled', 'true');
+        const label = node.querySelector('b');
+        if (label) label.textContent = 'Undiscovered';
+      }
+    });
+
+    const setMapOpen = (open: boolean) => {
+      mapPanel.hidden = !open;
+      mapToggle.setAttribute('aria-expanded', String(open));
+      root.dataset.mapOpen = String(open);
+      if (open) mapClose.focus();
+      else mapToggle.focus();
+    };
 
     const setState = (next: LibraryState) => {
       state = next;
@@ -710,10 +816,13 @@ const emblem = {
       rememberOpened(artifactId);
 
       if (options.push) {
+        const returnUrl = zoneId
+          ? '/library?zone=' + encodeURIComponent(zoneId)
+          : '/library';
         history.replaceState(
           { wisteriaView: 'zone', zoneId },
           '',
-          '/library'
+          returnUrl
         );
         history.pushState(
           { wisteriaView: 'artifact', artifactId, zoneId },
@@ -837,6 +946,8 @@ const emblem = {
       },
       { signal }
     );
+    mapToggle.addEventListener('click', () => setMapOpen(true), { signal });
+    mapClose.addEventListener('click', () => setMapOpen(false), { signal });
     bookLayer.addEventListener(
       'pointerdown',
       (event) => {
@@ -906,13 +1017,25 @@ const emblem = {
         });
         return;
       }
-      const zoneId = history.state?.zoneId as string | undefined;
+      const requestedZone = new URLSearchParams(window.location.search).get(
+        'zone'
+      );
+      const zoneId =
+        (history.state?.zoneId as string | undefined) ??
+        (requestedZone && zoneStages.has(requestedZone)
+          ? requestedZone
+          : undefined);
       await closeBookView(false);
       openedByScene = false;
       if (zoneId && activeZoneId !== zoneId) {
         await openZone(zoneId, { immediate: true, focus: false });
       }
       if (zoneId) {
+        history.replaceState(
+          { wisteriaView: 'zone', zoneId },
+          '',
+          '/library'
+        );
         root
           .querySelector<HTMLButtonElement>(
             '[data-artifact-trigger="' +
@@ -972,6 +1095,15 @@ const emblem = {
       void openZone(activeZoneId, { immediate: true, focus: false }).then(() =>
         openBook(activeArtifactId!, { immediate: true })
       );
+    } else if (restoredZoneId) {
+      void openZone(restoredZoneId, { immediate: true, focus: true }).then(() => {
+        if (activeZoneId !== restoredZoneId || activeArtifactId) return;
+        history.replaceState(
+          { wisteriaView: 'zone', zoneId: restoredZoneId },
+          '',
+          '/library'
+        );
+      });
     } else {
       setState('hall');
     }

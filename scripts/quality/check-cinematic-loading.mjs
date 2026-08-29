@@ -341,6 +341,7 @@ const transitionSourcePaths = {
   navigation: 'src/utils/immersiveNavigation.ts',
   mediaLoader: 'src/utils/cinematicMediaLoader.ts',
   village: 'src/components/sections/GamifiedCoastalVillage.astro',
+  villageParallax: 'src/utils/prototypeLayeredScene.ts',
   castle: 'src/components/sections/CastleVista.astro',
   restaurant: 'src/components/sections/RestaurantVista.astro',
   library: 'src/components/sections/LibraryExperience.astro',
@@ -390,6 +391,24 @@ if (
   transitionSources.village.includes('#0d4d52')
 ) {
   failures.push('village: shell continuity and teardown-safe clock contract are incomplete');
+}
+if (
+  !transitionSources.village.includes('zoom: 1.03') ||
+  !transitionSources.village.includes('data-camera-focal-y') ||
+  !transitionSources.village.includes('min-width:103%') ||
+  !transitionSources.village.includes('min-height:103%') ||
+  !transitionSources.village.includes('overflow:auto') ||
+  !transitionSources.village.includes('touch-action:pan-x pan-y') ||
+  !transitionSources.villageParallax.includes("data-overflow-y") ||
+  !transitionSources.villageParallax.includes('viewport.scrollTop') ||
+  !transitionSources.villageParallax.includes("event.key === 'ArrowUp'") ||
+  !transitionSources.villageParallax.includes("event.key === 'ArrowDown'") ||
+  transitionSources.village.includes('data-vertical-pan="document"') ||
+  transitionSources.village.includes('document.scrollingElement') ||
+  transitionSources.village.includes('scene-scroll-surface') ||
+  transitionSources.layout.includes('data-immersive-scroll-runway')
+) {
+  failures.push('village: native 1.03x four-direction camera contract is incomplete');
 }
 if (
   transitionSources.village.includes('data-immersive-document-route') ||
@@ -607,8 +626,8 @@ for (const route of config.routes) {
       !unique(inspectedArtifactIds) ||
       expectedArtifactIds.some((id) => !placedArtifactIds.includes(id)) ||
       expectedArtifactIds.some((id) => !inspectedArtifactIds.includes(id)) ||
-      placedArtifactIds.length !== expectedArtifactIds.length ||
-      inspectedArtifactIds.length !== expectedArtifactIds.length
+      placedArtifactIds.length !== inspectedArtifactIds.length ||
+      placedArtifactIds.some((id) => !inspectedArtifactIds.includes(id))
     ) {
       report(`${route.label}: scene placements and book inspectors are out of sync`, route, false);
     }
@@ -660,38 +679,44 @@ for (const route of config.routes) {
       report(`${route.label}: body-level overflow containment is missing`, route, false);
     }
 
-    for (const artifact of route.artifactRoutes) {
+    for (const artifactId of inspectedArtifactIds) {
+      const configuredArtifact = route.artifactRoutes.find(
+        (artifact) => artifact.id === artifactId
+      );
       const bookTag = bookTags.find(
-        (tag) => attribute(tag, 'data-book') === artifact.id
+        (tag) => attribute(tag, 'data-book') === artifactId
       );
       const declaredPages = Number(attribute(bookTag ?? '', 'data-page-count'));
       if (
-        artifact.pages < 2 ||
-        artifact.pages > 4 ||
-        declaredPages !== artifact.pages
+        declaredPages < 1 ||
+        declaredPages > 64 ||
+        (configuredArtifact && declaredPages !== configuredArtifact.pages)
       ) {
-        report(`${route.label}: ${artifact.id} page count is invalid`, route, false);
+        report(`${route.label}: ${artifactId} page count is invalid`, route, false);
       }
 
       let artifactHtml;
+      const artifactPath =
+        configuredArtifact?.html ??
+        `dist/collection/${artifactId}/index.html`;
       try {
-        artifactHtml = await readFile(resolve(artifact.html), 'utf8');
+        artifactHtml = await readFile(resolve(artifactPath), 'utf8');
       } catch {
-        report(`${route.label}: direct artifact route is missing at ${artifact.html}`, route, false);
+        report(`${route.label}: direct artifact route is missing at ${artifactPath}`, route, false);
         continue;
       }
       const semanticPages = artifactHtml.match(/<section\b[^>]*data-book-page=/g) ?? [];
       const ownBook = artifactHtml.match(
-        new RegExp(`<article\\b[^>]*data-book=["']${artifact.id}["'][^>]*>`)
+        new RegExp(`<article\\b[^>]*data-book=["']${artifactId}["'][^>]*>`)
       )?.[0];
       if (
-        !artifactHtml.includes(`data-initial-artifact="${artifact.id}"`) ||
+        !artifactHtml.includes(`data-initial-artifact="${artifactId}"`) ||
         !ownBook ||
         attribute(ownBook, 'aria-hidden') !== 'false' ||
-        semanticPages.length < artifact.pages ||
+        semanticPages.length < declaredPages ||
         !/<meta\b[^>]*name="robots"[^>]*noindex/i.test(artifactHtml)
       ) {
-        report(`${route.label}: ${artifact.id} direct/no-JavaScript route contract failed`, route, false);
+        report(`${route.label}: ${artifactId} direct/no-JavaScript route contract failed`, route, false);
       }
     }
 
@@ -810,7 +835,15 @@ for (const route of config.routes) {
   if (!routeCss.includes('/fonts/wisteria-immersive-ui.woff2')) {
     report(`${route.label}: compact immersive font is not registered`, route);
   }
-  if (
+  const hasLibraryBookFont =
+    routeCss.includes("font-family: 'LXGW WenKai Books'") &&
+    routeCss.includes('lxgwwenkai-regular-subset') &&
+    routeCss.includes('lxgwwenkai-bold-subset');
+  if (route.id === 'library') {
+    if (!hasLibraryBookFont) {
+      report(`${route.label}: content-aware LXGW WenKai book font is missing`, route);
+    }
+  } else if (
     routeCss.includes('zcool-kuaile-chinese-simplified') ||
     routeCss.includes('lxgwwenkai-regular-subset') ||
     routeCss.includes('lxgwwenkai-bold-subset')

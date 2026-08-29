@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 3,
+  "structureId": "library",
+  "map": {
+    "discoveryStorageKey": "wisteria:library:discovered-rooms:v1",
+    "nodes": [
+      {
+        "roomId": "library-grand-hall",
+        "label": "Grand Hall",
+        "route": "/library",
+        "x": 0.5,
+        "y": 0.5,
+        "initiallyDiscovered": true
+      }
+    ],
+    "edges": []
+  },
+  "rooms": [
+    {
+      "id": "library-grand-hall",
+      "label": "Grand Hall",
+      "route": "/library",
+      "characterVersion": 1,
+      "description": "The cathedral-like central hall of the Library, with a long aisle, warm reading lights, shelves, and a monumental coastal threshold.",
+      "protectedSceneIds": ["reading-table", "west-shelf"]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "reading-table",
+      "label": "Reading Table",
+      "roomId": "library-grand-hall",
+      "characterVersion": 1,
+      "description": "The foreground reading table viewed over its aisle-side chair, with books and writing vessels under warm light.",
+      "protectedRegion": { "x": 0.285, "y": 0.56, "width": 0.2, "height": 0.37 },
+      "slots": [
+        {
+          "id": "reading-table-primary-book",
+          "representation": "book",
+          "bounds": { "x": 0.414, "y": 0.372, "width": 0.18, "height": 0.24 },
+          "occupiedBy": "wisteria-field-notes"
+        },
+        {
+          "id": "reading-table-lower-volume",
+          "representation": "book",
+          "bounds": { "x": 0.405, "y": 0.51, "width": 0.19, "height": 0.13 },
+          "occupiedBy": "library-pilot-quiet-hour"
+        }
+      ]
+    },
+    {
+      "id": "west-shelf",
+      "label": "West Shelf",
+      "roomId": "library-grand-hall",
+      "characterVersion": 1,
+      "description": "The west wall's close shelf alcove, dense with leather volumes and two registered featured-book regions.",
+      "protectedRegion": { "x": 0.135, "y": 0.34, "width": 0.235, "height": 0.39 },
+      "slots": [
+        {
+          "id": "west-shelf-atlas-book",
+          "representation": "book",
+          "bounds": { "x": 0.417, "y": 0.44, "width": 0.075, "height": 0.33 },
+          "occupiedBy": "atlas-of-tides"
+        },
+        {
+          "id": "west-shelf-glimmers-book",
+          "representation": "book",
+          "bounds": { "x": 0.49, "y": 0.44, "width": 0.075, "height": 0.33 },
+          "occupiedBy": "collected-glimmers"
+        },
+        {
+          "id": "west-shelf-right-book-cluster",
+          "representation": "book",
+          "bounds": { "x": 0.57, "y": 0.46, "width": 0.09, "height": 0.29 },
+          "occupiedBy": "library-pilot-returning-atlas"
+        }
+      ]
+    }
+  ]
+}
