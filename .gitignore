@@ -13,3 +13,8 @@ __pycache__/
 /assets/cinematic/archive/
 
 .env
+.env.local
+supabase/.temp/
+.wisteria-cache/
+/public/media/notion/
+/public/fonts/library-books/

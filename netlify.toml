@@ -6,6 +6,15 @@
   command = "npm run dev"
   targetPort = 4321
 
+[functions]
+  included_files = ["world/structures/library/*.json", "scripts/notion/*.mjs"]
+
+[context.production.environment]
+  WISTERIA_NOTION_REQUIRED = "1"
+
+[context.deploy-preview.environment]
+  WISTERIA_NOTION_REQUIRED = "1"
+
 [[headers]]
   for = "/*"
   [headers.values]

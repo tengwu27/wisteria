@@ -27,18 +27,22 @@ export function createPrototypeLayeredSceneController(options: {
   viewport: HTMLElement;
   world: HTMLElement;
   planes: LayeredScenePlane[];
-  neutralFocalRatio?: number;
+  neutralFocalRatioX?: number;
+  neutralFocalRatioY?: number;
   signal: AbortSignal;
 }): PrototypeLayeredSceneController {
   const { root, viewport, world, planes, signal } = options;
-  const neutral = options.neutralFocalRatio ?? 0.53;
+  const neutral = {
+    x: options.neutralFocalRatioX ?? 0.53,
+    y: options.neutralFocalRatioY ?? 0.5
+  };
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let target = { x: 0, y: 0 };
   let current = { x: 0, y: 0 };
   let spatial = { x: 0, y: 0 };
   let suspended = true;
-  let overflow = false;
-  let exploredRatio = neutral;
+  let overflow = { x: false, y: false };
+  let exploredRatio = { ...neutral };
   let initialized = false;
   let frame = 0;
 
@@ -65,39 +69,74 @@ export function createPrototypeLayeredSceneController(options: {
   };
 
   const syncScrollFocus = () => {
-    if (!overflow) return;
-    exploredRatio = (viewport.scrollLeft + viewport.clientWidth / 2) / viewport.scrollWidth;
-    target.x = clamp((neutral - exploredRatio) * 3.2, -1, 1);
-    target.y = 0;
+    if (overflow.x) {
+      exploredRatio.x =
+        (viewport.scrollLeft + viewport.clientWidth / 2) /
+        viewport.scrollWidth;
+      target.x = clamp((neutral.x - exploredRatio.x) * 3.2, -1, 1);
+    } else {
+      target.x = 0;
+    }
+
+    if (overflow.y) {
+      exploredRatio.y =
+        (viewport.scrollTop + viewport.clientHeight / 2) /
+        viewport.scrollHeight;
+      target.y = clamp((neutral.y - exploredRatio.y) * 3.2, -1, 1);
+    } else {
+      target.y = 0;
+    }
   };
 
   const recalculate = () => {
-    const previousOverflow = overflow;
+    const previousOverflow = { ...overflow };
     // Measure registered layout geometry, not transformed paint overflow from
-    // the 1.035× safety camera. Otherwise overscan falsely enables scrolling.
-    overflow = world.offsetWidth - viewport.clientWidth > 1;
-    root.toggleAttribute('data-overflow', overflow);
-    if (overflow) {
-      const max = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
-      const desired = clamp(exploredRatio * viewport.scrollWidth - viewport.clientWidth / 2, 0, max);
-      viewport.scrollLeft = desired;
-      syncScrollFocus();
-    } else {
-      if (previousOverflow) target = { x: 0, y: 0 };
-      exploredRatio = clamp(exploredRatio, 0, 1);
-    }
+    // the camera safety overscan. Otherwise paint overflow falsely enables scrolling.
+    overflow = {
+      x: world.offsetWidth - viewport.clientWidth > 1,
+      y: world.offsetHeight - viewport.clientHeight > 1
+    };
+    root.toggleAttribute('data-overflow', overflow.x || overflow.y);
+    root.toggleAttribute('data-overflow-x', overflow.x);
+    root.toggleAttribute('data-overflow-y', overflow.y);
+
     if (!initialized) {
       initialized = true;
-      exploredRatio = neutral;
-      if (overflow) viewport.scrollLeft = clamp(neutral * viewport.scrollWidth - viewport.clientWidth / 2, 0, viewport.scrollWidth);
+      exploredRatio = { ...neutral };
+    } else {
+      if (previousOverflow.x && !overflow.x) target.x = 0;
+      if (previousOverflow.y && !overflow.y) target.y = 0;
+      exploredRatio.x = clamp(exploredRatio.x, 0, 1);
+      exploredRatio.y = clamp(exploredRatio.y, 0, 1);
     }
+
+    const maxX = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+    const maxY = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
+    viewport.scrollLeft = overflow.x
+      ? clamp(
+          exploredRatio.x * viewport.scrollWidth - viewport.clientWidth / 2,
+          0,
+          maxX
+        )
+      : 0;
+    viewport.scrollTop = overflow.y
+      ? clamp(
+          exploredRatio.y * viewport.scrollHeight - viewport.clientHeight / 2,
+          0,
+          maxY
+        )
+      : 0;
+    syncScrollFocus();
   };
 
   const onKey = (event: KeyboardEvent) => {
-    if (!overflow) return;
-    const amount = Math.max(120, viewport.clientWidth * 0.22);
-    if (event.key === 'ArrowLeft') viewport.scrollBy({ left: -amount, behavior: 'smooth' });
-    else if (event.key === 'ArrowRight') viewport.scrollBy({ left: amount, behavior: 'smooth' });
+    if (!overflow.x && !overflow.y) return;
+    const amountX = Math.max(120, viewport.clientWidth * 0.22);
+    const amountY = Math.max(90, viewport.clientHeight * 0.18);
+    if (event.key === 'ArrowLeft') viewport.scrollBy({ left: -amountX, behavior: 'smooth' });
+    else if (event.key === 'ArrowRight') viewport.scrollBy({ left: amountX, behavior: 'smooth' });
+    else if (event.key === 'ArrowUp') viewport.scrollBy({ top: -amountY, behavior: 'smooth' });
+    else if (event.key === 'ArrowDown') viewport.scrollBy({ top: amountY, behavior: 'smooth' });
     else if (event.key === 'Home') viewport.scrollTo({ left: 0, behavior: 'smooth' });
     else if (event.key === 'End') viewport.scrollTo({ left: viewport.scrollWidth, behavior: 'smooth' });
     else return;
@@ -124,7 +163,8 @@ export function createPrototypeLayeredSceneController(options: {
       suspended = next;
       if (next) {
         spatial = { x: 0, y: 0 };
-        if (!overflow) target = { x: 0, y: 0 };
+        if (!overflow.x) target.x = 0;
+        if (!overflow.y) target.y = 0;
         if (immediate) current = { ...target };
       }
       apply();

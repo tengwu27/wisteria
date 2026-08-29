@@ -5,6 +5,11 @@ import villagePlate from '../../../assets/cinematic/scenes/gamified-coastal-vill
 
 const planningMode = false;
 const compositionReview = true;
+const camera = {
+  zoom: 1.03,
+  focalX: 0.674,
+  focalY: 0.5
+} as const;
 type PlaneDefinition = { id: string; src: string; owner: string; z: number; pointerX: number; pointerY: number; spatialX: number; spatialY: number; minX?: number; maxX?: number };
 type LandmarkDefinition = { id: string; zh: string; en: string; x: number; y: number; w: number; h: number; plane: string; route?: string };
 const planes: PlaneDefinition[] = [
@@ -92,8 +97,8 @@ const landmarks: LandmarkDefinition[] = [
 ];
 ---
 
-<section class="game" data-game-root data-review-mode={planningMode ? 'true' : undefined} data-composition-review={compositionReview ? 'true' : undefined} aria-label="Wisteria 海岸村庄多层视差原型">
-  <div class="scene-viewport" data-scene-viewport tabindex="0" aria-label="可水平探索的海岸村庄">
+<section class="game" data-game-root data-camera-zoom={camera.zoom} data-camera-focal-x={camera.focalX} data-camera-focal-y={camera.focalY} data-review-mode={planningMode ? 'true' : undefined} data-composition-review={compositionReview ? 'true' : undefined} aria-label="Wisteria 海岸村庄多层视差原型">
+  <div class="scene-viewport" data-scene-viewport tabindex="0" aria-label="可向四个方向探索的海岸村庄">
     <div class="scene-world" data-scene-world>
       <img class="fallback" src={holisticCandidate.src} alt="Wisteria 等距海岸村庄、城堡、港口、海湾工坊、咖啡工厂、风车咖啡馆与山城图书馆" data-fallback data-geography-master />
       <div class="layer-stack" data-layer-stack aria-hidden="true">
@@ -204,7 +209,7 @@ const landmarks: LandmarkDefinition[] = [
     <button type="button" data-drawer-toggle="quests">任务</button>
     <button type="button" data-drawer-toggle="inventory">物品</button>
   </div>
-  <p class="swipe-cue" aria-hidden="true">← 滑动探索 · SWIPE TO EXPLORE →</p>
+  <p class="swipe-cue" aria-hidden="true">↕ 滑动探索 · SWIPE TO EXPLORE ↔</p>
   <div class="dialogue hud-panel" data-dialogue role="status" aria-live="polite">
     <p>选择一种互动方式，然后探索村庄。</p><small>Choose an action, then discover the village.</small>
   </div>
@@ -274,7 +279,15 @@ const landmarks: LandmarkDefinition[] = [
       maxX: element.dataset.maxX === undefined ? undefined : Number(element.dataset.maxX),
       hotspotAssociation: [...element.querySelectorAll<HTMLElement>('[data-landmark]')].map((item) => item.dataset.landmark ?? '')
     }));
-    const parallax = createPrototypeLayeredSceneController({ root, viewport, world, planes: planeRecords, neutralFocalRatio: .674, signal });
+    const parallax = createPrototypeLayeredSceneController({
+      root,
+      viewport,
+      world,
+      planes: planeRecords,
+      neutralFocalRatioX: Number(root.dataset.cameraFocalX),
+      neutralFocalRatioY: Number(root.dataset.cameraFocalY),
+      signal
+    });
     const spatial = createDeviceOrientationSpatialEffect({
       button: spatialButton,
       signal,
@@ -463,11 +476,11 @@ const landmarks: LandmarkDefinition[] = [
 </script>
 
 <style>
-  :global(html), :global(body), :global(main) { margin: 0; width: 100%; height: 100%; overflow: hidden; background: var(--immersive-transition-background, #183d38); }
+  :global(html), :global(body), :global(main) { margin:0; width:100%; height:100%; overflow:hidden; background:var(--immersive-transition-background, #183d38); }
   .game { --cream:#f5dfaa; --teal:#0b6568; --deep:#073f44; --coral:#d86d49; --gold:#d5a63c; --line:#183d38; --ambient-speed:1; position:fixed; inset:0; width:var(--immersive-viewport-width,100dvw); height:var(--immersive-viewport-height,100dvh); overflow:hidden; color:#183d38; font-family:'Wisteria Immersive UI',system-ui,sans-serif; background:var(--immersive-transition-background, #183d38); }
-  .scene-viewport { position:absolute; inset:0; overflow-x:auto; overflow-y:hidden; overscroll-behavior-x:contain; scrollbar-width:none; outline:none; -webkit-overflow-scrolling:touch; }
+  .scene-viewport { position:absolute; inset:0; overflow:auto; overscroll-behavior:contain; scrollbar-width:none; outline:none; touch-action:pan-x pan-y; -webkit-overflow-scrolling:touch; }
   .scene-viewport::-webkit-scrollbar { display:none; }
-  .scene-world { position:relative; top:50%; translate:0 -50%; width:max(100%,calc(var(--immersive-viewport-height,100dvh) * 2412 / 941)); min-width:100%; min-height:100%; aspect-ratio:2412/941; overflow:hidden; }
+  .scene-world { position:relative; width:max(103%,calc(var(--immersive-viewport-height,100dvh) * 2.6401)); min-width:103%; min-height:103%; aspect-ratio:2412/941; overflow:hidden; }
   .fallback,.layer-stack,.plane,.plane-ambient,.plane img { position:absolute; inset:0; width:100%; height:100%; object-fit:fill; }
   .fallback { z-index:0; }
   [data-review-mode=true] > :not(.scene-viewport):not(.loading) { display:none!important; }

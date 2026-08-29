@@ -1,0 +1,32 @@
+name: Wisteria Deployment Lifecycle
+
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: Exact production commit SHA
+        required: true
+        type: string
+      production_url:
+        description: Verified production deployment URL
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  mark-alive:
+    name: Verify landed construction is Alive
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out deployed repository state
+        uses: actions/checkout@v4
+
+      - name: Reconcile production lifecycle
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: node scripts/github/wisteria-deployment-status.mjs

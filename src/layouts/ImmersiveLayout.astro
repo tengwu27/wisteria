@@ -13,6 +13,7 @@ interface Props {
   type?: 'website' | 'article';
   noindex?: boolean;
   clientRouter?: boolean;
+  fontStylesheet?: string;
 }
 
 const title = Astro.props.title ?? site.seo.title;
@@ -40,6 +41,9 @@ const canonical = absoluteUrl(Astro.url.pathname);
     {Astro.props.image && <meta property="og:image" content={Astro.props.image} />}
     <meta name="twitter:card" content="summary_large_image" />
     {Astro.props.noindex && <meta name="robots" content="noindex, nofollow" />}
+    {Astro.props.fontStylesheet && (
+      <link rel="stylesheet" href={Astro.props.fontStylesheet} />
+    )}
     <title>{title}</title>
     {clientRouter && <ClientRouter />}
     <script is:inline data-astro-rerun>
