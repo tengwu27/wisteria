@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "sceneId": "castle-gallery-wall",
   "registration": {
     "kind": "independent-viewpoint",
@@ -22,11 +22,35 @@
   ],
   "apertures": {
     "gallery-left-frame": {
+      "frameEnvelopeBounds": {
+        "x": 386,
+        "y": 317,
+        "width": 154,
+        "height": 227
+      },
+      "frameBounds": {
+        "x": 386,
+        "y": 317,
+        "width": 154,
+        "height": 227
+      },
       "bounds": {
         "x": 407,
         "y": 338,
         "width": 112,
         "height": 204
+      },
+      "normalizedFrameEnvelopeBounds": {
+        "x": 0.23086124401913877,
+        "y": 0.3368756641870351,
+        "width": 0.09210526315789473,
+        "height": 0.2412327311370882
+      },
+      "normalizedFrameBounds": {
+        "x": 0.23086124401913877,
+        "y": 0.3368756641870351,
+        "width": 0.09210526315789473,
+        "height": 0.2412327311370882
       },
       "normalizedBounds": {
         "x": 0.24342105263157895,
@@ -35,30 +59,78 @@
         "height": 0.21679064824654623
       },
       "mask": "gallery-left-frame-mask.png",
-      "aspectPolicy": "contain-with-mat"
+      "aspectPolicy": "match-source-frame"
     },
     "gallery-center-frame": {
+      "frameEnvelopeBounds": {
+        "x": 612,
+        "y": 272,
+        "width": 450,
+        "height": 288
+      },
+      "frameBounds": {
+        "x": 636,
+        "y": 272,
+        "width": 400,
+        "height": 288
+      },
       "bounds": {
-        "x": 633,
+        "x": 658,
         "y": 292,
-        "width": 406,
+        "width": 356,
         "height": 267
       },
+      "normalizedFrameEnvelopeBounds": {
+        "x": 0.3660287081339713,
+        "y": 0.28905419766206164,
+        "width": 0.26913875598086123,
+        "height": 0.30605738575983
+      },
+      "normalizedFrameBounds": {
+        "x": 0.3803827751196172,
+        "y": 0.28905419766206164,
+        "width": 0.23923444976076555,
+        "height": 0.30605738575983
+      },
       "normalizedBounds": {
-        "x": 0.3785885167464115,
+        "x": 0.39354066985645936,
         "y": 0.310308182784272,
-        "width": 0.24282296650717702,
+        "width": 0.21291866028708134,
         "height": 0.28374070138150903
       },
       "mask": "gallery-center-frame-mask.png",
-      "aspectPolicy": "contain-with-mat"
+      "aspectPolicy": "match-source-frame"
     },
     "gallery-right-frame": {
+      "frameEnvelopeBounds": {
+        "x": 1132,
+        "y": 317,
+        "width": 154,
+        "height": 227
+      },
+      "frameBounds": {
+        "x": 1132,
+        "y": 317,
+        "width": 154,
+        "height": 227
+      },
       "bounds": {
         "x": 1153,
         "y": 338,
         "width": 112,
         "height": 204
+      },
+      "normalizedFrameEnvelopeBounds": {
+        "x": 0.6770334928229665,
+        "y": 0.3368756641870351,
+        "width": 0.09210526315789473,
+        "height": 0.2412327311370882
+      },
+      "normalizedFrameBounds": {
+        "x": 0.6770334928229665,
+        "y": 0.3368756641870351,
+        "width": 0.09210526315789473,
+        "height": 0.2412327311370882
       },
       "normalizedBounds": {
         "x": 0.6895933014354066,
@@ -67,7 +139,7 @@
         "height": 0.21679064824654623
       },
       "mask": "gallery-right-frame-mask.png",
-      "aspectPolicy": "contain-with-mat"
+      "aspectPolicy": "match-source-frame"
     }
   },
   "occupied": {
@@ -85,16 +157,69 @@
         "width": 0.21291866028708134,
         "height": 0.28374070138150903
       },
+      "sourceDimensions": {
+        "width": 1448,
+        "height": 1086
+      },
+      "aspectRatioError": 0,
+      "aspectRatioTolerance": 0.005,
+      "minimumApertureShortSide": 96,
+      "transparentProxyPixels": 0,
       "sourceSha256": "60d56d0150d46b64524e99f367def985d36c1359bad99bd8d49b6bbc09043e53",
       "proxySha256": "fc1ec2f6948a99f2ed99e08fc09f8998012e8a341d2384afed4539c25f3c5c95"
     }
   },
+  "repair": {
+    "immutableMaster": "source/castle-gallery-master-v2.png",
+    "donor": "source/repairs/gallery-center-frame-v3-donor.png",
+    "mask": "source/repairs/gallery-center-frame-v3-repair-mask.png",
+    "contextBounds": {
+      "x": 560,
+      "y": 220,
+      "width": 552,
+      "height": 410
+    },
+    "ownershipBounds": {
+      "x": 575,
+      "y": 225,
+      "width": 522,
+      "height": 400
+    },
+    "donorUniformScale": 0.504725897920605,
+    "donorOffset": {
+      "x": 468,
+      "y": 155
+    },
+    "donorSourceChromaBounds": {
+      "x": 367,
+      "y": 272,
+      "width": 726,
+      "height": 529,
+      "maxX": 1092,
+      "maxY": 800,
+      "pixels": 382598
+    },
+    "donorRegisteredChromaBounds": {
+      "x": 653,
+      "y": 292,
+      "width": 367,
+      "height": 267,
+      "maxX": 1019,
+      "maxY": 558,
+      "pixels": 97145
+    },
+    "outsideRepairDifferencePixels": 0
+  },
   "protectedPixels": {
     "outsideApertures": true,
-    "outsideDifferencePixels": 0
+    "shellTransparencyMismatchPixels": 0,
+    "outsideDifferencePixels": 0,
+    "outsideRepairDifferencePixels": 0
   },
   "source": {
-    "master": "source/castle-gallery-master-v2.png",
-    "masterSha256": "19588aeef66bbd26f71777c9efa61b4dcc8d8a0be5c67296b17315104eb76d7b"
+    "master": "source/castle-gallery-master-v3.png",
+    "masterSha256": "e6990de01e997e37e719eef045a11ab908d3db7c26d1604c8c54e71b02c24fd6",
+    "immutableMaster": "source/castle-gallery-master-v2.png",
+    "immutableMasterSha256": "19588aeef66bbd26f71777c9efa61b4dcc8d8a0be5c67296b17315104eb76d7b"
   }
 }

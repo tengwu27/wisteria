@@ -59,10 +59,11 @@ export interface LibraryRoomRef {
 export interface LibraryHotspotSlot {
   id: string;
   representation: WisteriaItemRepresentation;
+  frameEnvelopeBounds?: NormalizedBounds;
   bounds: NormalizedBounds;
   apertureBounds?: NormalizedBounds;
   apertureMaskId?: string;
-  aspectPolicy?: 'cover' | 'contain-with-mat';
+  aspectPolicy?: 'cover' | 'contain-with-mat' | 'match-source-frame';
   occupiedBy: string | null;
 }
 
@@ -152,6 +153,7 @@ export interface LibraryConstructionRecord extends RegisteredWisteriaEntity {
   slotId: string;
   hotspotId: string;
   representation: WisteriaItemRepresentation;
+  frameEnvelopeBounds?: NormalizedBounds;
   bounds: NormalizedBounds;
   apertureBounds?: NormalizedBounds;
   apertureMaskId?: string;

@@ -46,19 +46,19 @@
       "state": "pending",
       "constructionVersion": 1,
       "promptHash": "b41ef3387b4b0c3d2319815a1e81352906850e89537807e1b9b1b2ed08648183",
-      "constructionHash": "d02ed22ace4aee8698eb631556d779bada3d440977e6a1ace7d91d0a648b106c",
+      "constructionHash": "323f60e89c9efe9e05e284b72dcd862f9299a7f5429c399cee4dec5ef39ae576",
       "lockedConstructionHash": "",
       "releaseId": null,
       "route": "/castle/gallery",
       "mapNodeId": "castle-gallery-room",
       "dependencyLock": {
-        "preserves": ["camera", "perspective", "architecture", "navigation", "apertures", "layer-ownership"],
+        "preserves": ["camera", "perspective", "architecture", "navigation", "frame-envelopes", "layer-ownership"],
         "protectedDescendantIds": ["castle-gallery-wall"],
         "allowParentRelighting": true
       },
       "pendingVersion": {
         "version": 1,
-        "constructionHash": "d02ed22ace4aee8698eb631556d779bada3d440977e6a1ace7d91d0a648b106c",
+        "constructionHash": "323f60e89c9efe9e05e284b72dcd862f9299a7f5429c399cee4dec5ef39ae576",
         "commit": null,
         "pullRequest": 9,
         "previewUrl": null,
@@ -76,19 +76,19 @@
       "state": "pending",
       "constructionVersion": 1,
       "promptHash": "7e156a73ba6b62550f38e8f1d808e36a87c11fc31da9b5a194521abc565063bc",
-      "constructionHash": "5125735df8a39577233407050c5c7f33f72426a9d60aeb85a7a0dacc955e326c",
+      "constructionHash": "562a4c8bdaf54c508a132d17d83b666f2b67c530b859fa2bd9be4ad4f5f0c36b",
       "lockedConstructionHash": "",
       "releaseId": null,
       "roomId": "castle-gallery-room",
       "anchor": "gallery-principal-wall",
       "dependencyLock": {
-        "preserves": ["parent-anchor", "camera-relationship", "geometry", "materials", "aperture-masks", "hotspots"],
+        "preserves": ["parent-anchor", "camera-relationship", "frame-envelopes", "aperture-ownership", "materials", "aperture-masks", "hotspots"],
         "protectedDescendantIds": ["still-life-with-wisteria"],
         "allowParentRelighting": true
       },
       "pendingVersion": {
         "version": 1,
-        "constructionHash": "5125735df8a39577233407050c5c7f33f72426a9d60aeb85a7a0dacc955e326c",
+        "constructionHash": "562a4c8bdaf54c508a132d17d83b666f2b67c530b859fa2bd9be4ad4f5f0c36b",
         "commit": null,
         "pullRequest": 9,
         "previewUrl": null,
@@ -109,16 +109,22 @@
       "slotId": "gallery-center-frame",
       "hotspotId": "castle-gallery-still-life-with-wisteria",
       "representation": "framed-art",
+      "frameEnvelopeBounds": {
+        "x": 0.3660287081339713,
+        "y": 0.28905419766206164,
+        "width": 0.26913875598086123,
+        "height": 0.30605738575983
+      },
       "bounds": {
-        "x": 0.366,
-        "y": 0.289,
-        "width": 0.269,
-        "height": 0.306
+        "x": 0.3803827751196172,
+        "y": 0.28905419766206164,
+        "width": 0.23923444976076555,
+        "height": 0.30605738575983
       },
       "apertureBounds": {
-        "x": 0.3785885167464115,
+        "x": 0.39354066985645936,
         "y": 0.310308182784272,
-        "width": 0.24282296650717702,
+        "width": 0.21291866028708134,
         "height": 0.28374070138150903
       },
       "apertureMaskId": "gallery-center-frame-mask",
@@ -137,17 +143,17 @@
       },
       "constructionVersion": 1,
       "promptHash": "bc162942fdef5ea726260f6c93dc1210f8792b852ae53e8f16e13d363ea5af4e",
-      "constructionHash": "5723572d9d47ff24ef50648f58787a01a31bd7d2ff592a3c2d30ee7b97d40c82",
+      "constructionHash": "d68bf5807022f758a2152fc447fd5de003e620795e81be02246cf33706ede99f",
       "lockedConstructionHash": "",
       "releaseId": null,
       "dependencyLock": {
-        "preserves": ["identity", "source-artwork", "aspect-ratio", "bounds", "aperture-mask", "wall-proxy", "hotspot", "content-binding"],
+        "preserves": ["identity", "source-artwork", "frame-envelope", "matched-source-ratio", "frame-bounds", "aperture-mask", "wall-proxy", "hotspot", "content-binding"],
         "protectedDescendantIds": [],
         "allowParentRelighting": true
       },
       "pendingVersion": {
         "version": 1,
-        "constructionHash": "5723572d9d47ff24ef50648f58787a01a31bd7d2ff592a3c2d30ee7b97d40c82",
+        "constructionHash": "d68bf5807022f758a2152fc447fd5de003e620795e81be02246cf33706ede99f",
         "commit": null,
         "pullRequest": 9,
         "previewUrl": null,

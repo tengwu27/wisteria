@@ -334,7 +334,7 @@ async function validateCastleGallery(route, html, routeCss) {
   }
 
   if (
-    manifest.schemaVersion !== 1 ||
+    manifest.schemaVersion !== 2 ||
     manifest.sceneId !== 'castle-gallery-wall' ||
     manifest.registration?.kind !== 'independent-viewpoint' ||
     manifest.registration?.canvas?.width !== 1672 ||
@@ -346,22 +346,31 @@ async function validateCastleGallery(route, html, routeCss) {
   if (
     apertureIds.length !== 3 ||
     !unique(apertureIds) ||
-    apertureIds.some((id) => !isNormalizedBounds(manifest.apertures[id]?.normalizedBounds))
+    apertureIds.some((id) =>
+      !isNormalizedBounds(manifest.apertures[id]?.normalizedBounds) ||
+      !isNormalizedBounds(manifest.apertures[id]?.normalizedFrameEnvelopeBounds) ||
+      !isNormalizedBounds(manifest.apertures[id]?.normalizedFrameBounds) ||
+      manifest.apertures[id]?.aspectPolicy !== 'match-source-frame'
+    )
   ) {
-    report(`${route.label}: three unique normalized frame apertures are required`, route, false);
+    report(`${route.label}: three unique source-matched frames, envelopes, and apertures are required`, route, false);
   }
   if (
     manifest.layerOrder?.join(',') !== 'base,framed-art-proxy,foreground-frame-shell' ||
     manifest.protectedPixels?.outsideApertures !== true ||
-    manifest.protectedPixels?.outsideDifferencePixels !== 0
+    manifest.protectedPixels?.shellTransparencyMismatchPixels !== 0 ||
+    manifest.protectedPixels?.outsideDifferencePixels !== 0 ||
+    manifest.protectedPixels?.outsideRepairDifferencePixels !== 0
   ) {
     report(`${route.label}: registered layer order or protected-pixel proof is invalid`, route, false);
   }
   if (
     manifest.occupied?.['gallery-center-frame']?.wisteriaId !== route.artworkId ||
-    manifest.occupied?.['gallery-center-frame']?.sourceSha256 !== route.sourceArtwork.sha256
+    manifest.occupied?.['gallery-center-frame']?.sourceSha256 !== route.sourceArtwork.sha256 ||
+    manifest.occupied?.['gallery-center-frame']?.aspectRatioError > 0.005 ||
+    manifest.occupied?.['gallery-center-frame']?.transparentProxyPixels !== 0
   ) {
-    report(`${route.label}: center-frame source identity is not authoritative`, route, false);
+    report(`${route.label}: center-frame source identity or exact-fit proof is not authoritative`, route, false);
   }
 
   try {

@@ -18,7 +18,15 @@ Treat Notion as creative intent, Git as permanent construction, and the open Git
 4. Read the impact manifest and the applicable structure `CHARACTER.md`.
 5. Compare every requested change with the structure's repository ledger,
    registered masks, anchors, protected descendants, and current spatial graph.
-6. Present one concise impact plan per room. Name all affected entities and state whether artwork, geometry, hotspots, navigation, or cascading unlocks are required.
+6. For `framed-art`, inspect the canonical source dimensions before proposing a
+   placement. A compatible slot must declare `aspectPolicy: match-source-frame`
+   and fixed `frameEnvelopeBounds`. Fit a source-matched aperture and frame
+   inside that envelope with at most 0.5% ratio error and a minimum 96px
+   aperture short side on the scene master. Use
+   `scripts/assets/frame-geometry.mjs`; never silently fall back to crop,
+   stretch, or `contain-with-mat`. If the exact-ratio assembly cannot fit, leave
+   the impact plan non-executable and request a different or larger placement.
+7. Present one concise impact plan per room. Name all affected entities and state whether artwork, geometry, hotspots, navigation, or cascading unlocks are required.
 
 Stop here until the user explicitly approves that exact impact plan. Approval to analyze or process Ready entries is not approval to generate artwork, create a branch, open a PR, unlock descendants, or publish.
 
@@ -35,8 +43,18 @@ Read [references/construction-session.md](references/construction-session.md), t
 4. Open a draft PR immediately. Put the approved metadata block from the reference in its body so GitHub can reserve the room.
 5. Do not construct until the reservation check labels the PR `wisteria-processing`. A `wisteria-blocked` PR must stop.
 6. Use the relevant cinematic artwork/integration skills for actual visual work. Preserve canonical Wisteria art direction and registered descendants.
-7. Store pending construction in the branch ledger and keep production records active until merge and deployment verification.
-8. Show the preview and obtain approval before making the PR ready for review.
+7. For approved framed art, rebuild the complete registered frame assembly and
+   its exact aperture as part of the item's construction version. Preserve the
+   room-owned wall envelope and anchor, restrict repair to the approved frame
+   and newly exposed wall, retain the structure's frame treatment unless the
+   item's Appearance Prompt explicitly changes it, and regenerate the shell,
+   proxy, fallback, masks, manifest, responsive assets, and difference proofs.
+   Content-only changes retain the existing frame. Replacing source artwork or
+   requesting physical reconstruction requires a new approved construction
+   version. This is a supervised construction step, not unattended image
+   generation.
+8. Store pending construction in the branch ledger and keep production records active until merge and deployment verification.
+9. Show the preview and obtain approval before making the PR ready for review.
 
 For a new room, register its spatial node and directional edges and create its
 nested three-property Scenes database only after the construction is

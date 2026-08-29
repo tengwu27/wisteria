@@ -6,13 +6,33 @@
       "roomId": "castle-gallery-room",
       "sceneId": "castle-gallery-wall"
     },
+    "assets/cinematic/scenes/castle-gallery-room/source/castle-gallery-master-v3.png": {
+      "sha256": "e6990de01e997e37e719eef045a11ab908d3db7c26d1604c8c54e71b02c24fd6",
+      "roomId": "castle-gallery-room",
+      "sceneId": "castle-gallery-wall"
+    },
+    "assets/cinematic/scenes/castle-gallery-room/source/repairs/gallery-center-frame-v3-donor.png": {
+      "sha256": "0b57a306f1cd72d3659750921cf6970f57d2d8bee5d3b324b76343d825f8975a",
+      "roomId": "castle-gallery-room",
+      "sceneId": "castle-gallery-wall"
+    },
+    "assets/cinematic/scenes/castle-gallery-room/source/repairs/gallery-center-frame-v3-repair-mask.png": {
+      "sha256": "1fd97fdd8e0759c45c8aafdd59d862b51a397a37b5c575a949e638b268e2da66",
+      "roomId": "castle-gallery-room",
+      "sceneId": "castle-gallery-wall"
+    },
+    "assets/cinematic/scenes/castle-gallery-room/source/repairs/gallery-center-frame-v3-prompt.md": {
+      "sha256": "7013d632c12eaaca5466d7fbd567ef58f2443157dd052fb0c83182ef7ad47a00",
+      "roomId": "castle-gallery-room",
+      "sceneId": "castle-gallery-wall"
+    },
     "assets/cinematic/scenes/castle-gallery-room/delivery/gallery-layer-manifest.json": {
-      "sha256": "89927c70e59b51fa5da3dffa378c5560647d111dd64cd2e7a6c199a793610786",
+      "sha256": "91d4b1a607da066da04671d876dfc9abecc4150f2eeddab502c3656ea0f7b881",
       "roomId": "castle-gallery-room",
       "sceneId": "castle-gallery-wall"
     },
     "assets/cinematic/scenes/castle-gallery-room/delivery/gallery-frame-shell.png": {
-      "sha256": "85793258c3ac07c8b0dd0baeec904b9411f0268f786d009217d3ca2f0d755c48",
+      "sha256": "3cfb5c913a6a2201994c3dfaf7f22dad9741d6cfa44afaca4e58bb3a7a3c9c80",
       "roomId": "castle-gallery-room",
       "sceneId": "castle-gallery-wall"
     },
@@ -28,4 +48,3 @@
     }
   }
 }
-

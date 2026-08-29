@@ -31,7 +31,7 @@
       "label": "Gallery Wall",
       "roomId": "castle-gallery-room",
       "characterVersion": 1,
-      "description": "The principal salon wall viewed nearly straight-on, with immutable frame geometry and three exact artwork apertures.",
+      "description": "The principal salon wall viewed nearly straight-on, with three fixed wall envelopes and item-owned, source-matched frame assemblies.",
       "protectedRegion": {
         "x": 0.14,
         "y": 0.14,
@@ -42,11 +42,17 @@
         {
           "id": "gallery-left-frame",
           "representation": "framed-art",
+          "frameEnvelopeBounds": {
+            "x": 0.23086124401913877,
+            "y": 0.3368756641870351,
+            "width": 0.09210526315789473,
+            "height": 0.2412327311370882
+          },
           "bounds": {
-            "x": 0.231,
-            "y": 0.337,
-            "width": 0.092,
-            "height": 0.241
+            "x": 0.23086124401913877,
+            "y": 0.3368756641870351,
+            "width": 0.09210526315789473,
+            "height": 0.2412327311370882
           },
           "apertureBounds": {
             "x": 0.24342105263157895,
@@ -55,36 +61,48 @@
             "height": 0.21679064824654623
           },
           "apertureMaskId": "gallery-left-frame-mask",
-          "aspectPolicy": "contain-with-mat",
+          "aspectPolicy": "match-source-frame",
           "occupiedBy": null
         },
         {
           "id": "gallery-center-frame",
           "representation": "framed-art",
+          "frameEnvelopeBounds": {
+            "x": 0.3660287081339713,
+            "y": 0.28905419766206164,
+            "width": 0.26913875598086123,
+            "height": 0.30605738575983
+          },
           "bounds": {
-            "x": 0.366,
-            "y": 0.289,
-            "width": 0.269,
-            "height": 0.306
+            "x": 0.3803827751196172,
+            "y": 0.28905419766206164,
+            "width": 0.23923444976076555,
+            "height": 0.30605738575983
           },
           "apertureBounds": {
-            "x": 0.3785885167464115,
+            "x": 0.39354066985645936,
             "y": 0.310308182784272,
-            "width": 0.24282296650717702,
+            "width": 0.21291866028708134,
             "height": 0.28374070138150903
           },
           "apertureMaskId": "gallery-center-frame-mask",
-          "aspectPolicy": "contain-with-mat",
+          "aspectPolicy": "match-source-frame",
           "occupiedBy": "still-life-with-wisteria"
         },
         {
           "id": "gallery-right-frame",
           "representation": "framed-art",
+          "frameEnvelopeBounds": {
+            "x": 0.6770334928229665,
+            "y": 0.3368756641870351,
+            "width": 0.09210526315789473,
+            "height": 0.2412327311370882
+          },
           "bounds": {
-            "x": 0.677,
-            "y": 0.337,
-            "width": 0.092,
-            "height": 0.241
+            "x": 0.6770334928229665,
+            "y": 0.3368756641870351,
+            "width": 0.09210526315789473,
+            "height": 0.2412327311370882
           },
           "apertureBounds": {
             "x": 0.6895933014354066,
@@ -93,11 +111,10 @@
             "height": 0.21679064824654623
           },
           "apertureMaskId": "gallery-right-frame-mask",
-          "aspectPolicy": "contain-with-mat",
+          "aspectPolicy": "match-source-frame",
           "occupiedBy": null
         }
       ]
     }
   ]
 }
-
