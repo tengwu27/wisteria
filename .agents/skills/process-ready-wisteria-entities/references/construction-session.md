@@ -9,7 +9,7 @@ Place this machine-readable block in the draft PR body after recording explicit 
 {
   "schemaVersion": 1,
   "sessionId": "<impact manifest session ID>",
-  "lockScope": "room:library/library-grand-hall",
+  "lockScope": "room:<structure>/<room>",
   "entityIds": ["<exact Wisteria IDs>"],
   "baseCommit": "<approved base commit>",
   "approvedAt": "<ISO-8601 timestamp>"
@@ -23,7 +23,8 @@ Do not invent entity IDs. Copy them from the impact manifest and repository ledg
 
 Reuse an existing PR only when its session ID matches, it owns the same lock, its base is current, and the new work stays within the approved impact. Otherwise create a new construction session after the current reservation is released.
 
-Compatible Ready entities in the same Grand Hall impact may share one PR. Content-only entries never join a construction PR.
+Compatible Ready entities in the same registered room impact may share one PR.
+Content-only entries never join a construction PR.
 
 ## Scoped cascading unlock
 

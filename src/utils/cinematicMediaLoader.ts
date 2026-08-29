@@ -85,8 +85,12 @@ export function waitForCinematicImage(
     );
 
     if (image.complete) {
+      // During a fresh navigation or responsive-viewport swap, browsers can
+      // briefly report `complete` before the selected source has begun
+      // decoding. A zero natural width is therefore not proof of failure here;
+      // the registered load/error listeners or bounded timeout remain
+      // authoritative.
       if (image.naturalWidth > 0) onLoad();
-      else onError();
     }
   });
 }

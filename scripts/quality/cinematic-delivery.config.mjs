@@ -97,6 +97,40 @@ export const cinematicDeliveryConfig = {
       performanceBypass: null
     },
     {
+      id: 'castle-gallery',
+      label: 'castle framed-art gallery',
+      html: 'dist/castle/gallery/index.html',
+      mediaRoots: [
+        'assets/cinematic/art-pieces/still-life-with-wisteria/delivery'
+      ],
+      sceneKind: 'layered-art-gallery',
+      manifest: 'assets/cinematic/scenes/castle-gallery-room/delivery/gallery-layer-manifest.json',
+      artworkHtml: 'dist/castle/gallery/art/still-life-with-wisteria/index.html',
+      artworkId: 'still-life-with-wisteria',
+      sourceArtwork: {
+        path: 'assets/cinematic/art-pieces/still-life-with-wisteria/source/still-life-with-wisteria-v1.png',
+        width: 1448,
+        height: 1086,
+        sha256: '60d56d0150d46b64524e99f367def985d36c1359bad99bd8d49b6bbc09043e53'
+      },
+      galleryMedia: [
+        { path: 'assets/cinematic/scenes/castle-gallery-room/delivery/castle-gallery-base-1254.webp', width: 1254, height: 706 },
+        { path: 'assets/cinematic/scenes/castle-gallery-room/delivery/castle-gallery-base-1672.webp', width: 1672, height: 941 },
+        { path: 'assets/cinematic/scenes/castle-gallery-room/delivery/castle-gallery-proxy-1254.webp', width: 1254, height: 706 },
+        { path: 'assets/cinematic/scenes/castle-gallery-room/delivery/castle-gallery-proxy-1672.webp', width: 1672, height: 941 },
+        { path: 'assets/cinematic/scenes/castle-gallery-room/delivery/castle-gallery-shell-1254.webp', width: 1254, height: 706 },
+        { path: 'assets/cinematic/scenes/castle-gallery-room/delivery/castle-gallery-shell-1672.webp', width: 1672, height: 941 },
+        { path: 'assets/cinematic/scenes/castle-gallery-room/delivery/castle-gallery-fallback-1254.webp', width: 1254, height: 706 },
+        { path: 'assets/cinematic/scenes/castle-gallery-room/delivery/castle-gallery-fallback-1672.webp', width: 1672, height: 941 },
+        { path: 'assets/cinematic/art-pieces/still-life-with-wisteria/delivery/still-life-with-wisteria-724.webp', width: 724, height: 543 },
+        { path: 'assets/cinematic/art-pieces/still-life-with-wisteria/delivery/still-life-with-wisteria-1448.webp', width: 1448, height: 1086 },
+        { path: 'assets/cinematic/art-pieces/still-life-with-wisteria/delivery/still-life-with-wisteria-proxy-724.webp', width: 724, height: 543 },
+        { path: 'assets/cinematic/art-pieces/still-life-with-wisteria/delivery/still-life-with-wisteria-proxy-1448.webp', width: 1448, height: 1086 }
+      ],
+      deliveryStatus: 'production',
+      performanceBypass: null
+    },
+    {
       id: 'restaurant',
       label: 'restaurant vista interior',
       html: 'dist/restaurant/index.html',

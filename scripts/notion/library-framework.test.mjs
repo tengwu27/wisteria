@@ -231,6 +231,32 @@ test('new items bind to visible slots before additive construction', () => {
   assert.equal(findFreeSlot(registry.scenes[0], occupied), undefined);
 });
 
+test('new items bind only to representation-compatible slots', () => {
+  const framedScene = {
+    id: 'gallery-wall',
+    roomId: 'castle-gallery-room',
+    slots: [
+      {
+        id: 'book-slot',
+        representation: 'book',
+        bounds: { x: 0.1, y: 0.1, width: 0.1, height: 0.1 },
+        occupiedBy: null
+      },
+      {
+        id: 'frame-slot',
+        representation: 'framed-art',
+        bounds: { x: 0.3, y: 0.2, width: 0.2, height: 0.3 },
+        apertureBounds: { x: 0.32, y: 0.22, width: 0.16, height: 0.26 },
+        apertureMaskId: 'frame-mask',
+        aspectPolicy: 'contain-with-mat',
+        occupiedBy: null
+      }
+    ]
+  };
+  assert.equal(findFreeSlot(framedScene, emptyLedger, 'framed-art')?.id, 'frame-slot');
+  assert.equal(findFreeSlot(framedScene, emptyLedger, 'book')?.id, 'book-slot');
+});
+
 test('destructive parent prompts fail until every descendant is scoped', () => {
   const entity = {
     notionPageId: 'scene-page',
@@ -373,5 +399,12 @@ test('mirrored Notion media uses stable hashed paths', () => {
   assert.equal(
     mediaPublicPath('Sample Entry', digest, 'image/webp'),
     '/media/notion/library/sample-entry/1234567890abcdef1234.webp'
+  );
+});
+
+test('mirrored media paths are namespaced by structure', () => {
+  assert.equal(
+    mediaPublicPath('Still Life', 'abcdef1234567890abcdef', 'image/png', 'castle'),
+    '/media/notion/castle/still-life/abcdef1234567890abcd.png'
   );
 });

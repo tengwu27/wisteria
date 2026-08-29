@@ -388,9 +388,13 @@ const proxySrcset = artwork.proxySources
   .load-error[hidden] { display: none; }
 
   @media (max-width: 800px), (pointer: coarse) {
-    .inspection-stage { inset: 5.2rem 1.2rem 7.5rem; }
+    .inspection-stage { inset: 8rem 1.2rem 7.5rem; }
     .art-mount { width: min(88vw, calc((100dvh - 14rem) * 4 / 3)); }
-    .art-plaque { min-width: 0; width: min(17rem, calc(100% - 8rem)); }
+    .art-plaque {
+      top: max(4.2rem, calc(env(safe-area-inset-top) + 4.2rem));
+      min-width: 0;
+      width: min(17rem, calc(100% - 2rem));
+    }
     .art-plaque span { display: none; }
     .zoom-controls { right: 50%; bottom: max(0.55rem, env(safe-area-inset-bottom)); translate: 50% 0; }
     .gesture-cue { bottom: max(4rem, calc(env(safe-area-inset-bottom) + 4rem)); width: 100%; text-align: center; }
@@ -401,4 +405,3 @@ const proxySrcset = artwork.proxySources
     .art-mount { will-change: auto; }
   }
 </style>
-
