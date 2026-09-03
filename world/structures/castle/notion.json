@@ -43,7 +43,7 @@
     "seed": {
       "still-life-with-wisteria": {
         "title": "Still Life with Wisteria",
-        "prompt": "A quiet Wisteria still life with blue-and-white ceramics, a walnut-bound sketchbook, mustard cloth, a wisteria sprig, and an aged-brass candleholder in warm coastal light.",
+        "prompt": "A hand-painted 4:3 still life of a blue-and-white ceramic pitcher and teacup, a closed walnut-bound sketchbook, mustard cloth, a wisteria sprig, and an aged-brass candleholder; warm amber studio light, cool violet-blue accents, no readable text.",
         "artKind": "painting",
         "canonicalSha256": "60d56d0150d46b64524e99f367def985d36c1359bad99bd8d49b6bbc09043e53",
         "compositionVersion": 1,
