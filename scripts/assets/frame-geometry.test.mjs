@@ -5,6 +5,7 @@ import {
   MATCHED_FRAME_ASPECT_TOLERANCE,
   aspectRatioError,
   fitMatchedAperture,
+  validateCuratedPlacementGeometry,
   validateMatchedFrameGeometry
 } from './frame-geometry.mjs';
 
@@ -61,4 +62,24 @@ test('rejects a frame that escapes its fixed wall envelope', () => {
     envelope: { x: 612, y: 272, width: 450, height: 288 }
   });
   assert.ok(result.errors.includes('Active frame must remain inside its registered wall envelope.'));
+});
+
+test('accepts a source-matched dynamic placement inside a curated exhibit region', () => {
+  const result = validateCuratedPlacementGeometry({
+    source: { width: 1448, height: 1086 },
+    aperture: { x: 658, y: 292, width: 356, height: 267 },
+    frame: { x: 636, y: 272, width: 400, height: 288 },
+    exhibitRegion: { x: 234, y: 132, width: 1254, height: 527 }
+  });
+  assert.deepEqual(result.errors, []);
+});
+
+test('rejects a dynamic placement that escapes the curated exhibit region', () => {
+  const result = validateCuratedPlacementGeometry({
+    source: { width: 1448, height: 1086 },
+    aperture: { x: 1050, y: 292, width: 356, height: 267 },
+    frame: { x: 1040, y: 272, width: 500, height: 288 },
+    exhibitRegion: { x: 234, y: 132, width: 1254, height: 527 }
+  });
+  assert.ok(result.errors.includes('Curated frame must remain inside the registered exhibit region.'));
 });

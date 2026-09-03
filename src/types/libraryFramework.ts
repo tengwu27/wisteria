@@ -13,6 +13,7 @@ export type ConstructionIntent =
   | 'content-only'
   | 'bind-existing-object'
   | 'additive-construction'
+  | 'recompose-curated-exhibit'
   | 'reconstruct-registered-entity'
   | 'create-location'
   | 'remove-or-unbind';
@@ -28,6 +29,10 @@ export type WisteriaItemRepresentation =
   | 'letter'
   | 'object'
   | 'framed-art';
+
+export type RevelationMode = 'container-revealed' | 'self-revealing';
+
+export type WisteriaArtKind = 'painting' | 'sculpture' | 'installation';
 
 /** @deprecated Prefer the structure-neutral WisteriaItemRepresentation. */
 export type LibraryRepresentation = WisteriaItemRepresentation;
@@ -74,11 +79,36 @@ export interface LibrarySceneRef {
   characterVersion: number;
   description: string;
   protectedRegion: NormalizedBounds;
-  slots: LibraryHotspotSlot[];
+  slots?: LibraryHotspotSlot[];
+  composition?: CuratedExhibitComposition;
+}
+
+export interface CuratedExhibitPlacement {
+  id: string;
+  artworkId: string;
+  revelationMode: 'self-revealing';
+  artKind: WisteriaArtKind;
+  hotspotId: string;
+  frameBounds: NormalizedBounds;
+  apertureBounds: NormalizedBounds;
+  apertureMaskId: string;
+  aspectPolicy: 'match-source-frame';
+  canonicalSha256: string;
+  proxyAssetPath: string;
+  proxySha256: string;
+  layerOrder: number;
+}
+
+export interface CuratedExhibitComposition {
+  mode: 'curated-exhibit';
+  compositionVersion: number;
+  compositionHash: string;
+  exhibitRegion: NormalizedBounds;
+  placements: CuratedExhibitPlacement[];
 }
 
 export interface WisteriaLocationRegistry {
-  schemaVersion: 3;
+  schemaVersion: 3 | 4;
   structureId: string;
   map: {
     discoveryStorageKey: string;
@@ -150,7 +180,12 @@ export interface LibraryConstructionRecord extends RegisteredWisteriaEntity {
   entityKind: 'item';
   roomId: string;
   sceneId: string;
-  slotId: string;
+  revelationMode: RevelationMode;
+  artKind?: WisteriaArtKind;
+  constructionTrigger?: 'notion-ready' | 'codex-request';
+  slotId?: string;
+  placementId?: string;
+  compositionVersion?: number;
   hotspotId: string;
   representation: WisteriaItemRepresentation;
   frameEnvelopeBounds?: NormalizedBounds;
@@ -212,6 +247,11 @@ export interface LibraryNotionEntry extends LibraryNotionEntity {
   sceneId: string;
   hotspotId: string;
   representation: WisteriaItemRepresentation;
+  revelationMode: RevelationMode;
+  artKind?: WisteriaArtKind;
+  canonicalSha256?: string;
+  compositionVersion?: number;
+  previewOrPrUrl?: string;
   releaseId: string | null;
   bodyMarkdown: string;
   media: LibraryRuntimeMediaReference[];
@@ -245,6 +285,8 @@ export interface ResolvedConstructionRequest {
   sceneId?: string;
   existingRecord?: RegisteredWisteriaEntity;
   compatibleSlot?: LibraryHotspotSlot;
+  currentCompositionVersion?: number;
+  nextCompositionVersion?: number;
   reason: string;
   executable: boolean;
 }

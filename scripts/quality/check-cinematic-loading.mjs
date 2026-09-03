@@ -334,43 +334,52 @@ async function validateCastleGallery(route, html, routeCss) {
   }
 
   if (
-    manifest.schemaVersion !== 2 ||
+    manifest.schemaVersion !== 3 ||
     manifest.sceneId !== 'castle-gallery-wall' ||
+    manifest.mode !== 'curated-exhibit' ||
     manifest.registration?.kind !== 'independent-viewpoint' ||
     manifest.registration?.canvas?.width !== 1672 ||
     manifest.registration?.canvas?.height !== 941
   ) {
     report(`${route.label}: independent 1672x941 Gallery registration is invalid`, route, false);
   }
-  const apertureIds = Object.keys(manifest.apertures ?? {});
+  const placements = manifest.composition?.placements ?? [];
   if (
-    apertureIds.length !== 3 ||
-    !unique(apertureIds) ||
-    apertureIds.some((id) =>
-      !isNormalizedBounds(manifest.apertures[id]?.normalizedBounds) ||
-      !isNormalizedBounds(manifest.apertures[id]?.normalizedFrameEnvelopeBounds) ||
-      !isNormalizedBounds(manifest.apertures[id]?.normalizedFrameBounds) ||
-      manifest.apertures[id]?.aspectPolicy !== 'match-source-frame'
+    manifest.composition?.version !== route.compositionVersion ||
+    manifest.composition?.hash !== route.compositionHash ||
+    !isNormalizedBounds(manifest.composition?.normalizedExhibitRegion) ||
+    placements.length !== 1 ||
+    !unique(placements.map((placement) => placement.id)) ||
+    !unique(placements.map((placement) => placement.artworkId)) ||
+    !unique(placements.map((placement) => placement.hotspotId)) ||
+    placements.some((placement) =>
+      placement.revelationMode !== 'self-revealing' ||
+      placement.artKind !== 'painting' ||
+      !isNormalizedBounds(placement.normalizedApertureBounds) ||
+      !isNormalizedBounds(placement.normalizedFrameBounds) ||
+      placement.aspectPolicy !== 'match-source-frame'
     )
   ) {
-    report(`${route.label}: three unique source-matched frames, envelopes, and apertures are required`, route, false);
+    report(`${route.label}: curated composition identity, exhibit region, and unique source-matched placements are required`, route, false);
   }
   if (
-    manifest.layerOrder?.join(',') !== 'base,framed-art-proxy,foreground-frame-shell' ||
+    manifest.composition?.layerOrder?.join(',') !== 'base,artwork-proxies,foreground-support-shell,hotspots' ||
+    manifest.protectedPixels?.outsideExhibitRegion !== true ||
     manifest.protectedPixels?.outsideApertures !== true ||
     manifest.protectedPixels?.shellTransparencyMismatchPixels !== 0 ||
-    manifest.protectedPixels?.outsideDifferencePixels !== 0 ||
-    manifest.protectedPixels?.outsideRepairDifferencePixels !== 0
+    manifest.protectedPixels?.outsideApertureDifferencePixels !== 0 ||
+    manifest.protectedPixels?.outsideRepairDifferencePixels !== 0 ||
+    manifest.protectedPixels?.repairMaskPixelsOutsideExhibitRegion !== 0
   ) {
     report(`${route.label}: registered layer order or protected-pixel proof is invalid`, route, false);
   }
+  const artworkPlacement = placements.find((placement) => placement.artworkId === route.artworkId);
   if (
-    manifest.occupied?.['gallery-center-frame']?.wisteriaId !== route.artworkId ||
-    manifest.occupied?.['gallery-center-frame']?.sourceSha256 !== route.sourceArtwork.sha256 ||
-    manifest.occupied?.['gallery-center-frame']?.aspectRatioError > 0.005 ||
-    manifest.occupied?.['gallery-center-frame']?.transparentProxyPixels !== 0
+    artworkPlacement?.canonicalArtwork?.sha256 !== route.sourceArtwork.sha256 ||
+    artworkPlacement?.aspectRatioError > 0.005 ||
+    artworkPlacement?.proxy?.transparentPixelsInsideAperture !== 0
   ) {
-    report(`${route.label}: center-frame source identity or exact-fit proof is not authoritative`, route, false);
+    report(`${route.label}: canonical painting identity or exact-fit proof is not authoritative`, route, false);
   }
 
   try {

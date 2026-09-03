@@ -94,3 +94,29 @@ export function validateMatchedFrameGeometry({
   if (!containsBounds(envelope, frame)) errors.push('Active frame must remain inside its registered wall envelope.');
   return { errors, ratioError };
 }
+
+export function validateCuratedPlacementGeometry({
+  source,
+  aperture,
+  frame,
+  exhibitRegion,
+  minShortSide = MATCHED_FRAME_MIN_SHORT_SIDE,
+  aspectTolerance = MATCHED_FRAME_ASPECT_TOLERANCE
+}) {
+  const result = validateMatchedFrameGeometry({
+    source,
+    aperture,
+    frame,
+    envelope: exhibitRegion,
+    minShortSide,
+    aspectTolerance
+  });
+  return {
+    ...result,
+    errors: result.errors.map((error) =>
+      error === 'Active frame must remain inside its registered wall envelope.'
+        ? 'Curated frame must remain inside the registered exhibit region.'
+        : error
+    )
+  };
+}

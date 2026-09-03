@@ -54,6 +54,11 @@ async function offlineSnapshot(reason, config, ledger) {
       sceneId: record.sceneId,
       hotspotId: record.hotspotId,
       representation: record.representation,
+      revelationMode: record.revelationMode ?? 'container-revealed',
+      artKind: record.artKind,
+      canonicalSha256: record.sourceArtwork.sha256,
+      compositionVersion: record.compositionVersion,
+      previewOrPrUrl: config.artCatalog?.seed?.[record.wisteriaId]?.previewOrPrUrl,
       releaseId: record.releaseId,
       bodyMarkdown: '',
       media: record.sourceArtwork.publicPath
@@ -137,10 +142,22 @@ async function main() {
         maxMediaBytes,
         media
       });
-      if (record.sourceArtwork?.sha256 && media[0]?.sha256 !== record.sourceArtwork.sha256) {
+      if (entity.wisteriaId && entity.wisteriaId !== record.wisteriaId) {
+        throw new Error(`${record.wisteriaId}: the Notion Wisteria ID conflicts with the ledger.`);
+      }
+      if (
+        record.sourceArtwork?.sha256 &&
+        entity.canonicalSha256 !== record.sourceArtwork.sha256
+      ) {
         throw new Error(
-          `${record.wisteriaId}: the first Notion image no longer matches the registered source artwork.`
+          `${record.wisteriaId}: the Notion canonical hash no longer matches the Git-owned source artwork.`
         );
+      }
+      if (record.compositionVersion && entity.compositionVersion !== record.compositionVersion) {
+        throw new Error(`${record.wisteriaId}: the Notion composition version is stale.`);
+      }
+      if (record.artKind && entity.artKind !== record.artKind) {
+        throw new Error(`${record.wisteriaId}: the Notion Art Type conflicts with the ledger.`);
       }
       entries.push({
         ...entity,
@@ -153,6 +170,11 @@ async function main() {
         sceneId: record.sceneId,
         hotspotId: record.hotspotId,
         representation: record.representation,
+        revelationMode: record.revelationMode ?? 'container-revealed',
+        artKind: record.artKind,
+        canonicalSha256: record.sourceArtwork?.sha256,
+        compositionVersion: record.compositionVersion,
+        previewOrPrUrl: entity.previewOrPrUrl,
         releaseId: record.releaseId,
         bodyMarkdown,
         media
@@ -190,4 +212,3 @@ main().catch((error) => {
   console.error(error instanceof Error ? error.message : error);
   process.exitCode = 1;
 });
-

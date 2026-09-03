@@ -34,7 +34,7 @@ const hotspotStyle = [
         sizes="(min-aspect-ratio: 1672/941) 100vw, 178vh"
         width={scene.fallbackAssets[0].width}
         height={scene.fallbackAssets[0].height}
-        alt="暖红色墙面的城堡画廊，墙上密集悬挂着画作，中央大画框中陈列紫藤静物"
+        alt="暖红色墙面的城堡画廊，中央画框陈列紫藤静物，两侧留有空白展框"
         loading="eager"
         fetchpriority="high"
         decoding="async"
@@ -68,7 +68,7 @@ const hotspotStyle = [
           fetchpriority="high"
           decoding="async"
           draggable="false"
-          data-gallery-layer="framed-art-proxy"
+          data-gallery-layer="artwork-proxies"
         />
         <img
           class="scene-layer"
@@ -82,7 +82,7 @@ const hotspotStyle = [
           fetchpriority="high"
           decoding="async"
           draggable="false"
-          data-gallery-layer="foreground-frame-shell"
+          data-gallery-layer="foreground-support-shell"
         />
       </div>
 
@@ -475,4 +475,3 @@ const hotspotStyle = [
     .swipe-cue { animation: none; opacity: 0.85; }
   }
 </style>
-

@@ -27,5 +27,28 @@
         "galleryViewId": "3cb86b89-9566-818e-a493-000c353655da"
       }
     }
+  },
+  "artCatalog": {
+    "constructionTrigger": "codex-request-only",
+    "schema": {
+      "Title": "title",
+      "Appearance Prompt": "rich_text",
+      "Wisteria Status": "select",
+      "Art Type": "select",
+      "Wisteria ID": "rich_text",
+      "Canonical SHA-256": "rich_text",
+      "Composition Version": "number",
+      "Preview/PR URL": "url"
+    },
+    "seed": {
+      "still-life-with-wisteria": {
+        "title": "Still Life with Wisteria",
+        "prompt": "A quiet Wisteria still life with blue-and-white ceramics, a walnut-bound sketchbook, mustard cloth, a wisteria sprig, and an aged-brass candleholder in warm coastal light.",
+        "artKind": "painting",
+        "canonicalSha256": "60d56d0150d46b64524e99f367def985d36c1359bad99bd8d49b6bbc09043e53",
+        "compositionVersion": 1,
+        "previewOrPrUrl": "https://github.com/tengwu27/wisteria/pull/9"
+      }
+    }
   }
 }

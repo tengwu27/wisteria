@@ -18,15 +18,23 @@ const gallerySceneRegistry = locationRegistry.scenes.find(
 );
 if (!gallerySceneRegistry) throw new Error('Castle Gallery scene registry is missing.');
 
-const centerFrame = gallerySceneRegistry.slots.find(
-  (slot) => slot.id === 'gallery-center-frame'
+const composition = gallerySceneRegistry.composition;
+if (composition?.mode !== 'curated-exhibit') {
+  throw new Error('Castle Gallery curated composition is not registered.');
+}
+const stillLifePlacement = composition.placements.find(
+  (placement) => placement.artworkId === 'still-life-with-wisteria'
 );
-if (!centerFrame?.occupiedBy || !centerFrame.apertureBounds) {
-  throw new Error('Castle Gallery center frame is not registered.');
+if (!stillLifePlacement) {
+  throw new Error('Castle Gallery still-life placement is not registered.');
 }
 
 export const castleGalleryScene = {
   id: gallerySceneRegistry.id,
+  mode: composition.mode,
+  compositionVersion: composition.compositionVersion,
+  compositionHash: composition.compositionHash,
+  exhibitRegion: composition.exhibitRegion,
   canvas: { width: 1672, height: 941 },
   initialFocalRatio: 836 / 1672,
   baseAssets: [galleryBase1254, galleryBase1672],
@@ -34,17 +42,19 @@ export const castleGalleryScene = {
   shellAssets: [galleryShell1254, galleryShell1672],
   fallbackAssets: [galleryFallback1254, galleryFallback1672],
   artwork: {
-    id: centerFrame.occupiedBy,
+    id: stillLifePlacement.artworkId,
     title: 'Still Life with Wisteria',
     titleZh: '紫藤静物',
     artist: 'Wisteria Collection',
     year: 'Undated',
     description:
       'A blue-and-white pitcher and teacup rest beside a walnut-bound sketchbook, mustard cloth, wisteria sprig, and aged-brass candleholder.',
-    route: `/castle/gallery/art/${centerFrame.occupiedBy}`,
-    hotspotId: 'castle-gallery-still-life-with-wisteria',
-    bounds: centerFrame.bounds,
-    apertureBounds: centerFrame.apertureBounds,
+    route: `/castle/gallery/art/${stillLifePlacement.artworkId}`,
+    hotspotId: stillLifePlacement.hotspotId,
+    placementId: stillLifePlacement.id,
+    artKind: stillLifePlacement.artKind,
+    bounds: stillLifePlacement.frameBounds,
+    apertureBounds: stillLifePlacement.apertureBounds,
     source: artworkSource,
     responsiveSources: [artwork724, artwork1448],
     proxySources: [artworkProxy724, artworkProxy1448],
@@ -60,4 +70,3 @@ export function findCastleGalleryArtwork(artworkId: string) {
     ? castleGalleryScene.artwork
     : undefined;
 }
-

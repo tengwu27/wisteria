@@ -14,13 +14,13 @@
 - Samuel F. B. Morse's *Gallery of the Louvre* governs only salon density,
   varied frame rhythm, warm collected atmosphere, and open-floor hierarchy.
   No figure, sculpture, individual painting, or exact composition is copied.
-- `castle-gallery-master-v2.png` is the immutable full-scene authority for the
-  Gallery camera, wall, lighting, neighboring art, and every pixel outside the
-  approved center-frame repair mask.
+- `castle-gallery-master-v3.png` is the immutable full-scene authority for the
+  Gallery camera, architecture, lighting, three dominant supports, and every
+  pixel outside the sparse-curation repair mask.
 - `still-life-with-wisteria-v1.png` governs only the center item's 4:3 source
   identity and the uncropped inspector representation.
 
-## Immutable master and approved localized repair
+## Immutable masters and approved localized repairs
 
 - Immutable file: `castle-gallery-master-v2.png`
 - Dimensions: `1672x941`
@@ -37,12 +37,23 @@ original brief and was not edited from the rejected candidate. The approved v3
 master is a deterministic composite from v2 plus the registered localized donor
 documented in `repairs/gallery-center-frame-v3-prompt.md`.
 
-## Framed-art contract
+Gallery composition v1 uses `castle-gallery-master-v3.png` as its immutable
+input and `repairs/gallery-sparse-curation-v4-donor.png` only as a localized
+donor. `repairs/gallery-sparse-curation-v4-repair-mask.png` removes every
+anonymous miniature painting and frame while protecting the three dominant
+supports. The deterministic composite is `castle-gallery-master-v4.png`
+(`1672x941`, SHA-256
+`7ca409906a0a6ddfac733f57ed52dd904789e7be1a655824a58088eb2744b4c3`).
+The build proves that the repair mask never leaves the registered exhibit
+region `{x: 0.14, y: 0.14, width: 0.75, height: 0.56}` and that no pixel outside
+the repair mask changes.
 
-The wall placement envelope and center anchor belong to the room. The active
-frame and aperture belong to the item's construction version. The center frame
-uses active bounds `(636, 272, 400, 288)` inside envelope
-`(612, 272, 450, 288)`. Its exact artwork aperture is
+## Curated-exhibit contract
+
+The exhibit region belongs to the room. Frame assemblies, apertures, supports,
+and hotspots belong to scene composition v1. The sole occupied placement,
+`gallery-placement-still-life-v1`, uses frame bounds `(636, 272, 400, 288)`.
+Its exact artwork aperture is
 `(658, 292, 356, 267)`, a true 4:3 opening centered at canvas x=836.
 
 The warm-linen openings are simple known rectangles and therefore use
@@ -51,10 +62,11 @@ then the exact foreground shell is reasserted above it. The center source and
 wall proxy fill all 356x267 pixels with no crop, stretch, or mat. The full
 1448x1086 source remains unchanged for inspection.
 
-Future framed art uses `match-source-frame`: measure source dimensions, propose
-a custom frame within the fixed envelope, require no more than 0.5% aspect-ratio
-error and a 96px minimum aperture short side, and obtain explicit construction
-approval before rebuilding the registered frame. An extreme ratio that cannot
-meet those constraints is a placement blocker. Content-only changes retain the
-existing geometry; source replacement or physical reconstruction requires a new
-construction version.
+Future paintings use `match-source-frame`: measure the canonical source, propose
+a custom support within the exhibit region, require no more than 0.5%
+aspect-ratio error and a 96px minimum aperture short side, and obtain explicit
+visual approval before persistence. Each approved addition rebuilds the scene
+composition from the latest immutable master and all existing canonical works.
+Existing artwork identity hashes cannot change when placements move. Sculpture
+and installation remain reserved schema values, not executable construction in
+v1.

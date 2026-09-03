@@ -45,8 +45,10 @@ for (const source of sources) {
   for (const page of pages) {
     const entity = propertyModel(page, source.entityKind, source.parentId);
     const existing = ledger.records.find((record) => record.notionPageId === entity.notionPageId);
-    entity.wisteriaId = existing?.wisteriaId ?? slugify(entity.title);
-    if (source.entityKind === 'item') entity.representation = 'framed-art';
+    entity.wisteriaId = existing?.wisteriaId ?? entity.wisteriaId ?? slugify(entity.title);
+    if (source.entityKind === 'item') {
+      entity.representation = entity.artKind ? 'framed-art' : 'object';
+    }
     const identityConflict = !existing
       ? ledger.records.find((record) => record.wisteriaId === entity.wisteriaId)
       : undefined;
@@ -107,5 +109,4 @@ const result = {
 };
 await writeJsonAtomic(IMPACT_MANIFEST_PATH, result);
 console.log(result.sessions.length ? JSON.stringify(result, null, 2) : 'No Ready Castle entities require processing.');
-console.log('No branch, PR, artwork, ledger, or Notion status was changed.');
-
+console.log('Notion Ready is informational for self-revealing art. No branch, PR, artwork, placement, ledger, or Notion status was changed.');

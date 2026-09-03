@@ -11,6 +11,26 @@
       "roomId": "castle-gallery-room",
       "sceneId": "castle-gallery-wall"
     },
+    "assets/cinematic/scenes/castle-gallery-room/source/castle-gallery-master-v4.png": {
+      "sha256": "7ca409906a0a6ddfac733f57ed52dd904789e7be1a655824a58088eb2744b4c3",
+      "roomId": "castle-gallery-room",
+      "sceneId": "castle-gallery-wall"
+    },
+    "assets/cinematic/scenes/castle-gallery-room/source/repairs/gallery-sparse-curation-v4-donor.png": {
+      "sha256": "4413d99f9c7ebd8bc50fcfc72877b3fd7f6e5a25395d552a0069220a2bee1af1",
+      "roomId": "castle-gallery-room",
+      "sceneId": "castle-gallery-wall"
+    },
+    "assets/cinematic/scenes/castle-gallery-room/source/repairs/gallery-sparse-curation-v4-repair-mask.png": {
+      "sha256": "2d6c5b074b2d206235be0340bef837f82c6087d1ac114c67dfeb8fc2d6e43048",
+      "roomId": "castle-gallery-room",
+      "sceneId": "castle-gallery-wall"
+    },
+    "assets/cinematic/scenes/castle-gallery-room/source/repairs/gallery-sparse-curation-v4-prompt.md": {
+      "sha256": "65d65516d6cd901a600cd2776b177be7c0a428127b2afdcb0dd0bb4004d247d4",
+      "roomId": "castle-gallery-room",
+      "sceneId": "castle-gallery-wall"
+    },
     "assets/cinematic/scenes/castle-gallery-room/source/repairs/gallery-center-frame-v3-donor.png": {
       "sha256": "0b57a306f1cd72d3659750921cf6970f57d2d8bee5d3b324b76343d825f8975a",
       "roomId": "castle-gallery-room",
@@ -27,12 +47,17 @@
       "sceneId": "castle-gallery-wall"
     },
     "assets/cinematic/scenes/castle-gallery-room/delivery/gallery-layer-manifest.json": {
-      "sha256": "91d4b1a607da066da04671d876dfc9abecc4150f2eeddab502c3656ea0f7b881",
+      "sha256": "fa5b33356d66c4a1b80f3fabb3fa5a53057d9b21aaaba0573635abc5ccb665f1",
       "roomId": "castle-gallery-room",
       "sceneId": "castle-gallery-wall"
     },
     "assets/cinematic/scenes/castle-gallery-room/delivery/gallery-frame-shell.png": {
-      "sha256": "3cfb5c913a6a2201994c3dfaf7f22dad9741d6cfa44afaca4e58bb3a7a3c9c80",
+      "sha256": "e708ea91ef18bcb0e19528aa471a9d90903ce28d6a43d8dbb7b55d3676c13876",
+      "roomId": "castle-gallery-room",
+      "sceneId": "castle-gallery-wall"
+    },
+    "assets/cinematic/scenes/castle-gallery-room/delivery/gallery-artwork-proxies.png": {
+      "sha256": "6012584597be50ab08ce708c248e3b1c5aa8880b8e764580d6dccd7ac63736b7",
       "roomId": "castle-gallery-room",
       "sceneId": "castle-gallery-wall"
     },

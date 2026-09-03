@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node assets/cinematic/scenes/castle-gallery-room/scripts/build-static-bundle.mjs && node scripts/notion/sync-library.mjs && node scripts/notion/sync-castle.mjs && node scripts/media/build-library-book-font.mjs && ASTRO_TELEMETRY_DISABLED=1 astro dev",
     "lint": "ASTRO_TELEMETRY_DISABLED=1 astro check",
-    "build": "node assets/cinematic/scenes/castle-gallery-room/scripts/build-static-bundle.mjs && node scripts/notion/ensure-library-inline.mjs && node scripts/notion/ensure-library-gallery-views.mjs && node scripts/notion/sync-library.mjs && node scripts/notion/sync-castle.mjs && node scripts/media/build-library-book-font.mjs && node scripts/notion/verify-library-construction.mjs && node scripts/notion/verify-castle-construction.mjs && ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build && node scripts/quality/check-cinematic-loading.mjs --profile=production",
+    "build": "node assets/cinematic/scenes/castle-gallery-room/scripts/build-static-bundle.mjs && node scripts/notion/ensure-library-inline.mjs && node scripts/notion/ensure-library-gallery-views.mjs && node scripts/notion/ensure-castle-art-catalog.mjs && node scripts/notion/sync-library.mjs && node scripts/notion/sync-castle.mjs && node scripts/media/build-library-book-font.mjs && node scripts/notion/verify-library-construction.mjs && node scripts/notion/verify-castle-construction.mjs && ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build && node scripts/quality/check-cinematic-loading.mjs --profile=production",
     "build:prototype": "node assets/cinematic/scenes/castle-gallery-room/scripts/build-static-bundle.mjs && node scripts/notion/sync-castle.mjs && node scripts/media/build-library-book-font.mjs && ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build && node scripts/quality/check-cinematic-loading.mjs --profile=prototype",
     "audit:cinematic-loading": "node scripts/quality/check-cinematic-loading.mjs --profile=production",
     "audit:cinematic-loading:prototype": "node scripts/quality/check-cinematic-loading.mjs --profile=prototype",
@@ -30,6 +30,8 @@
     "notion:library:verify": "node scripts/notion/verify-library-construction.mjs",
     "notion:library:verify-notion": "node scripts/notion/verify-library-notion.mjs",
     "notion:castle:sync": "node scripts/notion/sync-castle.mjs",
+    "notion:castle:ensure-art-catalog": "node scripts/notion/ensure-castle-art-catalog.mjs",
+    "notion:castle:catalog-approved": "node scripts/notion/ensure-castle-art-catalog.mjs --upsert-approved",
     "notion:castle:process": "node scripts/notion/process-castle.mjs",
     "notion:castle:verify": "node scripts/notion/verify-castle-construction.mjs"
   },

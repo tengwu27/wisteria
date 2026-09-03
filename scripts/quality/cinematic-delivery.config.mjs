@@ -98,7 +98,7 @@ export const cinematicDeliveryConfig = {
     },
     {
       id: 'castle-gallery',
-      label: 'castle framed-art gallery',
+      label: 'castle curated-art gallery',
       html: 'dist/castle/gallery/index.html',
       mediaRoots: [
         'assets/cinematic/art-pieces/still-life-with-wisteria/delivery'
@@ -107,6 +107,8 @@ export const cinematicDeliveryConfig = {
       manifest: 'assets/cinematic/scenes/castle-gallery-room/delivery/gallery-layer-manifest.json',
       artworkHtml: 'dist/castle/gallery/art/still-life-with-wisteria/index.html',
       artworkId: 'still-life-with-wisteria',
+      compositionVersion: 1,
+      compositionHash: '29f09b5ce3d98807ba114bfcdbc6539377aa81ce33114ee2e2619ea93aec1c9c',
       sourceArtwork: {
         path: 'assets/cinematic/art-pieces/still-life-with-wisteria/source/still-life-with-wisteria-v1.png',
         width: 1448,
