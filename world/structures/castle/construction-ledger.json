@@ -7,7 +7,7 @@
     "lockScope": "room:castle/castle-gallery-room",
     "branch": "codex/castle-gallery-art-pilot",
     "pullRequest": 9,
-    "baseCommit": "9a107ff6d48f4b8e685a19c571b935dd4790979b",
+    "baseCommit": "aa36cdf55d9ea7d146ac2112d6d2cb71d8be7627",
     "entityIds": [
       "castle",
       "castle-gallery-room",
