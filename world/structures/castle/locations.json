@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 4,
+  "structureId": "castle",
+  "map": {
+    "discoveryStorageKey": "wisteria:castle:discovered-rooms:v1",
+    "nodes": [
+      {
+        "roomId": "castle-gallery-room",
+        "label": "Gallery Room",
+        "route": "/castle/gallery",
+        "x": 0.5,
+        "y": 0.5,
+        "initiallyDiscovered": true
+      }
+    ],
+    "edges": []
+  },
+  "rooms": [
+    {
+      "id": "castle-gallery-room",
+      "label": "Gallery Room",
+      "route": "/castle/gallery",
+      "characterVersion": 2,
+      "description": "An intimate terracotta-walled salon whose collection grows through versioned, Codex-curated compositions while architecture, camera, and navigation remain fixed.",
+      "protectedSceneIds": ["castle-gallery-wall"]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "castle-gallery-wall",
+      "label": "Gallery Wall",
+      "roomId": "castle-gallery-room",
+      "characterVersion": 2,
+      "description": "A sparse curated exhibit whose paintings and supports may be recomposed only inside the registered exhibit region.",
+      "protectedRegion": {
+        "x": 0.14,
+        "y": 0.14,
+        "width": 0.75,
+        "height": 0.56
+      },
+      "composition": {
+        "mode": "curated-exhibit",
+        "compositionVersion": 1,
+        "compositionHash": "29f09b5ce3d98807ba114bfcdbc6539377aa81ce33114ee2e2619ea93aec1c9c",
+        "exhibitRegion": {
+          "x": 0.14,
+          "y": 0.14,
+          "width": 0.75,
+          "height": 0.56
+        },
+        "placements": [
+          {
+            "id": "gallery-placement-still-life-v1",
+            "artworkId": "still-life-with-wisteria",
+            "revelationMode": "self-revealing",
+            "artKind": "painting",
+            "hotspotId": "castle-gallery-still-life-with-wisteria",
+            "frameBounds": {
+              "x": 0.3803827751196172,
+              "y": 0.28905419766206164,
+              "width": 0.23923444976076555,
+              "height": 0.30605738575983
+            },
+            "apertureBounds": {
+              "x": 0.39354066985645936,
+              "y": 0.310308182784272,
+              "width": 0.21291866028708134,
+              "height": 0.28374070138150903
+            },
+            "apertureMaskId": "gallery-placement-still-life-v1-mask",
+            "aspectPolicy": "match-source-frame",
+            "canonicalSha256": "60d56d0150d46b64524e99f367def985d36c1359bad99bd8d49b6bbc09043e53",
+            "proxyAssetPath": "assets/cinematic/art-pieces/still-life-with-wisteria/source/proxy/still-life-with-wisteria-wall-proxy-v1.png",
+            "proxySha256": "fc1ec2f6948a99f2ed99e08fc09f8998012e8a341d2384afed4539c25f3c5c95",
+            "layerOrder": 0
+          }
+        ]
+      }
+    }
+  ]
+}

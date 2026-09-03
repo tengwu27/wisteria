@@ -1,0 +1,407 @@
+---
+import type { CastleGalleryArtwork } from '@/data/castleGallery';
+
+interface Props {
+  artwork: CastleGalleryArtwork;
+}
+
+const { artwork } = Astro.props;
+const proxySrcset = artwork.proxySources
+  .map((asset) => `${asset.src} ${asset.width}w`)
+  .join(', ');
+---
+
+<section
+  class="artwork-inspector"
+  data-artwork-inspector
+  data-artwork-id={artwork.id}
+  aria-label={`近看《${artwork.titleZh}》`}
+>
+  <div
+    class="inspection-stage"
+    data-inspection-stage
+    tabindex="0"
+    role="region"
+    aria-label="画作近看区域。使用加减键缩放，方向键移动，数字零重置。"
+  >
+    <div class="art-mount" data-art-mount>
+      <img
+        class="art-proxy"
+        src={artwork.proxySources[0].src}
+        srcset={proxySrcset}
+        sizes="min(86vw, 1200px)"
+        width={artwork.proxySources[0].width}
+        height={artwork.proxySources[0].height}
+        alt=""
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        draggable="false"
+        data-artwork-proxy
+      />
+      <img
+        class="art-source"
+        src={artwork.source.src}
+        width={artwork.source.width}
+        height={artwork.source.height}
+        alt={`${artwork.titleZh}：${artwork.description}`}
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        draggable="false"
+        data-artwork-source
+      />
+    </div>
+  </div>
+
+  <a
+    class="back-control"
+    href={`/castle/gallery#${artwork.id}`}
+    aria-label="返回城堡画廊"
+    data-immersive-route
+  >
+    <span aria-hidden="true">←</span>
+    <span>返回画廊<small>BACK TO GALLERY</small></span>
+  </a>
+
+  <aside class="art-plaque" aria-label="藏品说明">
+    <p>{artwork.titleZh}</p>
+    <h1>{artwork.title}</h1>
+    <span>{artwork.artist} · {artwork.year}</span>
+  </aside>
+
+  <div class="zoom-controls" role="group" aria-label="画作缩放控制">
+    <button type="button" data-zoom-out aria-label="缩小画作">−</button>
+    <output data-zoom-output aria-live="polite">100%</output>
+    <button type="button" data-zoom-in aria-label="放大画作">＋</button>
+    <button type="button" data-zoom-reset>重置<small>RESET</small></button>
+  </div>
+
+  <p class="gesture-cue" aria-hidden="true">捏合或滚轮缩放 · 拖动画面探索细节</p>
+
+  <div class="loading-veil" data-loading-veil data-immersive-loading aria-hidden="false">
+    <p>正在展开藏品…<small>UNFURLING THE ARTWORK</small></p>
+  </div>
+
+  <div class="load-error" data-load-error role="status" hidden>
+    <p>藏品暂时无法载入。<small>THE ARTWORK COULD NOT BE LOADED.</small></p>
+  </div>
+</section>
+
+<script>
+  import {
+    afterCinematicPaint,
+    waitForCinematicImage
+  } from '@/utils/cinematicMediaLoader';
+  import { settleImmersiveArrival } from '@/utils/immersiveNavigation';
+
+  function initArtworkInspector() {
+    const root = document.querySelector<HTMLElement>('[data-artwork-inspector]');
+    if (!root || root.dataset.initialized === 'true') return;
+    root.dataset.initialized = 'true';
+
+    const abort = new AbortController();
+    const { signal } = abort;
+    const stage = root.querySelector<HTMLElement>('[data-inspection-stage]')!;
+    const mount = root.querySelector<HTMLElement>('[data-art-mount]')!;
+    const source = root.querySelector<HTMLImageElement>('[data-artwork-source]')!;
+    const proxy = root.querySelector<HTMLImageElement>('[data-artwork-proxy]')!;
+    const output = root.querySelector<HTMLOutputElement>('[data-zoom-output]')!;
+    const loading = root.querySelector<HTMLElement>('[data-loading-veil]')!;
+    const loadError = root.querySelector<HTMLElement>('[data-load-error]')!;
+    const pointers = new Map<number, { x: number; y: number }>();
+    let zoom = 1;
+    let panX = 0;
+    let panY = 0;
+    let dragOrigin: { x: number; y: number; panX: number; panY: number } | null = null;
+    let pinchDistance = 0;
+    let pinchZoom = 1;
+
+    const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+    const panLimit = () => ({
+      x: Math.max(0, stage.clientWidth * (zoom - 1) / 2),
+      y: Math.max(0, stage.clientHeight * (zoom - 1) / 2)
+    });
+    const render = () => {
+      const limit = panLimit();
+      panX = clamp(panX, -limit.x, limit.x);
+      panY = clamp(panY, -limit.y, limit.y);
+      mount.style.transform = `translate3d(${panX}px, ${panY}px, 0) scale(${zoom})`;
+      output.value = `${Math.round(zoom * 100)}%`;
+      root.dataset.zoomed = String(zoom > 1.001);
+    };
+    const setZoom = (next: number) => {
+      zoom = clamp(next, 1, 4);
+      if (zoom === 1) panX = panY = 0;
+      render();
+    };
+    const reset = () => {
+      zoom = 1;
+      panX = panY = 0;
+      render();
+    };
+    const distance = () => {
+      const [a, b] = [...pointers.values()];
+      return a && b ? Math.hypot(b.x - a.x, b.y - a.y) : 0;
+    };
+
+    root.querySelector<HTMLButtonElement>('[data-zoom-in]')!
+      .addEventListener('click', () => setZoom(zoom + 0.25), { signal });
+    root.querySelector<HTMLButtonElement>('[data-zoom-out]')!
+      .addEventListener('click', () => setZoom(zoom - 0.25), { signal });
+    root.querySelector<HTMLButtonElement>('[data-zoom-reset]')!
+      .addEventListener('click', reset, { signal });
+
+    stage.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      setZoom(zoom + (event.deltaY < 0 ? 0.2 : -0.2));
+    }, { passive: false, signal });
+    stage.addEventListener('keydown', (event) => {
+      const step = Math.max(28, stage.clientWidth * 0.035);
+      if (event.key === '+' || event.key === '=') setZoom(zoom + 0.25);
+      else if (event.key === '-') setZoom(zoom - 0.25);
+      else if (event.key === '0') reset();
+      else if (event.key === 'ArrowLeft') panX += step;
+      else if (event.key === 'ArrowRight') panX -= step;
+      else if (event.key === 'ArrowUp') panY += step;
+      else if (event.key === 'ArrowDown') panY -= step;
+      else return;
+      event.preventDefault();
+      render();
+    }, { signal });
+
+    stage.addEventListener('pointerdown', (event) => {
+      stage.setPointerCapture(event.pointerId);
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (pointers.size === 1) {
+        dragOrigin = { x: event.clientX, y: event.clientY, panX, panY };
+      } else if (pointers.size === 2) {
+        pinchDistance = distance();
+        pinchZoom = zoom;
+        dragOrigin = null;
+      }
+    }, { signal });
+    stage.addEventListener('pointermove', (event) => {
+      if (!pointers.has(event.pointerId)) return;
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (pointers.size === 2 && pinchDistance > 0) {
+        setZoom(pinchZoom * distance() / pinchDistance);
+      } else if (pointers.size === 1 && dragOrigin && zoom > 1) {
+        panX = dragOrigin.panX + event.clientX - dragOrigin.x;
+        panY = dragOrigin.panY + event.clientY - dragOrigin.y;
+        render();
+      }
+    }, { signal });
+    const releasePointer = (event: PointerEvent) => {
+      pointers.delete(event.pointerId);
+      dragOrigin = null;
+      pinchDistance = 0;
+    };
+    stage.addEventListener('pointerup', releasePointer, { signal });
+    stage.addEventListener('pointercancel', releasePointer, { signal });
+    window.addEventListener('resize', render, { passive: true, signal });
+
+    const reveal = (delivery: 'source' | 'proxy') => {
+      if (signal.aborted || root.dataset.ready === 'true') return;
+      root.dataset.delivery = delivery;
+      root.dataset.ready = 'true';
+      loadError.hidden = true;
+      afterCinematicPaint(() => {
+        loading.setAttribute('aria-hidden', 'true');
+        settleImmersiveArrival();
+      }, signal);
+    };
+    const fail = () => {
+      if (signal.aborted || root.dataset.ready === 'true') return;
+      loadError.hidden = false;
+      afterCinematicPaint(() => {
+        loading.setAttribute('aria-hidden', 'true');
+        settleImmersiveArrival();
+      }, signal);
+    };
+
+    void Promise.all([
+      waitForCinematicImage(source, { signal, onLateReady: () => reveal('source') }),
+      waitForCinematicImage(proxy, { signal, onLateReady: () => reveal('proxy') })
+    ]).then(([sourceState, proxyState]) => {
+      if (sourceState === 'loaded') reveal('source');
+      else if (proxyState === 'loaded') reveal('proxy');
+      else if (sourceState !== 'aborted' && proxyState !== 'aborted') fail();
+    });
+
+    render();
+    document.addEventListener('astro:before-swap', () => abort.abort(), { once: true });
+  }
+
+  initArtworkInspector();
+  document.addEventListener('astro:page-load', initArtworkInspector);
+</script>
+
+<style>
+  :global(html), :global(body), :global(main) {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--immersive-transition-background, #183d38);
+  }
+
+  .artwork-inspector {
+    position: fixed;
+    inset: 0;
+    width: var(--immersive-viewport-width, 100dvw);
+    height: var(--immersive-viewport-height, 100dvh);
+    overflow: hidden;
+    color: #fff4d2;
+    background:
+      radial-gradient(circle at 50% 38%, rgba(205, 146, 85, 0.2), transparent 46%),
+      linear-gradient(155deg, #4e2923, #6c382e 48%, #3d241f);
+    font-family: 'Wisteria Immersive UI', system-ui, sans-serif;
+  }
+
+  .artwork-inspector::before {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 3.5rem 100%;
+    content: '';
+    pointer-events: none;
+  }
+
+  .inspection-stage {
+    position: absolute;
+    inset: 5.6rem 8vw 6.2rem;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    outline: none;
+    touch-action: none;
+    cursor: zoom-in;
+  }
+
+  [data-zoomed='true'] .inspection-stage { cursor: grab; }
+  [data-zoomed='true'] .inspection-stage:active { cursor: grabbing; }
+  .inspection-stage:focus-visible { box-shadow: 0 0 0 3px rgba(255, 239, 184, 0.82); }
+
+  .art-mount {
+    position: relative;
+    width: min(76vw, calc((100dvh - 12rem) * 4 / 3), 72rem);
+    aspect-ratio: 4 / 3;
+    border: clamp(0.7rem, 1.5vw, 1.4rem) solid #563b2c;
+    outline: 2px solid #c29a54;
+    background: #b99d72;
+    box-shadow:
+      0 0 0 0.35rem #2f231e,
+      0 1.2rem 2.4rem rgba(22, 12, 9, 0.62),
+      inset 0 0 0 2px rgba(255, 230, 162, 0.58);
+    transform-origin: center;
+    will-change: transform;
+  }
+
+  .art-source,
+  .art-proxy {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+  }
+
+  .art-source { opacity: 0; }
+  [data-delivery='source'] .art-source { opacity: 1; }
+  [data-delivery='source'] .art-proxy { opacity: 0; }
+
+  .back-control,
+  .art-plaque,
+  .zoom-controls {
+    position: fixed;
+    z-index: 10;
+    border: 1px solid rgba(255, 241, 197, 0.65);
+    color: #fff4d2;
+    background: rgba(45, 31, 26, 0.84);
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(0.55rem);
+  }
+
+  .back-control {
+    top: max(0.65rem, env(safe-area-inset-top));
+    left: max(0.65rem, env(safe-area-inset-left));
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    text-decoration: none;
+  }
+
+  .back-control small,
+  .zoom-controls small { display: block; font-size: 0.5rem; letter-spacing: 0.1em; opacity: 0.72; }
+  .back-control:hover, .back-control:focus-visible, .zoom-controls button:hover, .zoom-controls button:focus-visible { outline: 2px solid rgba(255, 242, 178, 0.78); outline-offset: 2px; }
+
+  .art-plaque {
+    top: max(0.65rem, env(safe-area-inset-top));
+    left: 50%;
+    min-width: min(24rem, calc(100% - 14rem));
+    padding: 0.5rem 1rem 0.58rem;
+    border-radius: 0.65rem;
+    translate: -50% 0;
+    text-align: center;
+  }
+
+  .art-plaque p, .art-plaque h1 { margin: 0; }
+  .art-plaque p { font-size: 0.84rem; }
+  .art-plaque h1 { margin-top: 0.08rem; font-size: 0.64rem; letter-spacing: 0.16em; font-weight: 500; text-transform: uppercase; }
+  .art-plaque span { display: block; margin-top: 0.28rem; font-size: 0.55rem; opacity: 0.72; }
+
+  .zoom-controls {
+    right: max(0.65rem, env(safe-area-inset-right));
+    bottom: max(0.65rem, env(safe-area-inset-bottom));
+    display: grid;
+    grid-template-columns: 2.75rem 4.2rem 2.75rem 4.6rem;
+    align-items: stretch;
+    overflow: hidden;
+    border-radius: 999px;
+  }
+
+  .zoom-controls button,
+  .zoom-controls output {
+    min-height: 2.75rem;
+    border: 0;
+    color: inherit;
+    background: transparent;
+    font: inherit;
+  }
+  .zoom-controls button { cursor: pointer; }
+  .zoom-controls button + *, .zoom-controls output + * { border-left: 1px solid rgba(255, 241, 197, 0.28); }
+  .zoom-controls output { display: grid; place-items: center; font-variant-numeric: tabular-nums; }
+
+  .gesture-cue { position: fixed; left: 50%; bottom: max(1.1rem, env(safe-area-inset-bottom)); margin: 0; translate: -50% 0; font-size: 0.62rem; letter-spacing: 0.06em; text-shadow: 0 2px 5px rgba(22, 12, 9, 0.95); }
+
+  .loading-veil, .load-error { position: fixed; inset: 0; display: grid; place-items: center; text-align: center; }
+  .loading-veil { z-index: 20; background: #183d38; opacity: 1; transition: opacity 240ms ease, visibility 0s linear 240ms; }
+  .loading-veil[aria-hidden='true'] { visibility: hidden; opacity: 0; pointer-events: none; }
+  .loading-veil p, .load-error p { margin: 0; }
+  .loading-veil small, .load-error small { display: block; margin-top: 0.35rem; font-size: 0.64rem; letter-spacing: 0.12em; opacity: 0.72; }
+  .load-error { z-index: 5; padding: 2rem; background: #3d241f; }
+  .load-error[hidden] { display: none; }
+
+  @media (max-width: 800px), (pointer: coarse) {
+    .inspection-stage { inset: 8rem 1.2rem 7.5rem; }
+    .art-mount { width: min(88vw, calc((100dvh - 14rem) * 4 / 3)); }
+    .art-plaque {
+      top: max(4.2rem, calc(env(safe-area-inset-top) + 4.2rem));
+      min-width: 0;
+      width: min(17rem, calc(100% - 2rem));
+    }
+    .art-plaque span { display: none; }
+    .zoom-controls { right: 50%; bottom: max(0.55rem, env(safe-area-inset-bottom)); translate: 50% 0; }
+    .gesture-cue { bottom: max(4rem, calc(env(safe-area-inset-bottom) + 4rem)); width: 100%; text-align: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loading-veil { transition-duration: 1ms; }
+    .art-mount { will-change: auto; }
+  }
+</style>

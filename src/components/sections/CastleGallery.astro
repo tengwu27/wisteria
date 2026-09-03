@@ -1,0 +1,477 @@
+---
+import { castleGalleryScene } from '@/data/castleGallery';
+
+const scene = castleGalleryScene;
+const artwork = scene.artwork;
+const srcset = (assets: readonly ImageMetadata[]) =>
+  assets.map((asset) => `${asset.src} ${asset.width}w`).join(', ');
+const hotspotStyle = [
+  `left:${artwork.bounds.x * 100}%`,
+  `top:${artwork.bounds.y * 100}%`,
+  `width:${artwork.bounds.width * 100}%`,
+  `height:${artwork.bounds.height * 100}%`
+].join(';');
+---
+
+<section
+  class="castle-gallery"
+  data-castle-gallery
+  data-initial-focal-ratio={scene.initialFocalRatio}
+  aria-label="Wisteria 城堡画廊"
+  style={`--scene-width:${scene.canvas.width};--scene-height:${scene.canvas.height}`}
+>
+  <div
+    class="scene-viewport"
+    data-gallery-viewport
+    tabindex="0"
+    aria-label="可水平探索的城堡画廊。使用左右方向键移动，选择画作进入近看。"
+  >
+    <div class="scene-world" data-gallery-world>
+      <img
+        class="scene-layer scene-fallback"
+        src={scene.fallbackAssets[0].src}
+        srcset={srcset(scene.fallbackAssets)}
+        sizes="(min-aspect-ratio: 1672/941) 100vw, 178vh"
+        width={scene.fallbackAssets[0].width}
+        height={scene.fallbackAssets[0].height}
+        alt="暖红色墙面的城堡画廊，中央画框陈列紫藤静物，两侧留有空白展框"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        draggable="false"
+        data-gallery-fallback
+      />
+      <div class="registered-stack" data-gallery-stack aria-hidden="true">
+        <img
+          class="scene-layer"
+          src={scene.baseAssets[0].src}
+          srcset={srcset(scene.baseAssets)}
+          sizes="(min-aspect-ratio: 1672/941) 100vw, 178vh"
+          width={scene.baseAssets[0].width}
+          height={scene.baseAssets[0].height}
+          alt=""
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          draggable="false"
+          data-gallery-layer="base"
+        />
+        <img
+          class="scene-layer"
+          src={scene.proxyAssets[0].src}
+          srcset={srcset(scene.proxyAssets)}
+          sizes="(min-aspect-ratio: 1672/941) 100vw, 178vh"
+          width={scene.proxyAssets[0].width}
+          height={scene.proxyAssets[0].height}
+          alt=""
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          draggable="false"
+          data-gallery-layer="artwork-proxies"
+        />
+        <img
+          class="scene-layer"
+          src={scene.shellAssets[0].src}
+          srcset={srcset(scene.shellAssets)}
+          sizes="(min-aspect-ratio: 1672/941) 100vw, 178vh"
+          width={scene.shellAssets[0].width}
+          height={scene.shellAssets[0].height}
+          alt=""
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          draggable="false"
+          data-gallery-layer="foreground-support-shell"
+        />
+      </div>
+
+      <a
+        id={artwork.id}
+        class="art-hotspot"
+        href={artwork.route}
+        style={hotspotStyle}
+        aria-label={`近看《${artwork.titleZh}》 · Inspect ${artwork.title}`}
+        data-gallery-artwork={artwork.id}
+        data-immersive-route
+      >
+        <span>
+          近看《{artwork.titleZh}》
+          <small>INSPECT {artwork.title.toUpperCase()}</small>
+        </span>
+      </a>
+    </div>
+  </div>
+
+  <a
+    class="back-control"
+    href="/castle/courtyard"
+    aria-label="返回城堡庭院"
+    data-immersive-route
+  >
+    <span aria-hidden="true">←</span>
+    <span>返回庭院<small>BACK TO COURTYARD</small></span>
+  </a>
+
+  <header class="room-plaque">
+    <p>城堡画廊</p>
+    <h1>THE CASTLE GALLERY</h1>
+    <span>触碰画框，近看藏品 · Touch a frame to look closer</span>
+  </header>
+
+  <p class="swipe-cue" aria-hidden="true">← 滑动探索 · SWIPE TO EXPLORE →</p>
+
+  <div class="loading-veil" data-loading-veil data-immersive-loading aria-hidden="false">
+    <p>正在点亮画廊…<small>LIGHTING THE GALLERY</small></p>
+  </div>
+
+  <div class="load-error" data-load-error role="status" hidden>
+    <p>画廊暂时无法载入。<small>THE GALLERY COULD NOT BE LOADED.</small></p>
+  </div>
+</section>
+
+<script>
+  import {
+    afterCinematicPaint,
+    waitForCinematicImage
+  } from '@/utils/cinematicMediaLoader';
+  import { settleImmersiveArrival } from '@/utils/immersiveNavigation';
+
+  function initCastleGallery() {
+    const root = document.querySelector<HTMLElement>('[data-castle-gallery]');
+    if (!root || root.dataset.initialized === 'true') return;
+    root.dataset.initialized = 'true';
+
+    const abort = new AbortController();
+    const { signal } = abort;
+    const viewport = root.querySelector<HTMLElement>('[data-gallery-viewport]')!;
+    const world = root.querySelector<HTMLElement>('[data-gallery-world]')!;
+    const fallback = root.querySelector<HTMLImageElement>('[data-gallery-fallback]')!;
+    const layers = [...root.querySelectorAll<HTMLImageElement>('[data-gallery-layer]')];
+    const loading = root.querySelector<HTMLElement>('[data-loading-veil]')!;
+    const loadError = root.querySelector<HTMLElement>('[data-load-error]')!;
+    const artwork = root.querySelector<HTMLAnchorElement>('[data-gallery-artwork]')!;
+    const readyLayers = new Set<HTMLImageElement>();
+    let centerRatio = Number(root.dataset.initialFocalRatio ?? 0.5);
+    let resizeFrame = 0;
+    let revealed = false;
+
+    const overflow = () => Math.max(0, world.scrollWidth - viewport.clientWidth);
+    const restoreFocalPoint = () => {
+      window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = window.requestAnimationFrame(() => {
+        const available = overflow();
+        root.dataset.overflowing = String(available > 1);
+        viewport.scrollLeft = Math.min(
+          available,
+          Math.max(0, centerRatio * world.scrollWidth - viewport.clientWidth / 2)
+        );
+      });
+    };
+    const rememberFocalPoint = () => {
+      if (world.scrollWidth > 0 && overflow() > 1) {
+        centerRatio = (viewport.scrollLeft + viewport.clientWidth / 2) / world.scrollWidth;
+      }
+    };
+    const finishReveal = () => {
+      if (revealed || signal.aborted) return;
+      revealed = true;
+      root.dataset.ready = 'true';
+      loadError.hidden = true;
+      restoreFocalPoint();
+      afterCinematicPaint(() => {
+        loading.setAttribute('aria-hidden', 'true');
+        settleImmersiveArrival();
+        if (window.location.hash === `#${artwork.id}`) artwork.focus({ preventScroll: true });
+      }, signal);
+    };
+    const revealLayered = () => {
+      if (readyLayers.size !== layers.length || signal.aborted) return;
+      root.dataset.delivery = 'layered';
+      finishReveal();
+    };
+    const revealFallback = () => {
+      if (signal.aborted) return;
+      root.dataset.delivery = root.dataset.delivery ?? 'fallback';
+      finishReveal();
+    };
+    const fail = () => {
+      if (signal.aborted || revealed) return;
+      root.dataset.failed = 'true';
+      loadError.hidden = false;
+      afterCinematicPaint(() => {
+        loading.setAttribute('aria-hidden', 'true');
+        settleImmersiveArrival();
+      }, signal);
+    };
+
+    viewport.addEventListener('scroll', rememberFocalPoint, { passive: true, signal });
+    viewport.addEventListener('keydown', (event) => {
+      const distance = Math.max(64, viewport.clientWidth * 0.12);
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        viewport.scrollBy({
+          left: event.key === 'ArrowLeft' ? -distance : distance,
+          behavior: reducedMotion ? 'auto' : 'smooth'
+        });
+      } else if (event.key === 'Home' || event.key === 'End') {
+        event.preventDefault();
+        viewport.scrollTo({ left: event.key === 'Home' ? 0 : overflow(), behavior: 'auto' });
+      }
+    }, { signal });
+
+    const resizeObserver = new ResizeObserver(restoreFocalPoint);
+    resizeObserver.observe(viewport);
+    resizeObserver.observe(world);
+    window.visualViewport?.addEventListener('resize', restoreFocalPoint, { passive: true, signal });
+    window.addEventListener('orientationchange', restoreFocalPoint, { passive: true, signal });
+
+    const layerStates = layers.map(async (image) => {
+      const onLateReady = () => {
+        readyLayers.add(image);
+        revealLayered();
+      };
+      const state = await waitForCinematicImage(image, { signal, onLateReady });
+      if (state === 'loaded') readyLayers.add(image);
+      revealLayered();
+      return state;
+    });
+    const fallbackState = waitForCinematicImage(fallback, {
+      signal,
+      onLateReady: revealFallback
+    });
+
+    void Promise.all([Promise.all(layerStates), fallbackState]).then(([, state]) => {
+      revealLayered();
+      if (!revealed && state === 'loaded') revealFallback();
+      else if (!revealed && state !== 'aborted') fail();
+    });
+
+    document.addEventListener('astro:before-swap', () => {
+      abort.abort();
+      resizeObserver.disconnect();
+      window.cancelAnimationFrame(resizeFrame);
+    }, { once: true });
+  }
+
+  initCastleGallery();
+  document.addEventListener('astro:page-load', initCastleGallery);
+</script>
+
+<style>
+  :global(html), :global(body), :global(main) {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--immersive-transition-background, #183d38);
+  }
+
+  .castle-gallery {
+    position: fixed;
+    inset: 0;
+    width: var(--immersive-viewport-width, 100dvw);
+    height: var(--immersive-viewport-height, 100dvh);
+    overflow: hidden;
+    color: #fff4d2;
+    background: #30221d;
+    font-family: 'Wisteria Immersive UI', system-ui, sans-serif;
+  }
+
+  .scene-viewport {
+    position: absolute;
+    inset: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    outline: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scene-viewport::-webkit-scrollbar { display: none; }
+  .scene-viewport:focus-visible { box-shadow: inset 0 0 0 3px rgba(255, 239, 184, 0.85); }
+
+  .scene-world {
+    position: relative;
+    top: 50%;
+    width: max(100%, calc(var(--immersive-viewport-height, 100dvh) * var(--scene-width) / var(--scene-height)));
+    min-width: 100%;
+    aspect-ratio: var(--scene-width) / var(--scene-height);
+    overflow: hidden;
+    translate: 0 -50%;
+  }
+
+  .scene-layer,
+  .registered-stack {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .scene-layer {
+    object-fit: fill;
+    user-select: none;
+  }
+
+  .registered-stack { opacity: 0; }
+  [data-delivery='layered'] .registered-stack { opacity: 1; }
+  [data-delivery='layered'] .scene-fallback { opacity: 0; }
+
+  .art-hotspot {
+    position: absolute;
+    z-index: 4;
+    display: grid;
+    place-items: end center;
+    border: 1px solid transparent;
+    color: #fff8d9;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+  }
+
+  .art-hotspot::before {
+    position: absolute;
+    inset: -2px;
+    border: 2px solid rgba(255, 239, 179, 0);
+    box-shadow: 0 0 0 rgba(255, 220, 137, 0);
+    content: '';
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .art-hotspot > span {
+    margin-bottom: -3.45rem;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid rgba(255, 236, 182, 0.58);
+    border-radius: 0.55rem;
+    background: rgba(46, 31, 25, 0.86);
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.34);
+    opacity: 0;
+    transform: translateY(-0.35rem);
+    transition: opacity 180ms ease, transform 180ms ease;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .art-hotspot small,
+  .back-control small {
+    display: block;
+    margin-top: 0.1rem;
+    font-size: 0.52rem;
+    letter-spacing: 0.1em;
+    opacity: 0.72;
+  }
+
+  .art-hotspot:hover::before,
+  .art-hotspot:focus-visible::before {
+    border-color: rgba(255, 239, 179, 0.95);
+    box-shadow: 0 0 1rem rgba(255, 220, 137, 0.42);
+  }
+
+  .art-hotspot:hover > span,
+  .art-hotspot:focus-visible > span {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .back-control {
+    position: fixed;
+    z-index: 10;
+    top: max(0.65rem, env(safe-area-inset-top));
+    left: max(0.65rem, env(safe-area-inset-left));
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid rgba(255, 241, 197, 0.65);
+    border-radius: 999px;
+    color: #fff4d2;
+    background: rgba(45, 31, 26, 0.82);
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.28);
+    text-decoration: none;
+    backdrop-filter: blur(0.55rem);
+  }
+
+  .back-control:hover,
+  .back-control:focus-visible {
+    border-color: #fff2b2;
+    background: rgba(75, 49, 39, 0.96);
+    outline: 2px solid rgba(255, 242, 178, 0.72);
+    outline-offset: 2px;
+  }
+
+  .room-plaque {
+    position: fixed;
+    z-index: 8;
+    top: max(0.65rem, env(safe-area-inset-top));
+    left: 50%;
+    width: min(24rem, calc(100% - 12rem));
+    padding: 0.48rem 1rem 0.55rem;
+    border: 1px solid rgba(238, 212, 158, 0.62);
+    border-radius: 0.7rem;
+    translate: -50% 0;
+    color: #fff0ca;
+    text-align: center;
+    background: rgba(62, 36, 29, 0.82);
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(0.55rem);
+  }
+
+  .room-plaque p,
+  .room-plaque h1 { margin: 0; }
+  .room-plaque p { font-size: 0.84rem; }
+  .room-plaque h1 { margin-top: 0.08rem; font-size: 0.62rem; letter-spacing: 0.18em; font-weight: 500; }
+  .room-plaque span { display: block; margin-top: 0.3rem; font-size: 0.55rem; opacity: 0.72; }
+
+  .loading-veil,
+  .load-error {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    text-align: center;
+  }
+
+  .loading-veil {
+    z-index: 20;
+    background: #183d38;
+    opacity: 1;
+    transition: opacity 240ms ease, visibility 0s linear 240ms;
+  }
+
+  .loading-veil[aria-hidden='true'] { visibility: hidden; opacity: 0; pointer-events: none; }
+  .loading-veil p, .load-error p { margin: 0; }
+  .loading-veil small, .load-error small { display: block; margin-top: 0.35rem; font-size: 0.64rem; letter-spacing: 0.12em; opacity: 0.72; }
+  .load-error { z-index: 5; padding: 2rem; background: #30221d; }
+  .load-error[hidden] { display: none; }
+  .swipe-cue { display: none; }
+
+  @media (max-width: 800px), (pointer: coarse) {
+    .room-plaque { top: auto; bottom: max(0.55rem, env(safe-area-inset-bottom)); width: min(21rem, calc(100% - 1.1rem)); }
+    .back-control { top: max(0.4rem, env(safe-area-inset-top)); left: max(0.4rem, env(safe-area-inset-left)); min-height: 2.55rem; padding: 0.36rem 0.62rem; font-size: 0.75rem; }
+    [data-overflowing='true'] .swipe-cue {
+      position: fixed;
+      z-index: 8;
+      left: 50%;
+      bottom: max(5.1rem, calc(env(safe-area-inset-bottom) + 5.1rem));
+      display: block;
+      margin: 0;
+      translate: -50% 0;
+      color: #fff8dc;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-shadow: 0 2px 5px rgba(33, 20, 16, 0.95);
+      animation: swipe-cue 3.2s ease both 0.8s;
+      pointer-events: none;
+    }
+  }
+
+  @keyframes swipe-cue { 0%, 18%, 100% { opacity: 0; } 38%, 72% { opacity: 0.92; } }
+  @media (prefers-reduced-motion: reduce) {
+    .loading-veil, .art-hotspot::before, .art-hotspot > span { transition-duration: 1ms; }
+    .swipe-cue { animation: none; opacity: 0.85; }
+  }
+</style>

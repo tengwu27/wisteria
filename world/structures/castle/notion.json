@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 3,
+  "structureId": "castle",
+  "structurePageId": "3cb86b89-9566-81c4-b013-f5336ca69e77",
+  "pages": {
+    "castle-gallery-room": "3cb86b89-9566-8130-9bd2-ea3ad1ee7f58",
+    "castle-gallery-wall": "3cb86b89-9566-81dc-94ac-f03bac4b449e",
+    "still-life-with-wisteria": "3cb86b89-9566-818c-89ce-eba7dc3aa863"
+  },
+  "dataSources": {
+    "rooms": {
+      "databaseId": "c6fa7f7a-d723-4f6b-8b81-bbaf2e07af1d",
+      "dataSourceId": "532e74ee-8d17-41c9-8ded-33a884f71e55",
+      "galleryViewId": "3cb86b89-9566-81a5-beb4-000c7f818dd9"
+    },
+    "scenes": {
+      "castle-gallery-room": {
+        "databaseId": "6ae6d500-decd-4a1e-83dd-070c61e607e1",
+        "dataSourceId": "89a7a91d-8391-4088-b590-3ac9db37e4e8",
+        "galleryViewId": "3cb86b89-9566-81b3-b294-000ceff0d5d2"
+      }
+    },
+    "items": {
+      "castle-gallery-wall": {
+        "databaseId": "26f70a95-049f-428b-93db-cb514a4902cd",
+        "dataSourceId": "eed6d832-1a32-47fb-bd31-882f3f9466d2",
+        "galleryViewId": "3cb86b89-9566-818e-a493-000c353655da"
+      }
+    }
+  },
+  "artCatalog": {
+    "constructionTrigger": "codex-request-only",
+    "schema": {
+      "Title": "title",
+      "Appearance Prompt": "rich_text",
+      "Wisteria Status": "select",
+      "Art Type": "select",
+      "Wisteria ID": "rich_text",
+      "Canonical SHA-256": "rich_text",
+      "Composition Version": "number",
+      "Preview/PR URL": "url"
+    },
+    "seed": {
+      "still-life-with-wisteria": {
+        "title": "Still Life with Wisteria",
+        "prompt": "A hand-painted 4:3 still life of a blue-and-white ceramic pitcher and teacup, a closed walnut-bound sketchbook, mustard cloth, a wisteria sprig, and an aged-brass candleholder; warm amber studio light, cool violet-blue accents, no readable text.",
+        "artKind": "painting",
+        "canonicalSha256": "60d56d0150d46b64524e99f367def985d36c1359bad99bd8d49b6bbc09043e53",
+        "compositionVersion": 1,
+        "previewOrPrUrl": "https://github.com/tengwu27/wisteria/pull/9"
+      }
+    }
+  }
+}

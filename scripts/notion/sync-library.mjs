@@ -124,6 +124,7 @@ async function main() {
         sceneId: record.sceneId,
         hotspotId: record.hotspotId,
         representation: record.representation,
+        revelationMode: record.revelationMode ?? 'container-revealed',
         releaseId: record.releaseId,
         bodyMarkdown,
         media

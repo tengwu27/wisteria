@@ -1,0 +1,24 @@
+---
+import CastleArtworkInspector from '@/components/sections/CastleArtworkInspector.astro';
+import { castleGalleryScene, findCastleGalleryArtwork } from '@/data/castleGallery';
+import ImmersiveLayout from '@/layouts/ImmersiveLayout.astro';
+
+export function getStaticPaths() {
+  return [{
+    params: { artworkId: castleGalleryScene.artwork.id }
+  }];
+}
+
+const artwork = findCastleGalleryArtwork(Astro.params.artworkId ?? '');
+if (!artwork) return Astro.redirect('/castle/gallery');
+---
+
+<ImmersiveLayout
+  title={`Wisteria · ${artwork.titleZh} · ${artwork.title}`}
+  description={artwork.description}
+  image={artwork.source.src}
+  type="article"
+>
+  <CastleArtworkInspector artwork={artwork} />
+</ImmersiveLayout>
+

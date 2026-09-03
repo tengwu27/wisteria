@@ -46,7 +46,7 @@ a Netlify build automatically. Otherwise it appears on the next manual or
 scheduled build. Long text is repaginated by the reader without scene
 construction or code changes.
 
-### Add a new item or change its physical appearance
+### Add a new container-revealed item or change its physical appearance
 
 1. Enter the Items database inside the intended scene, such as Reading Table
    or West Shelf.
@@ -71,6 +71,29 @@ After approval, Codex creates a fresh construction branch and draft pull
 request, acquires the room reservation, constructs a pending preview, and asks
 for preview approval. Existing production remains unchanged throughout this
 process.
+
+### Curate a painting into a scene
+
+Paintings are self-revealing: their content is physically visible in the room,
+so a generic slot cannot hide changes in size, aspect ratio, or composition.
+They use a Codex-first curation flow instead of the Ready-item flow:
+
+1. Ask Codex to create or hang a painting in a named curated scene and provide
+   the artistic brief.
+2. Codex verifies the latest scene composition and every existing canonical art
+   hash, then generates a temporary standalone painting and updated room view.
+3. Review both together. Nothing is written to Git, Notion, a PR, or the active
+   scene before visual approval.
+4. After approval, Codex reserves the room in a draft PR, persists the canonical
+   painting and next composition version, rebuilds masks/proxies/hotspots and
+   the inspector, then idempotently catalogs the work in Notion as `Processing`.
+
+Notion owns the painting's title, artistic prompt, preview image, status, and
+annotations. Git owns its immutable canonical source and SHA-256, scene masters,
+composition manifests, and release history. A Notion `Ready` value is
+informational for self-revealing art and never generates, binds, or rearranges
+it. Paintings execute in v1; sculpture and installation are reserved schema
+types.
 
 ### Change a room or scene
 
@@ -124,8 +147,8 @@ Alive
 
 | System | Authority |
 | --- | --- |
-| Notion | Editorial content, descriptions, prompts, attachments, and author intent |
-| Git | Stable Wisteria IDs, hierarchy, spatial graph, geometry, masks, hotspots, locks, cinematic assets, and history |
+| Notion | Editorial content, descriptions, prompts, preview media, statuses, annotations, and author intent |
+| Git | Stable Wisteria IDs, canonical art hashes/media, hierarchy, spatial graph, composition versions, geometry, masks, hotspots, locks, cinematic assets, and history |
 | GitHub pull requests | Construction currently in progress and its room reservation |
 | Netlify | Preview builds, production delivery, and evidence that a landed commit is `Alive` |
 
@@ -133,6 +156,12 @@ Notion attachments are downloaded during the build, validated, hashed, and
 emitted at stable runtime paths under `/media/notion/library/`. The website
 never depends on Notion's temporary signed download URLs. Cinematic masters,
 masks, manifests, geometry, and prompts remain in Git during the pilot.
+
+The Castle Gallery is registered as a `curated-exhibit`. Its exhibit region is
+fixed, while painting frames, apertures, supports, placements, and hotspots are
+owned by the composition version. Every visible painting must map to one Git
+canonical asset, one manifest placement, and one Notion catalog record; anonymous
+visible artwork is not allowed.
 
 The permanent Library contract is in `world/structures/library/`:
 
@@ -199,6 +228,18 @@ npm run preview
 npm run test:library-framework
 npm run test:wisteria-reservations
 ```
+
+Castle art-catalog operations:
+
+```bash
+npm run notion:castle:ensure-art-catalog
+npm run notion:castle:catalog-approved
+npm run notion:castle:sync
+npm run notion:castle:verify
+```
+
+`notion:castle:catalog-approved` is only for a visually approved curation
+transaction; it creates or updates canonical art metadata as `Processing`.
 
 Library operations:
 
