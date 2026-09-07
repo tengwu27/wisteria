@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 3,
+  "databaseDefaults": {
+    "isInline": true,
+    "primaryView": {
+      "name": "Tiles",
+      "type": "gallery",
+      "showAllProperties": true,
+      "wrapProperties": true
+    }
+  },
+  "libraryPageId": "3c986b89-9566-8194-aa66-c2ce341128c2",
+  "characterGuidePageId": "3c986b89-9566-813a-b582-d05403444edc",
+  "workflowGuidePageId": "3c986b89-9566-8174-bf90-c4cb99a99059",
+  "legacy": {
+    "databaseId": "559a4dce-ca88-4635-842b-84aefab592b2",
+    "dataSourceId": "93033868-e8c6-430a-b837-2e36670721c6",
+    "archived": true
+  },
+  "dataSources": {
+    "rooms": {
+      "databaseId": "492307b8-3c34-4604-8ab4-32967d7cf759",
+      "dataSourceId": "63865669-9986-4bc7-a59e-28ab843d4ceb",
+      "parentEntityId": "library"
+    },
+    "scenes": {
+      "library-grand-hall": {
+        "databaseId": "03cd121a-ac84-4804-8126-7b0482dc28f5",
+        "dataSourceId": "6bf92b66-0b35-4949-994a-58164183b5ed",
+        "parentEntityId": "library-grand-hall"
+      }
+    },
+    "items": {
+      "reading-table": {
+        "databaseId": "24911af8-189f-4c98-9a75-0fc36b189899",
+        "dataSourceId": "11967811-e13c-4c79-8314-0f6cf1175529",
+        "parentEntityId": "reading-table"
+      },
+      "west-shelf": {
+        "databaseId": "0c995bf7-ad2b-45ea-96d0-583f74dc9ff4",
+        "dataSourceId": "515104f0-5f92-4204-bb60-c075f52d217e",
+        "parentEntityId": "west-shelf"
+      }
+    }
+  }
+}

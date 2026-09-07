@@ -1,0 +1,4 @@
+interface:
+  display_name: "Process Ready Wisteria entities"
+  short_description: "Analyze and safely construct Ready Library entities"
+  default_prompt: "Process Ready Wisteria entities without changing construction before explicit approval."

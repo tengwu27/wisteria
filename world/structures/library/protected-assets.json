@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 3,
+  "assets": {
+    "assets/cinematic/scenes/library-grand-hall/delivery/library-grand-hall-2048.webp": { "sha256": "f11446568368cb76c89bbe9a45d4fa027459803e6bacee06b83dfcc32e0ba1f7", "roomId": "library-grand-hall", "sceneId": null },
+    "assets/cinematic/scenes/library-grand-hall/delivery/library-grand-hall-3072.webp": { "sha256": "dfc69c609cc7ef2b0ccb8f7deb024c4153ce017778b24da1bfd64a1497c2b3b3", "roomId": "library-grand-hall", "sceneId": null },
+    "assets/cinematic/scenes/library-grand-hall/delivery/library-grand-hall-4096.webp": { "sha256": "22ebd871bec6483d840b023c2b62cebcc30743dc9c24d2008f548f86ba08a87a", "roomId": "library-grand-hall", "sceneId": null },
+    "assets/cinematic/scenes/library-grand-hall/delivery/library-shelf-close-1254.webp": { "sha256": "8fe588cda1446ab79f851fa02ecc862e3194fb9f8b8668aaeb704483857acc37", "roomId": "library-grand-hall", "sceneId": "west-shelf" },
+    "assets/cinematic/scenes/library-grand-hall/delivery/library-shelf-close-1672.webp": { "sha256": "f39ef3812e0c873fbf62ce3e4c6396e955a17d0242126140491e29badace3e58", "roomId": "library-grand-hall", "sceneId": "west-shelf" },
+    "assets/cinematic/scenes/library-grand-hall/delivery/library-table-over-chair-1254.webp": { "sha256": "12844559d97be61c81fd7d28a3c2118fae6b1489e63261d828b009d6a38a5a90", "roomId": "library-grand-hall", "sceneId": "reading-table" },
+    "assets/cinematic/scenes/library-grand-hall/delivery/library-table-over-chair-1672.webp": { "sha256": "672f09482a1a1286ccf8a77273a6afbffac3334b1eba0a141297c15e1a7ccbfb", "roomId": "library-grand-hall", "sceneId": "reading-table" },
+    "assets/cinematic/scenes/library-grand-hall/source/library-grand-hall-full-tile-v3.png": { "sha256": "ef78783b35b3288e6c7dd3ce32a721c92caf47d0e83655d5b3723d3110b423cb", "roomId": "library-grand-hall", "sceneId": null },
+    "assets/cinematic/scenes/library-grand-hall/source/library-shelf-close-v1.png": { "sha256": "b82bb5b1680b1c346f828e4ffa5cbd44c4d6d34f0697fd6f7b9ef77e9fb9116e", "roomId": "library-grand-hall", "sceneId": "west-shelf" },
+    "assets/cinematic/scenes/library-grand-hall/source/library-table-over-chair-v1.png": { "sha256": "3a67d239ab86c5844205d9d9e251e1a24da5e7a85a428ae85b13a456ea558878", "roomId": "library-grand-hall", "sceneId": "reading-table" },
+    "src/data/libraryScene.ts": { "sha256": "01ae14181874fd1e74960897a5f1c51da4b68d0243de76647a47e8729398dac3", "roomId": "library-grand-hall", "sceneId": null },
+    "world/structures/library/locations.json": { "sha256": "e59d98686b72ff5a7010845058cb2137249235dc2a3f9df2520b6970173f56af", "roomId": "library-grand-hall", "sceneId": null }
+  }
+}

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { dirname, extname, resolve } from 'node:path';
 import { cinematicDeliveryConfig as config } from './cinematic-delivery.config.mjs';
@@ -177,6 +178,23 @@ async function readWebpDimensions(path) {
   throw new Error(`unsupported WebP chunk ${chunk}`);
 }
 
+async function readPngDimensions(path) {
+  const bytes = await readFile(path);
+  if (
+    bytes.length < 24 ||
+    bytes[0] !== 0x89 ||
+    bytes.toString('ascii', 1, 4) !== 'PNG' ||
+    bytes.toString('ascii', 12, 16) !== 'IHDR'
+  ) {
+    throw new Error('not a PNG file');
+  }
+  return {
+    width: bytes.readUInt32BE(16),
+    height: bytes.readUInt32BE(20),
+    sha256: createHash('sha256').update(bytes).digest('hex')
+  };
+}
+
 async function validateLibraryManifest(route) {
   let manifest;
   try {
@@ -306,6 +324,189 @@ async function validateLibraryManifest(route) {
   }
 }
 
+async function validateCastleGallery(route, html, routeCss) {
+  let manifest;
+  try {
+    manifest = JSON.parse(await readFile(resolve(route.manifest), 'utf8'));
+  } catch (error) {
+    report(`${route.label}: layer manifest cannot be read (${error.message})`, route, false);
+    return;
+  }
+
+  if (
+    manifest.schemaVersion !== 3 ||
+    manifest.sceneId !== 'castle-gallery-wall' ||
+    manifest.mode !== 'curated-exhibit' ||
+    manifest.registration?.kind !== 'independent-viewpoint' ||
+    manifest.registration?.canvas?.width !== 1672 ||
+    manifest.registration?.canvas?.height !== 941
+  ) {
+    report(`${route.label}: independent 1672x941 Gallery registration is invalid`, route, false);
+  }
+  const placements = manifest.composition?.placements ?? [];
+  if (
+    manifest.composition?.version !== route.compositionVersion ||
+    manifest.composition?.hash !== route.compositionHash ||
+    !isNormalizedBounds(manifest.composition?.normalizedExhibitRegion) ||
+    placements.length !== 1 ||
+    !unique(placements.map((placement) => placement.id)) ||
+    !unique(placements.map((placement) => placement.artworkId)) ||
+    !unique(placements.map((placement) => placement.hotspotId)) ||
+    placements.some((placement) =>
+      placement.revelationMode !== 'self-revealing' ||
+      placement.artKind !== 'painting' ||
+      !isNormalizedBounds(placement.normalizedApertureBounds) ||
+      !isNormalizedBounds(placement.normalizedFrameBounds) ||
+      placement.aspectPolicy !== 'match-source-frame'
+    )
+  ) {
+    report(`${route.label}: curated composition identity, exhibit region, and unique source-matched placements are required`, route, false);
+  }
+  if (
+    manifest.composition?.layerOrder?.join(',') !== 'base,artwork-proxies,foreground-support-shell,hotspots' ||
+    manifest.protectedPixels?.outsideExhibitRegion !== true ||
+    manifest.protectedPixels?.outsideApertures !== true ||
+    manifest.protectedPixels?.shellTransparencyMismatchPixels !== 0 ||
+    manifest.protectedPixels?.outsideApertureDifferencePixels !== 0 ||
+    manifest.protectedPixels?.outsideRepairDifferencePixels !== 0 ||
+    manifest.protectedPixels?.repairMaskPixelsOutsideExhibitRegion !== 0
+  ) {
+    report(`${route.label}: registered layer order or protected-pixel proof is invalid`, route, false);
+  }
+  const artworkPlacement = placements.find((placement) => placement.artworkId === route.artworkId);
+  if (
+    artworkPlacement?.canonicalArtwork?.sha256 !== route.sourceArtwork.sha256 ||
+    artworkPlacement?.aspectRatioError > 0.005 ||
+    artworkPlacement?.proxy?.transparentPixelsInsideAperture !== 0
+  ) {
+    report(`${route.label}: canonical painting identity or exact-fit proof is not authoritative`, route, false);
+  }
+
+  try {
+    const source = await readPngDimensions(resolve(route.sourceArtwork.path));
+    if (
+      source.width !== route.sourceArtwork.width ||
+      source.height !== route.sourceArtwork.height ||
+      source.sha256 !== route.sourceArtwork.sha256
+    ) {
+      report(`${route.label}: canonical HD source dimensions or digest changed`, route, false);
+    }
+  } catch (error) {
+    report(`${route.label}: canonical HD source is invalid (${error.message})`, route, false);
+  }
+
+  for (const media of route.galleryMedia ?? []) {
+    try {
+      const dimensions = await readWebpDimensions(resolve(media.path));
+      const bytes = (await stat(resolve(media.path))).size;
+      if (dimensions.width !== media.width || dimensions.height !== media.height) {
+        report(`${route.label}: ${media.path} has unexpected dimensions`, route, false);
+      }
+      if (bytes > config.budgets.deliveryImageBytes) {
+        report(`${route.label}: ${media.path} exceeds the individual image budget`, route);
+      }
+    } catch (error) {
+      report(`${route.label}: invalid Gallery delivery ${media.path} (${error.message})`, route, false);
+    }
+  }
+
+  const layerTags = html.match(/<img\b[^>]*data-gallery-layer=[^>]*>/g) ?? [];
+  const hotspot = html.match(/<a\b[^>]*data-gallery-artwork=[^>]*>/)?.[0] ?? '';
+  const artworkPublished = Boolean(hotspot);
+  if (
+    !html.includes('data-castle-gallery') ||
+    !html.includes('data-gallery-stack') ||
+    !html.includes('data-gallery-fallback') ||
+    layerTags.length !== (artworkPublished ? 3 : 2)
+  ) {
+    report(`${route.label}: publication-aware base/proxy/shell stack and fallback are invalid`, route, false);
+  }
+  if (artworkPublished && (
+    attribute(hotspot, 'data-gallery-artwork') !== route.artworkId ||
+    attribute(hotspot, 'href') !== `/castle/gallery/art/${route.artworkId}` ||
+    !hotspot.includes('data-immersive-route')
+  )) {
+    report(`${route.label}: semantic artwork hotspot or direct route is invalid`, route, false);
+  } else if (artworkPublished) {
+    validateNormalizedBounds(hotspot, `artwork ${route.artworkId}`, route);
+  }
+  if (
+    !transitionSources.castleGallery.includes('readyLayers') ||
+    !transitionSources.castleGallery.includes('revealFallback') ||
+    !routeCss.includes('prefers-reduced-motion')
+  ) {
+    report(`${route.label}: bounded layered/fallback runtime contract is incomplete`, route, false);
+  }
+
+  if (!artworkPublished) {
+    try {
+      await stat(resolve(route.artworkHtml));
+      report(`${route.label}: unpublished artwork inspector route must not be generated`, route, false);
+    } catch (error) {
+      if (error.code !== 'ENOENT') {
+        report(`${route.label}: inspector publication check failed (${error.message})`, route, false);
+      }
+    }
+    if (html.includes('data-gallery-layer="artwork-proxies"')) {
+      report(`${route.label}: unpublished artwork proxy entered the Gallery delivery`, route, false);
+    }
+    return;
+  }
+
+  let artworkHtml;
+  try {
+    artworkHtml = await readFile(resolve(route.artworkHtml), 'utf8');
+  } catch {
+    report(`${route.label}: artwork inspector route is missing`, route, false);
+    return;
+  }
+  const artworkStyles = [
+    artworkHtml,
+    ...await Promise.all(
+      [...artworkHtml.matchAll(/href=["']([^"']+\.css)["']/g)].map((match) =>
+        readFile(resolve('dist', match[1].replace(/^\//, '')), 'utf8')
+      )
+    )
+  ].join('\n');
+  const artworkScripts = [
+    artworkHtml,
+    ...await Promise.all(
+      [...artworkHtml.matchAll(/src=["']([^"']+\.js)["']/g)].map((match) =>
+        readFile(resolve('dist', match[1].replace(/^\//, '')), 'utf8')
+      )
+    )
+  ].join('\n');
+  const sourceTag = artworkHtml.match(/<img\b[^>]*data-artwork-source[^>]*>/)?.[0] ?? '';
+  if (
+    !artworkHtml.includes(`data-artwork-id="${route.artworkId}"`) ||
+    attribute(sourceTag, 'width') !== String(route.sourceArtwork.width) ||
+    attribute(sourceTag, 'height') !== String(route.sourceArtwork.height) ||
+    !(attribute(sourceTag, 'alt') ?? '').trim()
+  ) {
+    report(`${route.label}: inspector does not expose the exact HD source identity`, route, false);
+  }
+  if (
+    !artworkHtml.includes('data-zoom-in') ||
+    !artworkHtml.includes('data-zoom-out') ||
+    !artworkHtml.includes('data-zoom-reset') ||
+    !artworkHtml.includes('data-inspection-stage') ||
+    !artworkScripts.includes('pointerdown') ||
+    !artworkScripts.includes('wheel') ||
+    !artworkScripts.includes('ArrowLeft') ||
+    !artworkStyles.includes('object-fit:contain') ||
+    !artworkStyles.includes('touch-action:none') ||
+    !artworkStyles.includes('prefers-reduced-motion')
+  ) {
+    report(`${route.label}: accessible zoom, pan, pinch, and no-crop inspector contract is incomplete`, route, false);
+  }
+  if (
+    (artworkHtml.match(/<[a-z][^>]*\bdata-immersive-route-curtain\b[^>]*>/gi) ?? []).length !== 1 ||
+    (artworkHtml.match(/<[a-z][^>]*\bdata-immersive-loading\b[^>]*>/gi) ?? []).length !== 1
+  ) {
+    report(`${route.label}: artwork inspector transition/loading ownership is invalid`, route, false);
+  }
+}
+
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
@@ -341,7 +542,10 @@ const transitionSourcePaths = {
   navigation: 'src/utils/immersiveNavigation.ts',
   mediaLoader: 'src/utils/cinematicMediaLoader.ts',
   village: 'src/components/sections/GamifiedCoastalVillage.astro',
+  villageParallax: 'src/utils/prototypeLayeredScene.ts',
   castle: 'src/components/sections/CastleVista.astro',
+  castleGallery: 'src/components/sections/CastleGallery.astro',
+  castleArtwork: 'src/components/sections/CastleArtworkInspector.astro',
   restaurant: 'src/components/sections/RestaurantVista.astro',
   library: 'src/components/sections/LibraryExperience.astro',
   libraryScene: 'src/data/libraryScene.ts',
@@ -392,6 +596,24 @@ if (
   failures.push('village: shell continuity and teardown-safe clock contract are incomplete');
 }
 if (
+  !transitionSources.village.includes('zoom: 1.03') ||
+  !transitionSources.village.includes('data-camera-focal-y') ||
+  !transitionSources.village.includes('min-width:103%') ||
+  !transitionSources.village.includes('min-height:103%') ||
+  !transitionSources.village.includes('overflow:auto') ||
+  !transitionSources.village.includes('touch-action:pan-x pan-y') ||
+  !transitionSources.villageParallax.includes("data-overflow-y") ||
+  !transitionSources.villageParallax.includes('viewport.scrollTop') ||
+  !transitionSources.villageParallax.includes("event.key === 'ArrowUp'") ||
+  !transitionSources.villageParallax.includes("event.key === 'ArrowDown'") ||
+  transitionSources.village.includes('data-vertical-pan="document"') ||
+  transitionSources.village.includes('document.scrollingElement') ||
+  transitionSources.village.includes('scene-scroll-surface') ||
+  transitionSources.layout.includes('data-immersive-scroll-runway')
+) {
+  failures.push('village: native 1.03x four-direction camera contract is incomplete');
+}
+if (
   transitionSources.village.includes('data-immersive-document-route') ||
   transitionSources.library.includes('data-immersive-document-route') ||
   transitionSources.libraryPage.includes('clientRouter={false}')
@@ -408,7 +630,7 @@ if (
 ) {
   failures.push('library: overview must start on the central gate and remain stationary while close-ups open');
 }
-for (const name of ['village', 'castle', 'restaurant', 'library']) {
+for (const name of ['village', 'castle', 'castleGallery', 'castleArtwork', 'restaurant', 'library']) {
   const source = transitionSources[name];
   if (
     !source.includes('waitForCinematicImage') ||
@@ -607,8 +829,8 @@ for (const route of config.routes) {
       !unique(inspectedArtifactIds) ||
       expectedArtifactIds.some((id) => !placedArtifactIds.includes(id)) ||
       expectedArtifactIds.some((id) => !inspectedArtifactIds.includes(id)) ||
-      placedArtifactIds.length !== expectedArtifactIds.length ||
-      inspectedArtifactIds.length !== expectedArtifactIds.length
+      placedArtifactIds.length !== inspectedArtifactIds.length ||
+      placedArtifactIds.some((id) => !inspectedArtifactIds.includes(id))
     ) {
       report(`${route.label}: scene placements and book inspectors are out of sync`, route, false);
     }
@@ -660,38 +882,44 @@ for (const route of config.routes) {
       report(`${route.label}: body-level overflow containment is missing`, route, false);
     }
 
-    for (const artifact of route.artifactRoutes) {
+    for (const artifactId of inspectedArtifactIds) {
+      const configuredArtifact = route.artifactRoutes.find(
+        (artifact) => artifact.id === artifactId
+      );
       const bookTag = bookTags.find(
-        (tag) => attribute(tag, 'data-book') === artifact.id
+        (tag) => attribute(tag, 'data-book') === artifactId
       );
       const declaredPages = Number(attribute(bookTag ?? '', 'data-page-count'));
       if (
-        artifact.pages < 2 ||
-        artifact.pages > 4 ||
-        declaredPages !== artifact.pages
+        declaredPages < 1 ||
+        declaredPages > 64 ||
+        (configuredArtifact && declaredPages !== configuredArtifact.pages)
       ) {
-        report(`${route.label}: ${artifact.id} page count is invalid`, route, false);
+        report(`${route.label}: ${artifactId} page count is invalid`, route, false);
       }
 
       let artifactHtml;
+      const artifactPath =
+        configuredArtifact?.html ??
+        `dist/collection/${artifactId}/index.html`;
       try {
-        artifactHtml = await readFile(resolve(artifact.html), 'utf8');
+        artifactHtml = await readFile(resolve(artifactPath), 'utf8');
       } catch {
-        report(`${route.label}: direct artifact route is missing at ${artifact.html}`, route, false);
+        report(`${route.label}: direct artifact route is missing at ${artifactPath}`, route, false);
         continue;
       }
       const semanticPages = artifactHtml.match(/<section\b[^>]*data-book-page=/g) ?? [];
       const ownBook = artifactHtml.match(
-        new RegExp(`<article\\b[^>]*data-book=["']${artifact.id}["'][^>]*>`)
+        new RegExp(`<article\\b[^>]*data-book=["']${artifactId}["'][^>]*>`)
       )?.[0];
       if (
-        !artifactHtml.includes(`data-initial-artifact="${artifact.id}"`) ||
+        !artifactHtml.includes(`data-initial-artifact="${artifactId}"`) ||
         !ownBook ||
         attribute(ownBook, 'aria-hidden') !== 'false' ||
-        semanticPages.length < artifact.pages ||
+        semanticPages.length < declaredPages ||
         !/<meta\b[^>]*name="robots"[^>]*noindex/i.test(artifactHtml)
       ) {
-        report(`${route.label}: ${artifact.id} direct/no-JavaScript route contract failed`, route, false);
+        report(`${route.label}: ${artifactId} direct/no-JavaScript route contract failed`, route, false);
       }
     }
 
@@ -731,6 +959,10 @@ for (const route of config.routes) {
         report(`${route.label}: orphaned delivery media ${stem}`, route, false);
       }
     }
+  }
+
+  if (route.sceneKind === 'layered-art-gallery') {
+    await validateCastleGallery(route, html, routeCss);
   }
 
   if (route.castleScene) {
@@ -810,7 +1042,15 @@ for (const route of config.routes) {
   if (!routeCss.includes('/fonts/wisteria-immersive-ui.woff2')) {
     report(`${route.label}: compact immersive font is not registered`, route);
   }
-  if (
+  const hasLibraryBookFont =
+    routeCss.includes("font-family: 'LXGW WenKai Books'") &&
+    routeCss.includes('lxgwwenkai-regular-subset') &&
+    routeCss.includes('lxgwwenkai-bold-subset');
+  if (route.id === 'library') {
+    if (!hasLibraryBookFont) {
+      report(`${route.label}: content-aware LXGW WenKai book font is missing`, route);
+    }
+  } else if (
     routeCss.includes('zcool-kuaile-chinese-simplified') ||
     routeCss.includes('lxgwwenkai-regular-subset') ||
     routeCss.includes('lxgwwenkai-bold-subset')

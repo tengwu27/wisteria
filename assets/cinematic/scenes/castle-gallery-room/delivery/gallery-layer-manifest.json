@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 3,
+  "sceneId": "castle-gallery-wall",
+  "mode": "curated-exhibit",
+  "registration": {
+    "kind": "independent-viewpoint",
+    "canvas": {
+      "width": 1672,
+      "height": 941
+    },
+    "camera": "Eye level near 1.6 m, level horizon, rectilinear natural wide angle near 30 mm, facing the principal wall nearly straight-on.",
+    "continuityAnchors": [
+      "terracotta-red salon wall within pale carved limestone",
+      "dark walnut dado, doors, and coffered ceiling",
+      "aged brass and patinated teal ornament",
+      "cool coastal daylight at the left arch against amber practical lights"
+    ]
+  },
+  "composition": {
+    "version": 1,
+    "hash": "29f09b5ce3d98807ba114bfcdbc6539377aa81ce33114ee2e2619ea93aec1c9c",
+    "exhibitRegion": {
+      "x": 234,
+      "y": 132,
+      "width": 1254,
+      "height": 527
+    },
+    "normalizedExhibitRegion": {
+      "x": 0.14,
+      "y": 0.14,
+      "width": 0.75,
+      "height": 0.56
+    },
+    "layerOrder": [
+      "base",
+      "artwork-proxies",
+      "foreground-support-shell",
+      "hotspots"
+    ],
+    "emptySupports": [
+      {
+        "id": "gallery-left-empty-support",
+        "bounds": {
+          "x": 386,
+          "y": 317,
+          "width": 154,
+          "height": 227
+        }
+      },
+      {
+        "id": "gallery-right-empty-support",
+        "bounds": {
+          "x": 1132,
+          "y": 317,
+          "width": 154,
+          "height": 227
+        }
+      }
+    ],
+    "placements": [
+      {
+        "id": "gallery-placement-still-life-v1",
+        "artworkId": "still-life-with-wisteria",
+        "artKind": "painting",
+        "hotspotId": "castle-gallery-still-life-with-wisteria",
+        "frameBounds": {
+          "x": 636,
+          "y": 272,
+          "width": 400,
+          "height": 288
+        },
+        "apertureBounds": {
+          "x": 658,
+          "y": 292,
+          "width": 356,
+          "height": 267
+        },
+        "apertureMaskId": "gallery-placement-still-life-v1-mask",
+        "aspectPolicy": "match-source-frame",
+        "revelationMode": "self-revealing",
+        "normalizedFrameBounds": {
+          "x": 0.3803827751196172,
+          "y": 0.28905419766206164,
+          "width": 0.23923444976076555,
+          "height": 0.30605738575983
+        },
+        "normalizedApertureBounds": {
+          "x": 0.39354066985645936,
+          "y": 0.310308182784272,
+          "width": 0.21291866028708134,
+          "height": 0.28374070138150903
+        },
+        "mask": "gallery-placement-still-life-v1-mask.png",
+        "canonicalArtwork": {
+          "source": "assets/cinematic/art-pieces/still-life-with-wisteria/source/still-life-with-wisteria-v1.png",
+          "width": 1448,
+          "height": 1086,
+          "sha256": "60d56d0150d46b64524e99f367def985d36c1359bad99bd8d49b6bbc09043e53"
+        },
+        "proxy": {
+          "source": "assets/cinematic/art-pieces/still-life-with-wisteria/source/proxy/still-life-with-wisteria-wall-proxy-v1.png",
+          "layer": "gallery-artwork-proxies.png",
+          "sha256": "fc1ec2f6948a99f2ed99e08fc09f8998012e8a341d2384afed4539c25f3c5c95",
+          "transparentPixelsInsideAperture": 0
+        },
+        "aspectRatioError": 0,
+        "aspectRatioTolerance": 0.005,
+        "minimumApertureShortSide": 96
+      }
+    ]
+  },
+  "repair": {
+    "immutableMaster": "source/castle-gallery-master-v3.png",
+    "immutableMasterSha256": "e6990de01e997e37e719eef045a11ab908d3db7c26d1604c8c54e71b02c24fd6",
+    "donor": "source/repairs/gallery-sparse-curation-v4-donor.png",
+    "donorSha256": "4413d99f9c7ebd8bc50fcfc72877b3fd7f6e5a25395d552a0069220a2bee1af1",
+    "prompt": "source/repairs/gallery-sparse-curation-v4-prompt.md",
+    "promptSha256": "65d65516d6cd901a600cd2776b177be7c0a428127b2afdcb0dd0bb4004d247d4",
+    "mask": "source/repairs/gallery-sparse-curation-v4-repair-mask.png",
+    "maskSha256": "2d6c5b074b2d206235be0340bef837f82c6087d1ac114c67dfeb8fc2d6e43048",
+    "repairClusters": [
+      {
+        "x": 244,
+        "y": 177,
+        "width": 190,
+        "height": 454
+      },
+      {
+        "x": 1238,
+        "y": 177,
+        "width": 190,
+        "height": 454
+      }
+    ],
+    "protectedSupportAssemblies": [
+      {
+        "x": 365,
+        "y": 295,
+        "width": 195,
+        "height": 290
+      },
+      {
+        "x": 1115,
+        "y": 295,
+        "width": 195,
+        "height": 290
+      }
+    ],
+    "outsideRepairDifferencePixels": 0,
+    "repairMaskPixelsOutsideExhibitRegion": 0
+  },
+  "protectedPixels": {
+    "outsideExhibitRegion": true,
+    "outsideApertures": true,
+    "shellTransparencyMismatchPixels": 0,
+    "outsideApertureDifferencePixels": 0,
+    "outsideRepairDifferencePixels": 0,
+    "repairMaskPixelsOutsideExhibitRegion": 0
+  },
+  "source": {
+    "master": "source/castle-gallery-master-v4.png",
+    "masterSha256": "7ca409906a0a6ddfac733f57ed52dd904789e7be1a655824a58088eb2744b4c3"
+  }
+}
