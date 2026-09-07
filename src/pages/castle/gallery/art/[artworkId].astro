@@ -1,0 +1,24 @@
+---
+import CastleArtworkInspector from '@/components/sections/CastleArtworkInspector.astro';
+import { getCastleGalleryScene, type CastleGalleryArtwork } from '@/data/castleGallery';
+import ImmersiveLayout from '@/layouts/ImmersiveLayout.astro';
+
+export async function getStaticPaths() {
+  const scene = await getCastleGalleryScene();
+  return scene.artwork ? [{
+    params: { artworkId: scene.artwork.id },
+    props: { artwork: scene.artwork }
+  }] : [];
+}
+
+const { artwork } = Astro.props as { artwork: CastleGalleryArtwork };
+---
+
+<ImmersiveLayout
+  title={`Wisteria · ${artwork.titleZh} · ${artwork.title}`}
+  description={artwork.description}
+  image={artwork.source.src}
+  type="article"
+>
+  <CastleArtworkInspector artwork={artwork} />
+</ImmersiveLayout>

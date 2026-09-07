@@ -6,9 +6,17 @@ import shelf1672 from '../../assets/cinematic/scenes/library-grand-hall/delivery
 import table1254 from '../../assets/cinematic/scenes/library-grand-hall/delivery/library-table-over-chair-1254.webp';
 import table1672 from '../../assets/cinematic/scenes/library-grand-hall/delivery/library-table-over-chair-1672.webp';
 import type { SceneManifest } from '@/types/immersive';
+import constructionLedgerJson from '../../world/structures/library/construction-ledger.json';
+import locationRegistryJson from '../../world/structures/library/locations.json';
+import type {
+  LibraryConstructionRecord,
+  RegisteredWisteriaEntity
+} from '@/types/libraryFramework';
 
 const LIBRARY_CANVAS_WIDTH = 4096;
 const MAIN_GATE_AXIS_X = 2199;
+
+export const librarySpatialGraph = locationRegistryJson.map;
 
 export const libraryScene = {
   id: 'library-grand-hall',
@@ -94,8 +102,53 @@ export const libraryScene = {
   ]
 } satisfies SceneManifest;
 
-export function findArtifactPlacement(artifactId: string) {
-  for (const zone of libraryScene.zones) {
+const notionPlacements = (
+  constructionLedgerJson.records as unknown as RegisteredWisteriaEntity[]
+).filter(
+  (record): record is LibraryConstructionRecord =>
+    record.entityKind === 'item' &&
+    record.source === 'notion' &&
+    record.state === 'locked'
+);
+
+export function getLibrarySceneForBooks(
+  books: Array<{ artifactId: string; title: string }>
+): SceneManifest {
+  const available = new Map(books.map((book) => [book.artifactId, book]));
+  return {
+    ...libraryScene,
+    zones: libraryScene.zones.map((zone) => ({
+      ...zone,
+      artifacts: [
+        ...zone.artifacts,
+        ...notionPlacements
+          .filter(
+            (record) =>
+              record.sceneId === zone.id && available.has(record.wisteriaId)
+          )
+          .map((record) => {
+            const book = available.get(record.wisteriaId)!;
+            return {
+              artifactId: record.wisteriaId,
+              // This experience currently opens editorial items in the book reader.
+              // The construction ledger may describe future letters or objects, but
+              // those require their own inspector before they can be rendered here.
+              kind: 'book' as const,
+              labelZh: `查看《${book.title}》`,
+              labelEn: `INSPECT ${book.title.toUpperCase()}`,
+              bounds: record.bounds
+            };
+          })
+      ]
+    }))
+  };
+}
+
+export function findArtifactPlacement(
+  artifactId: string,
+  scene: SceneManifest = libraryScene
+) {
+  for (const zone of scene.zones) {
     const artifact = zone.artifacts.find((item) => item.artifactId === artifactId);
     if (artifact) return { zone, artifact };
   }

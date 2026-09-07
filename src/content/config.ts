@@ -43,7 +43,7 @@ const bookPresentation = z.object({
     color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
     foil: z.string().regex(/^#[0-9a-fA-F]{6}$/)
   }),
-  pages: z.array(bookPage).min(2).max(4)
+  pages: z.array(bookPage).min(1).max(64)
 });
 
 const galleryImage = z.object({

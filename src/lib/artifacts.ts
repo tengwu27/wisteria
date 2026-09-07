@@ -6,6 +6,8 @@ import {
   getPublishedBookEntries,
   type ContentCollection
 } from '@/lib/content';
+import { paginateBookMarkdown } from '@/lib/libraryPagination';
+import { getNotionLibraryEntries } from '@/lib/notionLibrary';
 import type {
   ArtifactKind,
   BookPageLayout,
@@ -24,7 +26,7 @@ export interface LibraryBookPage {
 
 export interface LibraryBook {
   artifactId: string;
-  sourceCollection: ContentCollection;
+  sourceCollection: ContentCollection | 'notion';
   sourceSlug: string;
   title: string;
   excerpt: string;
@@ -45,7 +47,10 @@ export const artifactInspectorRegistry = {
 >;
 
 export async function getLibraryBooks(): Promise<LibraryBook[]> {
-  const entries = await getPublishedBookEntries();
+  const [entries, notionEntries] = await Promise.all([
+    getPublishedBookEntries(),
+    getNotionLibraryEntries()
+  ]);
   const byArtifactId = new Map(
     entries.map((entry) => [entry.data.book.artifactId, entry])
   );
@@ -53,7 +58,7 @@ export async function getLibraryBooks(): Promise<LibraryBook[]> {
     zone.artifacts.map((artifact) => artifact.artifactId)
   );
 
-  return placedIds.map((artifactId) => {
+  const localBooks = placedIds.map((artifactId) => {
     const entry = byArtifactId.get(artifactId);
     if (!entry) {
       throw new Error(
@@ -62,16 +67,10 @@ export async function getLibraryBooks(): Promise<LibraryBook[]> {
     }
 
     const presentation = entry.data.book;
-    const segments = getEntryBodyMarkdown(entry)
-      .split(/\n?<!--\s*page\s*-->\n?/i)
-      .map((segment) => segment.trim())
-      .filter(Boolean);
-
-    if (segments.length !== presentation.pages.length) {
-      throw new Error(
-        `${artifactId} declares ${presentation.pages.length} pages but contains ${segments.length} Markdown page segments`
-      );
-    }
+    const paginated = paginateBookMarkdown(
+      getEntryBodyMarkdown(entry),
+      presentation.pages
+    );
 
     return {
       artifactId,
@@ -79,16 +78,19 @@ export async function getLibraryBooks(): Promise<LibraryBook[]> {
       sourceSlug: entry.slug,
       title: entry.data.title,
       excerpt: entry.data.excerpt,
-      presentation,
-      pages: segments.map((segment, index) => {
-        const page = presentation.pages[index];
+      presentation: {
+        ...presentation,
+        pages: paginated.map((page) => page.presentation)
+      },
+      pages: paginated.map((item, index) => {
+        const page = item.presentation;
         const responsiveMedia = page.imageKey
           ? getResponsiveMedia(page.imageKey)
           : undefined;
         return {
           index,
           layout: page.layout,
-          html: marked.parse(segment, { async: false }),
+          html: marked.parse(item.markdown, { async: false }),
           imageSrc: page.imageKey
             ? responsiveMedia?.at(-1)?.src ?? getMedia(page.imageKey)
             : undefined,
@@ -101,6 +103,52 @@ export async function getLibraryBooks(): Promise<LibraryBook[]> {
       })
     };
   });
+
+  const notionBooks = notionEntries.map((entry): LibraryBook => {
+    const paginated = paginateBookMarkdown(entry.bodyMarkdown);
+    const coverColor =
+      entry.sceneId === 'west-shelf' ? '#244f58' : '#6f2f3c';
+    return {
+      artifactId: entry.wisteriaId,
+      sourceCollection: 'notion',
+      sourceSlug: entry.wisteriaId,
+      title: entry.title,
+      excerpt: entry.bodyMarkdown
+        .replace(/[#*_`>\-[\]()]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 180),
+      presentation: {
+        artifactId: entry.wisteriaId,
+        kind: 'book',
+        fixture: false,
+        noindex: entry.status !== 'Alive',
+        cover: {
+          titleZh: entry.title,
+          titleEn: entry.title.toUpperCase(),
+          emblem: entry.sceneId === 'west-shelf' ? 'wave' : 'wisteria',
+          color: coverColor,
+          foil: '#d3ad62'
+        },
+        pages: paginated.map((page) => page.presentation)
+      },
+      pages: paginated.map((page, index) => ({
+        index,
+        layout: page.presentation.layout,
+        html: marked.parse(page.markdown, { async: false })
+      }))
+    };
+  });
+
+  const duplicate = notionBooks.find((book) =>
+    byArtifactId.has(book.artifactId)
+  );
+  if (duplicate) {
+    throw new Error(
+      `Duplicate local and Notion artifact: ${duplicate.artifactId}`
+    );
+  }
+  return [...localBooks, ...notionBooks];
 }
 
 export async function getLibraryBook(artifactId: string) {

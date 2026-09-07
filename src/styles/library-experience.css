@@ -279,7 +279,8 @@
 .focus-heading,
 .library-exit,
 .zone-back,
-.reveal-control {
+.reveal-control,
+.library-map-control {
   position: fixed;
   z-index: 18;
   border: 1px solid rgba(255, 235, 176, 0.58);
@@ -304,6 +305,11 @@
   cursor: pointer;
 }
 
+.library-map-control {
+  top: max(3.9rem, calc(env(safe-area-inset-top) + 3.25rem));
+  right: max(0.65rem, env(safe-area-inset-right));
+}
+
 .library-exit {
   top: max(0.65rem, env(safe-area-inset-top));
   left: max(0.65rem, env(safe-area-inset-left));
@@ -322,6 +328,7 @@
 .library-exit small,
 .zone-back small,
 .reveal-control small,
+.library-map-control small,
 .focus-heading small {
   display: block;
   margin-top: 0.1rem;
@@ -336,11 +343,117 @@
 .zone-back:focus-visible,
 .reveal-control:hover,
 .reveal-control:focus-visible,
-.reveal-control[aria-pressed='true'] {
+.reveal-control[aria-pressed='true'],
+.library-map-control:hover,
+.library-map-control:focus-visible,
+.library-map-control[aria-expanded='true'] {
   border-color: #ffe8a3;
   background: rgba(44, 74, 66, 0.94);
   outline: 2px solid rgba(255, 232, 163, 0.55);
   outline-offset: 2px;
+}
+
+.library-map-panel {
+  position: fixed;
+  z-index: 26;
+  top: 50%;
+  left: 50%;
+  width: min(34rem, calc(100vw - 2rem));
+  border: 1px solid rgba(255, 232, 163, 0.68);
+  border-radius: 1.1rem;
+  padding: 1rem;
+  color: #f8eac6;
+  background:
+    radial-gradient(circle at 50% 25%, rgba(78, 111, 95, 0.28), transparent 50%),
+    rgba(17, 29, 27, 0.96);
+  box-shadow: 0 1.5rem 5rem rgba(3, 10, 9, 0.66);
+  backdrop-filter: blur(0.8rem);
+  translate: -50% -50%;
+}
+
+.library-map-panel[hidden] {
+  display: none;
+}
+
+.library-map-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.library-map-panel header p,
+.library-map-panel > p {
+  margin: 0;
+}
+
+.library-map-panel header small {
+  display: block;
+  margin-top: 0.12rem;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  opacity: 0.7;
+}
+
+.library-map-panel header button {
+  border: 1px solid rgba(255, 232, 163, 0.45);
+  border-radius: 999px;
+  width: 2.25rem;
+  height: 2.25rem;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.05);
+  font: inherit;
+  cursor: pointer;
+}
+
+.library-map-canvas {
+  position: relative;
+  min-height: 17rem;
+  margin: 0.85rem 0;
+  border: 1px solid rgba(216, 196, 137, 0.25);
+  border-radius: 0.85rem;
+  background:
+    linear-gradient(90deg, transparent 49.7%, rgba(211, 183, 112, 0.12) 50%, transparent 50.3%),
+    linear-gradient(transparent 49.7%, rgba(211, 183, 112, 0.12) 50%, transparent 50.3%),
+    rgba(238, 222, 178, 0.035);
+}
+
+.library-map-node {
+  position: absolute;
+  top: var(--map-y);
+  left: var(--map-x);
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  color: #ffe8a3;
+  text-decoration: none;
+  translate: -50% -50%;
+}
+
+.library-map-node > span {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid rgba(255, 232, 163, 0.58);
+  border-radius: 50%;
+  background: rgba(51, 91, 78, 0.76);
+  box-shadow: 0 0 1.3rem rgba(164, 220, 192, 0.2);
+}
+
+.library-map-node[data-current='true'] > span {
+  box-shadow: 0 0 0 0.3rem rgba(255, 232, 163, 0.12), 0 0 1.7rem rgba(255, 220, 125, 0.36);
+}
+
+.library-map-node[data-undiscovered] {
+  pointer-events: none;
+  opacity: 0.38;
+}
+
+.library-map-panel > p {
+  color: rgba(248, 234, 198, 0.66);
+  font-size: 0.68rem;
+  text-align: center;
 }
 
 .focus-heading {
@@ -548,7 +661,7 @@
 .book-cover strong {
   position: relative;
   display: block;
-  font-family: 'LXGW WenKai', Georgia, serif;
+  font-family: Georgia, 'LXGW WenKai Books', serif;
   font-size: clamp(1.8rem, 4vh, 3.2rem);
   letter-spacing: 0.07em;
 }
@@ -677,7 +790,7 @@
 
 .book-copy {
   min-height: 0;
-  font-family: 'LXGW WenKai', Georgia, serif;
+  font-family: Georgia, 'LXGW WenKai Books', serif;
   font-size: clamp(0.9rem, 1.55vh, 1.08rem);
   line-height: 1.78;
 }
@@ -694,7 +807,7 @@
 .book-copy h2 {
   margin: 0 0 1rem;
   color: #443021;
-  font-family: 'LXGW WenKai', Georgia, serif;
+  font-family: Georgia, 'LXGW WenKai Books', serif;
   font-weight: 700;
   line-height: 1.25;
 }

@@ -26,6 +26,7 @@ const { book, books } = Astro.props;
   type="article"
   noindex={book.presentation.noindex}
   clientRouter={false}
+  fontStylesheet="/fonts/library-books/font.css"
 >
   <LibraryExperience books={books} initialArtifactId={book.artifactId} />
 </ImmersiveLayout>
