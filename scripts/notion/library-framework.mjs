@@ -615,7 +615,7 @@ export function validateRuntimeEntry(entry, record, options = {}) {
 }
 
 export function evaluateWebhookAction(entity, record) {
-  if (!record || record.entityKind !== 'item' || record.source !== 'notion') {
+  if (!record || record.entityKind !== 'item' || !record.notionPageId) {
     return { build: false, reason: 'Page is not a registered Notion item.' };
   }
   if (record.state === 'retired') {

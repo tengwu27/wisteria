@@ -14,7 +14,6 @@ __pycache__/
 
 .env
 .env.local
-supabase/.temp/
 .wisteria-cache/
 /public/media/notion/
 /public/fonts/library-books/

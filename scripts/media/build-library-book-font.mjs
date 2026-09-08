@@ -3,11 +3,10 @@ import {
   copyFile,
   mkdir,
   readFile,
-  readdir,
   stat,
   writeFile
 } from 'node:fs/promises';
-import { extname, join, resolve } from 'node:path';
+import { resolve } from 'node:path';
 
 const projectRoot = resolve(import.meta.dirname, '../..');
 const fontPackageRoot = resolve(
@@ -15,7 +14,6 @@ const fontPackageRoot = resolve(
   'node_modules/lxgw-wenkai-webfont'
 );
 const outputRoot = resolve(projectRoot, 'public/fonts/library-books');
-const contentRoot = resolve(projectRoot, 'src/content');
 const notionSnapshot = resolve(
   projectRoot,
   '.wisteria-cache/library-notion.json'
@@ -33,22 +31,6 @@ async function readIfPresent(path) {
     if (error?.code === 'ENOENT') return '';
     throw error;
   }
-}
-
-async function collectEditorialText(directory) {
-  const entries = await readdir(directory, { withFileTypes: true });
-  const chunks = [];
-
-  for (const entry of entries) {
-    const path = join(directory, entry.name);
-    if (entry.isDirectory()) {
-      chunks.push(await collectEditorialText(path));
-    } else if (['.md', '.mdx'].includes(extname(entry.name))) {
-      chunks.push(await readFile(path, 'utf8'));
-    }
-  }
-
-  return chunks.join('\n');
 }
 
 function parseUnicodeRanges(value) {
@@ -85,10 +67,7 @@ function rewriteFace(face, fileName) {
 
 await mkdir(outputRoot, { recursive: true });
 
-const editorialText = [
-  await collectEditorialText(contentRoot),
-  await readIfPresent(notionSnapshot)
-].join('\n');
+const editorialText = await readIfPresent(notionSnapshot);
 const codePoints = [...new Set([...editorialText].map((character) =>
   character.codePointAt(0)
 ))];
@@ -125,7 +104,7 @@ for (const fileName of selectedFiles) {
 }
 
 const stylesheet = [
-  '/* Generated from current local and Notion Library content. */',
+  '/* Generated from current Notion Library content. */',
   ...selectedFaces,
   ''
 ].join('\n\n');
