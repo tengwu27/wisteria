@@ -1,12 +1,131 @@
 # Wisteria
 
-Wisteria is a living village for memories, writing, discoveries, art, and
-places that matter. Content is encountered as part of the world—a book on a
-shelf, a letter on a table, or a room reached by exploration—rather than only
-as entries in a conventional website catalogue.
+Wisteria is a living digital town for memories, writing, discoveries, art, and
+places that matter. It is designed to feel less like browsing a website and
+more like entering a place: content is encountered as a book on a shelf, a
+painting in a salon, a letter on a table, or a room reached through quiet
+exploration.
 
-The current pilot connects the Library to Notion while keeping permanent world
-construction in Git. Netlify builds and publishes the static Astro site.
+The project joins three systems without confusing their responsibilities:
+Notion is the town's living editorial memory, Git is its durable physical and
+visual construction record, and Netlify turns both into the public Astro
+experience.
+
+## The Flow Design Thesis
+
+Wisteria is organized around **attention, continuity, and gentle discovery**.
+The goal is not to maximize clicks or expose every piece of content at once.
+It is to help a visitor settle into a place, notice something with curiosity,
+and remain with it long enough for reading or reflection to become effortless.
+
+The intended rhythm is:
+
+```text
+arrive → orient → notice → approach → focus → dwell → return
+```
+
+- **Arrive without interruption.** A cinematic establishing view gives the
+  visitor time to understand the atmosphere and geography before asking for an
+  action.
+- **Orient spatially.** Buildings, rooms, tables, shelves, paths, and apertures
+  create a memorable world model. Navigation is a movement through that model,
+  not a jump between unrelated templates.
+- **Discover through attention.** Hotspots remain legible but quiet. They
+  reveal themselves through proximity, focus, and exploration instead of
+  competing as a wall of cards or calls to action.
+- **Move from world to detail.** Each interaction progressively narrows the
+  field—from village, to building, to room, to object, to content—while
+  preserving a clear way back.
+- **Protect the focused state.** Reading and artwork inspection reduce visual
+  noise, preserve comfortable pacing, and let the content become the dominant
+  layer.
+- **Keep motion meaningful.** Parallax, pans, aperture reveals, and route
+  transitions communicate depth and continuity. They are not decoration, and
+  reduced-motion and keyboard paths remain first-class experiences.
+- **Reward return visits.** Discovered rooms and familiar spatial anchors make
+  the town feel increasingly known without turning exploration into a game
+  checklist.
+
+This produces a quiet form of flow: the challenge of exploration stays small
+and readable, feedback is immediate, and each action has an obvious relation
+to the place the visitor is already inhabiting.
+
+## Notion as the Living Content Layer
+
+Notion is Wisteria's **only editorial and runtime content database**. It is
+where writing is drafted, revised, organized, and given publishing intent.
+The Notion hierarchy mirrors the physical town, so authors work in context
+rather than managing coordinates or implementation records:
+
+```text
+Notion authoring
+  → nested building / room / scene / item
+  → verified page identity and status
+  → webhook or scheduled Netlify build
+  → read-only content synchronization
+  → stable local media and content snapshot
+  → Astro pages inside the registered Wisteria world
+```
+
+A Notion page owns living editorial material: title, body, description,
+ordinary media, credits, annotations, appearance intent, and lifecycle status.
+Its stable page ID binds that material to one constructed Wisteria entity.
+Editing the body of a registered page updates content without moving the book,
+repainting the room, changing a hotspot, or unlocking a cinematic asset.
+
+Git owns what must remain spatially and visually exact: Wisteria IDs,
+containment contracts, navigation topology, camera and geometry, canonical
+artwork, masks, hotspots, composition versions, locks, releases, and history.
+This division lets Notion stay pleasant for everyday authors while preventing
+an editorial edit from silently reconstructing the town.
+
+`Draft` and `Ready` express author intent. `Ready` is deliberately not an
+automatic generation button: Codex first analyzes impact, explains the exact
+construction change, and waits for approval. Approved structural or visual
+work then moves through a branch, preview, pull request, release record, and
+production verification. Ordinary edits to already registered content can
+flow directly through the build pipeline.
+
+Netlify reads from Notion during a build, verifies registered identities and
+schemas, downloads media, hashes it, and emits stable public paths. The public
+site never depends on temporary Notion attachment URLs, and a build cannot
+write back to Notion or initiate generative construction.
+
+## The Wisteria Town Style
+
+Wisteria is a romantic Mediterranean world rendered as high-detail,
+hand-painted cinematic environment art. Its identity combines gentle
+storybook environmental storytelling with intricate Gothic and Art Nouveau
+architecture. The town should feel inhabited, cared for, and slightly
+weathered by salt air—even when no person is visible.
+
+The shared material and color language includes pale carved limestone, warm
+walnut, patinated teal metalwork, aged brass, blue-and-white ceramics, mustard
+textiles, oxblood leather, botanical ornament, hanging flowers, terraced
+vegetation, luminous coastal blues, and pools of amber practical light.
+Whimsical machinery is handcrafted and functional rather than futuristic.
+
+The visual grammar follows a few durable rules:
+
+- exterior village views preserve the approved isometric geography, coastline,
+  roads, terraces, docks, landmarks, and layered depth;
+- interiors use an inviting eye-level viewpoint, believable wide-angle
+  perspective, tactile materials, and a clear foreground, midground, and
+  background;
+- warm interiors are balanced against cool coastal daylight, with focal
+  objects and navigation apertures immediately readable;
+- small props and signs of unseen daily life carry the story, while clutter,
+  invented text, visible characters, modern minimalism, neon science fiction,
+  and photorealistic treatment are avoided;
+- each room may have a distinct local character, but it must remain recognizably
+  part of the same coastal town.
+
+The canonical visual authorities are the
+[`core-village-master.png`](assets/cinematic/scenes/gamified-coastal-village/isometric-parallax/source/core-village-master.png)
+for the exterior world and
+[`windmill-cafe-approved.png`](assets/cinematic/scenes/windmill-cafe-interior/source/windmill-cafe-approved.png)
+for the interior language. Scene-specific approved masters govern local
+geometry, lighting, props, and interaction anchors.
 
 ## The Everyday Authoring Flow
 
