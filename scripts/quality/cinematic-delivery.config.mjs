@@ -18,8 +18,7 @@ export const cinematicDeliveryConfig = {
     '/lifestyle/a-found-essay/',
     '/lifestyle/morning-table-notes/',
     '/travel/garden-walk/',
-    '/travel/winter-coastline/',
-    '/travel/supabase-test-trip/'
+    '/travel/winter-coastline/'
   ],
   legacyRedirects: [
     'art/archive',
@@ -30,8 +29,7 @@ export const cinematicDeliveryConfig = {
     'lifestyle/a-found-essay',
     'lifestyle/morning-table-notes',
     'travel/garden-walk',
-    'travel/winter-coastline',
-    'travel/supabase-test-trip'
+    'travel/winter-coastline'
   ],
   budgets: {
     initialRouteCodeBytes: 350 * KiB,

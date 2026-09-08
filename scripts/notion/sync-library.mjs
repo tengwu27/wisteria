@@ -81,7 +81,7 @@ async function main() {
       const record = ledger.records.find(
         (candidate) =>
           candidate.entityKind === 'item' &&
-          candidate.source === 'notion' &&
+          candidate.notionPageId &&
           candidate.notionPageId === page.id
       );
       if (!record || record.state === 'retired') continue;
@@ -135,7 +135,7 @@ async function main() {
   const expectedRecords = ledger.records.filter(
     (record) =>
       record.entityKind === 'item' &&
-      record.source === 'notion' &&
+      record.notionPageId &&
       record.state !== 'retired' &&
       (context !== 'production' || record.releaseId)
   );

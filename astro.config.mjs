@@ -16,8 +16,7 @@ export default defineConfig({
     '/lifestyle/a-found-essay': '/library',
     '/lifestyle/morning-table-notes': '/library',
     '/travel/garden-walk': '/library',
-    '/travel/winter-coastline': '/library',
-    '/travel/supabase-test-trip': '/library'
+    '/travel/winter-coastline': '/library'
   },
   integrations: [tailwind({
     applyBaseStyles: false
@@ -25,6 +24,6 @@ export default defineConfig({
     filter: (page) =>
       !page.includes('/prototype/') &&
       !page.includes('/collection/') &&
-      !/(\/art\/archive|\/lifestyle\/archive|\/travel\/archive|\/art\/quiet-window-study|\/art\/soft-geometry|\/lifestyle\/a-found-essay|\/lifestyle\/morning-table-notes|\/travel\/garden-walk|\/travel\/winter-coastline|\/travel\/supabase-test-trip)\/?$/.test(page)
+      !/(\/art\/archive|\/lifestyle\/archive|\/travel\/archive|\/art\/quiet-window-study|\/art\/soft-geometry|\/lifestyle\/a-found-essay|\/lifestyle\/morning-table-notes|\/travel\/garden-walk|\/travel\/winter-coastline)\/?$/.test(page)
   }), react()]
 });

@@ -306,16 +306,14 @@ or use the manual **Wisteria Force Release** workflow with an audit reason.
 - Notion for nested Library authoring
 - GitHub Actions for reservation and deployment lifecycle checks
 - Netlify for previews and production deployment
-- Supabase adapter with local Markdown fallback for the older Art, Lifestyle,
-  and Travel collections
+
+Notion is Wisteria's only editorial and runtime content database. Git retains
+stable identities, spatial construction, visual presentation, canonical media,
+locks, releases, and history; these construction records are not an alternate
+content source.
 
 Netlify uses `npm run build` and publishes `dist/`; configuration lives in
 `netlify.toml`.
-
-The older collections remain available under `src/content/art`,
-`src/content/lifestyle`, and `src/content/travel`. With `SUPABASE_URL` and
-`SUPABASE_ANON_KEY`, their published entries can instead come from
-`public.content_entries`; the expected schema is in `supabase/schema.sql`.
 
 ## Village Artwork Architecture
 
